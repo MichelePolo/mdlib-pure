@@ -114,10 +114,11 @@ export function createMarkdown(options: Options = {}): Markdown {
 
   function parse(src: string): Root {
     const refs = new Map<string, Reference>()
-    const inline = new InlineParser(inlineConfig, refs)
-    const doc = new BlockParser(types, starts, inline, refs).parse(src)
+    const env: Record<string, unknown> = {}
+    const inline = new InlineParser(inlineConfig, refs, env)
+    const doc = new BlockParser(types, starts, inline, refs, env).parse(src)
     let root = toAst(doc, inline) as Root
-    const ctx: TransformContext = { parseInline: (s) => inline.parse(s), references: refs }
+    const ctx: TransformContext = { parseInline: (s) => inline.parse(s), references: refs, env }
     for (const p of plugins) if (p.transform) root = p.transform(root, ctx) ?? root
     return root
   }
@@ -145,11 +146,12 @@ export function createMarkdown(options: Options = {}): Markdown {
 }
 
 export type * from './types.ts'
-export type { Block, BlockParser } from './block/parser.ts'
+export type { BlockParser } from './block/parser.ts'
 export type { InlineParser } from './inline/parser.ts'
 export type { Props, RenderContext, UrlKind, VChild, VElement, VRaw } from './render/vnode.ts'
 export type { EntityDecoder } from './util/entities.ts'
-export { MAX_NESTING } from './block/parser.ts'
+export { Block, MAX_NESTING } from './block/parser.ts'
+export { visit } from './util/visit.ts'
 export { h, raw } from './render/vnode.ts'
 export { toHtml } from './render/html.ts'
 export { toDom } from './render/dom.ts'

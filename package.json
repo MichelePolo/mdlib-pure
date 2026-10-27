@@ -17,6 +17,10 @@
       "types": "./dist/types/entities/index.d.ts",
       "default": "./dist/entities.js"
     },
+    "./gfm": {
+      "types": "./dist/types/gfm/index.d.ts",
+      "default": "./dist/gfm.js"
+    },
     "./theme.css": "./styles/theme.css",
     "./tailwind.css": "./styles/tailwind.css",
     "./package.json": "./package.json"

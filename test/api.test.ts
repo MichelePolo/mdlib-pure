@@ -202,3 +202,44 @@ describe('plugins', () => {
     assert.equal(md.render({ type: 'root', children: [{ type: 'paragraph', children: [{ type: 'custom', value: 'v' }] }] }), '<p>v</p>\n')
   })
 })
+
+describe('gfm extras', async () => {
+  const { gfm } = await import('../src/gfm/index.ts')
+  const md = createMarkdown({ plugins: gfm() })
+
+  test('alerts', () => {
+    assert.equal(
+      md.render('> [!WARNING]\n> Mind the *gap*.'),
+      '<div class="markdown-alert markdown-alert-warning">\n<p class="markdown-alert-title">Warning</p>\n<p>Mind the <em>gap</em>.</p>\n</div>\n',
+    )
+    assert.equal(md.render('> [!NOPE]\n> x'), '<blockquote>\n<p>[!NOPE]\nx</p>\n</blockquote>\n')
+  })
+
+  test('table alignment and inline content', () => {
+    assert.equal(
+      md.render('| a | b |\n|:-:|--:|\n| `x\\|y` | **z** |'),
+      '<table>\n<thead>\n<tr>\n<th align="center">a</th>\n<th align="right">b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td align="center"><code>x|y</code></td>\n<td align="right"><strong>z</strong></td>\n</tr>\n</tbody>\n</table>\n',
+    )
+  })
+
+  test('table AST is mdast-shaped', () => {
+    const [table] = md.parse('| a |\n|---|\n| 1 |').children
+    assert.deepEqual(table, {
+      type: 'table',
+      align: [null],
+      children: [
+        { type: 'tableRow', children: [{ type: 'tableCell', children: [{ type: 'text', value: 'a' }] }] },
+        { type: 'tableRow', children: [{ type: 'tableCell', children: [{ type: 'text', value: '1' }] }] },
+      ],
+    })
+  })
+
+  test('extensions can be turned off', () => {
+    const plain = createMarkdown({ plugins: gfm({ table: false, autolink: false }) })
+    assert.equal(plain.render('www.x.com ~~y~~'), '<p>www.x.com <del>y</del></p>\n')
+  })
+
+  test('autolinks pass through the URL policy', () => {
+    assert.equal(md.render('see https://x.y/z.'), '<p>see <a href="https://x.y/z">https://x.y/z</a>.</p>\n')
+  })
+})

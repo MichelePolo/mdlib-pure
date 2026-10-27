@@ -9,3 +9,4 @@ package (see `files` in `package.json`).
 
 The library code itself is MIT. The spec examples are redistributed here
 unmodified, under their own license, with attribution.
+| `gfm.json` | extracted by `scripts/extract-gfm.js` from [cmark-gfm](https://github.com/github/cmark-gfm) `test/spec.txt` (GFM spec, CC-BY-SA 4.0) and `test/extensions.txt` (BSD-2-Clause) | as noted |

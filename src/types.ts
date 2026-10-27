@@ -129,6 +129,8 @@ export interface TransformContext {
   /** Parse a string as inline content (for plugins building nodes from text). */
   parseInline(src: string): Node[]
   references: Map<string, Reference>
+  /** Per-parse scratch space, shared with block and inline rules (`p.env`). */
+  env: Record<string, unknown>
 }
 
 export interface Plugin {

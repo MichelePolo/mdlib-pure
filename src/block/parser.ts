@@ -94,21 +94,25 @@ export class BlockParser {
   oldtip!: Block
   lastMatchedContainer!: Block
   readonly refs: Map<string, Reference>
+  /** Per-parse scratch space shared with the inline parser and transforms. Namespace your keys. */
+  readonly env: Record<string, unknown>
 
   private readonly types: Map<string, BlockRule>
   private readonly starts: BlockRule[]
-  private readonly maybeSpecial: RegExp | null
   private readonly refParser: ReferenceParser
 
-  constructor(types: Map<string, BlockRule>, starts: BlockRule[], refParser: ReferenceParser, refs: Map<string, Reference>) {
+  constructor(
+    types: Map<string, BlockRule>,
+    starts: BlockRule[],
+    refParser: ReferenceParser,
+    refs: Map<string, Reference>,
+    env: Record<string, unknown> = {},
+  ) {
     this.types = types
     this.starts = starts
     this.refParser = refParser
     this.refs = refs
-    // Fast path: if every start declares its trigger characters, a
-    // non-indented line starting with anything else cannot open a block.
-    const triggers = starts.every((s) => s.triggers !== undefined) ? starts.map((s) => s.triggers).join('') : null
-    this.maybeSpecial = triggers === null ? null : new RegExp(`^[${triggers.replace(/[\\\]^-]/g, '\\$&')}]`)
+    this.env = env
   }
 
   parse(src: string): Block {
@@ -291,13 +295,14 @@ export class BlockParser {
     let matchedLeaf = container.type !== 'paragraph' && !!this.rule(container.type).acceptsLines
     while (!matchedLeaf) {
       this.findNextNonspace()
-      if (this.maybeSpecial && !this.indented && !this.maybeSpecial.test(ln.slice(this.nextNonspace))) {
-        this.advanceNextNonspace()
-        break
-      }
+      // Fast path: on a non-indented line, skip rules whose triggers cannot
+      // match the first character. Rules without `triggers` are always tried.
+      const first = this.indented ? null : ln.charAt(this.nextNonspace)
       let i = 0
       for (; i < this.starts.length; i++) {
-        const res = this.starts[i].start!(this, container)
+        const rule = this.starts[i]
+        if (first !== null && rule.triggers !== undefined && (first === '' || !rule.triggers.includes(first))) continue
+        const res = rule.start!(this, container)
         if (res === 1) {
           container = this.tip
           break

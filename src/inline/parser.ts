@@ -127,6 +127,8 @@ export class InlineParser {
   /** Current position in `src`. */
   pos = 0
   refs: Map<string, Reference>
+  /** Per-parse scratch space shared with the block parser and transforms. */
+  readonly env: Record<string, unknown>
 
   private readonly cfg: InlineConfig
   private root = new Inl({ type: 'root' }, true)
@@ -138,9 +140,10 @@ export class InlineParser {
   /** Memo of `src.lastIndexOf(token)` for raw HTML terminators. */
   private lastIndex = new Map<string, number>()
 
-  constructor(cfg: InlineConfig, refs: Map<string, Reference>) {
+  constructor(cfg: InlineConfig, refs: Map<string, Reference>, env: Record<string, unknown> = {}) {
     this.cfg = cfg
     this.refs = refs
+    this.env = env
   }
 
   /** Parse `src` as inline content. Re-entrant: plugins may call it from a rule. */

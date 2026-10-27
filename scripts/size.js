@@ -8,11 +8,31 @@ import { gzipSync } from 'node:zlib'
 const budgets = [
   { name: 'mdlib-pure', entry: 'src/index.ts', limit: 11 * 1024 },
   { name: 'mdlib-pure/entities', entry: 'src/entities/index.ts', limit: 12 * 1024 },
+  // Measured on its own; shared core code is not counted twice by bundlers.
+  { name: 'mdlib-pure/gfm', entry: 'src/gfm/index.ts', limit: 5 * 1024, external: true },
 ]
 
 let failed = false
-for (const { name, entry, limit } of budgets) {
-  const result = await build({ entryPoints: [entry], bundle: true, format: 'esm', minify: true, write: false, target: 'es2022', legalComments: 'none' })
+// Plugin entries import core modules (parser constants, URL helpers): mark them
+// external so the budget measures only the plugin's own code.
+const externalCore = {
+  name: 'external-core',
+  setup(b) {
+    b.onResolve({ filter: /^\.\.\/(block|util|render|types)/ }, (args) => ({ path: args.path, external: true }))
+  },
+}
+
+for (const { name, entry, limit, external } of budgets) {
+  const result = await build({
+    entryPoints: [entry],
+    bundle: true,
+    format: 'esm',
+    minify: true,
+    write: false,
+    target: 'es2022',
+    legalComments: 'none',
+    plugins: external ? [externalCore] : [],
+  })
   const code = result.outputFiles[0].contents
   const gz = gzipSync(code, { level: 9 }).length
   const ok = gz <= limit

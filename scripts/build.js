@@ -10,6 +10,7 @@ await build({
   entryPoints: {
     index: 'src/index.ts',
     entities: 'src/entities/index.ts',
+    gfm: 'src/gfm/index.ts',
   },
   outdir: 'dist',
   bundle: true,

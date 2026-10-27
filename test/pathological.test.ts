@@ -3,9 +3,10 @@
 // a quadratic regression blows through them by orders of magnitude.
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
+import { gfm } from '../src/gfm/index.ts'
 import { createMarkdown } from '../src/index.ts'
 
-const md = createMarkdown({ html: true })
+const md = createMarkdown({ html: true, plugins: gfm() })
 const N = 30_000
 
 const cases: Array<[string, string]> = [
@@ -32,6 +33,15 @@ const cases: Array<[string, string]> = [
   ['long inner space run in a paragraph', 'a' + ' '.repeat(N * 3) + 'b'],
   ['long space run in an ATX heading', '# a' + ' '.repeat(N * 3) + 'b'],
   ['HTML block with many trailing blank lines', '<!--\n' + '\n '.repeat(N) + 'x'],
+  // GFM
+  ['table: wide header, many short rows', '|' + 'a|'.repeat(5000) + '\n|' + '-|'.repeat(5000) + '\n' + 'x\n'.repeat(5000)],
+  ['table: rows with many pipes', '|a|\n|-|\n' + ('|'.repeat(N) + '\n').repeat(10)],
+  ['autolink: many @', 'a@'.repeat(N)],
+  ['autolink: many www.', 'www. '.repeat(N)],
+  ['autolink: many schemes', 'http://'.repeat(N)],
+  ['autolink: long email-like run', 'a.'.repeat(N) + '@' + 'b.'.repeat(N)],
+  ['strikethrough: many tildes', '~a '.repeat(N) + '~~b '.repeat(N)],
+  ['footnotes: many references', '[^1] '.repeat(N) + '\n\n[^1]: note'],
 ]
 
 describe('pathological inputs', () => {
