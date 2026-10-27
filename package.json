@@ -1,0 +1,57 @@
+{
+  "name": "mdlib-pure",
+  "version": "0.1.0",
+  "description": "Lightweight, zero-dependency, CommonMark-compliant Markdown renderer for the browser. Extensible via plugins, styled with semantic tokens, Tailwind-friendly.",
+  "license": "MIT",
+  "author": "Michele Polo <michele.polo@gmail.com>",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./entities": {
+      "types": "./dist/types/entities/index.d.ts",
+      "default": "./dist/entities.js"
+    },
+    "./theme.css": "./styles/theme.css",
+    "./tailwind.css": "./styles/tailwind.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "styles",
+    "docs",
+    "AGENTS.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "spec": "node test/spec-report.ts",
+    "typecheck": "tsc --noEmit",
+    "size": "node scripts/size.js",
+    "check": "node scripts/check.js",
+    "verify": "npm run typecheck && npm test && npm run check && npm run size",
+    "gen:entities": "node scripts/gen-entities.js"
+  },
+  "keywords": [
+    "markdown",
+    "commonmark",
+    "gfm",
+    "parser",
+    "renderer",
+    "tailwind",
+    "zero-dependency"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}
