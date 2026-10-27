@@ -20,7 +20,9 @@ interface FootnoteEnv {
 const envOf = (env: Record<string, unknown>): FootnoteEnv =>
   (env.footnotes ??= { defined: new Map() } as FootnoteEnv) as FootnoteEnv
 
-const reDefinition = /^\[\^([^\]\s]+)\]:/
+// Labels are bounded like link labels (999 chars): an unbounded scan makes
+// "[^[^[^…" quadratic.
+const reDefinition = /^\[\^([^\]\s]{1,999})\]:/
 
 const definitionRule: BlockRule = {
   name: 'footnoteDefinition',
@@ -64,7 +66,7 @@ const referenceRule: InlineRule = {
     if (p.peek(bang) !== 91 /* [ */ || p.peek(bang + 1) !== 94 /* ^ */) return false
     const start = p.pos
     p.pos += bang
-    const m = p.match(/\[\^([^\]\s]+)\]/y)
+    const m = p.match(/\[\^([^\]\s]{1,999})\]/y)
     const identifier = m ? normalizeLabel(m.slice(2, -1)) : ''
     const label = m ? envOf(p.env).defined.get(identifier) : undefined
     if (label === undefined) {

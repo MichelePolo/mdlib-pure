@@ -33,7 +33,7 @@
   ],
   "scripts": {
     "build": "node scripts/build.js",
-    "test": "node --test \"test/**/*.test.ts\"",
+    "test": "node --test \"test/**/*.test.ts\" \"templates/**/*.test.ts\"",
     "spec": "node test/spec-report.ts",
     "typecheck": "tsc --noEmit",
     "size": "node scripts/size.js",

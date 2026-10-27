@@ -42,6 +42,9 @@ const cases: Array<[string, string]> = [
   ['autolink: long email-like run', 'a.'.repeat(N) + '@' + 'b.'.repeat(N)],
   ['strikethrough: many tildes', '~a '.repeat(N) + '~~b '.repeat(N)],
   ['footnotes: many references', '[^1] '.repeat(N) + '\n\n[^1]: note'],
+  ['footnotes: many [^ without ]', '[^'.repeat(N)],
+  ['footnotes: many ![^ without ]', '![^'.repeat(N)],
+  ['table: alternating mismatched delimiter rows', 'a|b\n' + ':-\n-|-\n'.repeat(N / 2)],
 ]
 
 describe('pathological inputs', () => {

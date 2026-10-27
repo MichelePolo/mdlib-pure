@@ -58,14 +58,18 @@ function openTable(p: BlockParser, container: Block): 0 | 2 {
   if (p.indented || container.type !== 'paragraph' || container.depth >= MAX_NESTING) return 0
   const align = parseDelimiterRow(p.rest())
   if (!align) return 0
-  const lines = container.content.replace(/\n$/, '').split('\n')
-  const header = splitRow(lines[lines.length - 1])
+  // Only the paragraph's last line matters. Never scan the whole paragraph:
+  // every line of a long one may look like a delimiter row (O(n²)).
+  const content = container.content
+  const end = content.endsWith('\n') ? content.length - 1 : content.length
+  const nl = content.lastIndexOf('\n', end - 1)
+  const header = splitRow(content.slice(nl + 1, end))
   if (header.length !== align.length) return 0
 
   p.closeUnmatchedBlocks()
   // Lines above the header stay a paragraph; an emptied paragraph is dropped.
-  if (lines.length > 1) {
-    container.content = lines.slice(0, -1).join('\n') + '\n'
+  if (nl >= 0) {
+    container.content = content.slice(0, nl + 1)
     p.finalize(container, p.lineNumber - 2)
   } else {
     p.tip = container.parent!

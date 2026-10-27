@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>mdlib-pure demo</title>
+  <link rel="stylesheet" href="../styles/theme.css" />
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    :root[data-scheme='light'] { color-scheme: light; }
+    :root[data-scheme='dark'] { color-scheme: dark; }
+    body { margin: 0; background: light-dark(#fff, #0d1117); color: light-dark(#1f2328, #e6edf3); }
+    header { display: flex; gap: 1rem; align-items: center; padding: 0.75rem 1rem; border-block-end: 1px solid color-mix(in oklab, currentColor 15%, transparent); }
+    header h1 { margin: 0; font-size: 1rem; }
+    header label { margin-inline-start: auto; font-size: 0.875rem; }
+    main { display: grid; grid-template-columns: 1fr 1fr; min-block-size: calc(100dvh - 3.5rem); }
+    textarea { padding: 1rem; border: 0; border-inline-end: 1px solid color-mix(in oklab, currentColor 15%, transparent); background: transparent; color: inherit; font: 0.875rem/1.5 ui-monospace, monospace; resize: none; }
+    .md { padding: 1rem 1.5rem; overflow: auto; }
+    @media (width < 48rem) { main { grid-template-columns: 1fr; } textarea { min-block-size: 40dvh; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>mdlib-pure</h1>
+    <label>Theme
+      <select id="scheme">
+        <option value="">System</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+  </header>
+  <main>
+    <textarea id="src" aria-label="Markdown source" spellcheck="false"></textarea>
+    <article id="out" class="md" aria-live="polite"></article>
+  </main>
+  <script type="module">
+    import { createMarkdown } from '../dist/index.js'
+    import { gfm } from '../dist/gfm.js'
+
+    const md = createMarkdown({ plugins: gfm() })
+    const src = document.querySelector('#src')
+    const out = document.querySelector('#out')
+
+    src.value = `# mdlib-pure
+
+A **zero-dependency** Markdown renderer with *semantic tokens*.
+Visit www.commonmark.org or [the spec](https://spec.commonmark.org).
+
+> [!TIP]
+> Neutral colors derive from \`currentColor\`: switch the theme above.
+
+## Lists
+
+- [x] CommonMark 0.31.2 (652/652)
+- [x] GFM: tables, ~~strikethrough~~, autolinks, task lists
+- [ ] Your plugin here
+
+1. Ordered
+2. Lists
+
+## Code
+
+\`\`\`js
+const md = createMarkdown({ plugins: gfm() })
+md.renderTo(element, source)
+\`\`\`
+
+| Feature | Size (gzip) |
+|:--|--:|
+| core | ~10 KB |
+| gfm | ~4 KB |
+
+Footnotes work too.[^1]
+
+---
+
+[^1]: Rendered at the end, with back references.
+`
+
+    const render = () => md.renderTo(out, src.value)
+    src.addEventListener('input', render)
+    render()
+
+    document.querySelector('#scheme').addEventListener('change', (e) => {
+      document.documentElement.dataset.scheme = e.target.value
+    })
+  </script>
+</body>
+</html>
