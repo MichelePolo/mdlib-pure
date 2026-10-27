@@ -127,6 +127,9 @@ A plugin can provide:
 | `transform` | changes to the AST after parsing (heading ids, TOC) |
 | `render` | HTML output per node type, including core nodes |
 
+First-party plugin: `mdlib-pure/container` for fenced containers
+(`::: warning Title` … `:::`, nestable with longer fences).
+
 The full guide, written for both humans and AI agents, is
 [`AGENTS.md`](AGENTS.md). [`templates/plugin`](templates/plugin) is a
 complete, tested plugin to copy.
@@ -146,7 +149,7 @@ Details and threat model: [docs/security.md](docs/security.md).
 ## Development
 
 ```sh
-npm test         # 780+ tests, TypeScript runs natively in Node ≥ 22.18
+npm test         # 800+ tests, TypeScript runs natively in Node ≥ 22.18
 npm run spec     # CommonMark conformance report
 npm run verify   # typecheck + tests + invariants + size budgets
 npm run build    # dist/

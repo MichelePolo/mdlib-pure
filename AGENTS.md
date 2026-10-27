@@ -32,6 +32,7 @@ features need feature detection and a graceful fallback.
 ## Commands
 
 ```sh
+npm ci              # once, on a fresh checkout (dev tools only: esbuild, typescript)
 npm test            # all tests (node:test, runs TypeScript directly)
 npm run spec        # CommonMark report per section
 npm run spec -- 42  # show expected/actual for example 42
@@ -56,11 +57,19 @@ src/
   render/renderer.ts  AST → VNodes (coreRenderers, classes map)
   render/html.ts      VNodes → HTML string (CommonMark-exact newlines)
   render/dom.ts       VNodes → DOM without parsing HTML
-  util/               escaping, entities, URL normalization and safety policy
+  util/               escaping, entities, URL normalization and safety policy, visit()
   entities/           optional full entity table (`mdlib-pure/entities`)
+  gfm/                GFM plugins (`mdlib-pure/gfm`): table, autolink, footnotes, …
+  plugins/            other first-party plugins, one entry each (`mdlib-pure/container`)
+styles/               theme.css (tokens), tailwind.css (Tailwind v4 bridge)
+docs/                 tokens.md, security.md
+templates/plugin/     a complete tested plugin to copy (runs in `npm test`)
+demo/                 live editor (needs `npm run build`)
 test/
   spec.test.ts        the 652 CommonMark examples
-  api.test.ts         options, AST shape, plugin examples (good templates!)
+  gfm.test.ts         GFM extension examples
+  api.test.ts         options, AST shape, plugin examples
+  container.test.ts   a full block-container plugin test suite (good model)
   pathological.test.ts  linear-time guarantees
 ```
 
@@ -75,9 +84,17 @@ test/
    `content: 'inline'` gets its text parsed. At every *trigger character* the
    rules registered for it are tried in order; text between triggers is
    consumed in one regex step.
-3. **Transforms** (`plugin.transform`) run on the finished AST.
+3. **Transforms** (`plugin.transform`) run on the finished AST. Use
+   `visit()` to walk it, and `ctx.parseInline(text)` to turn text into
+   inline nodes (e.g. Markdown in a node property such as a title).
 4. **Render**: AST → VNodes via render functions keyed by node type → HTML
    string or DOM.
+
+**Per-parse state.** Plugin objects are shared by every parse, so never keep
+document state in them. Use `env`: one object per parse, available as `p.env`
+in block and inline rules and `ctx.env` in transforms. Namespace keys
+(`'footnotes'`, `'container:scan'`). Example: footnote definitions are
+registered in the block phase and looked up in the inline phase.
 
 ## Choosing the extension point
 
@@ -132,24 +149,63 @@ are the same as `*`.
 ### Block rule
 
 A rule with `start` opens blocks; a rule with `continue` defines a block
-type. One object can do both (see the `$$` math example in
-`test/api.test.ts`).
+type. One object can do both. Models: the `$$` math leaf in
+`test/api.test.ts`, the `:::` container in `src/plugins/container.ts`.
 
-- `start(p, container)` returns `0` (no match), `1` (container opened) or
-  `2` (leaf opened). Before `p.addChild(...)`, call `p.closeUnmatchedBlocks()`.
+**Results**
+
+- `start(p, container)` returns `0` (no match), `1` (container opened: keep
+  trying starts inside it) or `2` (leaf opened, or the line is otherwise fully
+  handled: stop). Call `p.closeUnmatchedBlocks()` before `p.addChild(...)`.
 - `continue(p, block)` returns `0` (line continues the block), `1` (it does
-  not; the block will be closed) or `2` (line fully consumed, e.g. a closing
-  fence: call `p.finalize(block, p.lineNumber)` first).
-- `acceptsLines: true` appends remaining text to `block.content`.
+  not: the block will be closed) or `2` (line fully consumed, e.g. a closing
+  fence: call `p.finalize(block, p.lineNumber)` first). `finalize` also closes
+  the block's open children, ending them on the previous line.
+
+**Shape**
+
+- `acceptsLines: true` appends remaining text to `block.content` (leaves).
 - `content: 'inline'` parses `block.content` as inlines into `node.children`;
-  `content: 'block'` makes child blocks the children.
+  `content: 'block'` makes child blocks the children (containers).
+- **Containers need `canContain(type)`.** The default is "nothing": `addChild`
+  then silently closes your block and attaches the child to its parent. Most
+  containers want `(t) => t !== 'listItem'`.
 - Set AST properties on `block.node`; keep parser state in `block.data`.
-- `triggers` lists the chars a block can start with. Omitting it disables a
-  fast path for every line: always provide it (`''` = only indented lines).
-- Container rules must refuse to start when `container.depth >= MAX_NESTING`.
-- Order matters: use `before: 'fencedCode'` etc. Core start order is
-  `blockquote, atxHeading, fencedCode, htmlBlock, setextHeading,
-  thematicBreak, listItem, indentedCode`.
+- **`endLine` matters**: lists are tight or loose depending on line gaps
+  between sibling blocks. A container closed by the end of its parent should
+  end at its last child: in `finalize`, `b.endLine = b.lastChild?.endLine ??
+  b.startLine` (like `listItem`).
+
+**Order and dispatch**
+
+- `triggers` lists the chars a block can start with (after indentation); the
+  rule is skipped on other lines. Without `triggers` the rule is tried on every
+  line (only that rule pays). `''` = only on indented lines.
+- Rules without `before`/`after` are appended **after all core rules and
+  after earlier plugins' rules**. The GFM table rule has no triggers and takes
+  every line inside a table as a row, so give your start an anchor
+  (`before: 'fencedCode'`). Core start order: `blockquote, atxHeading,
+  fencedCode, htmlBlock, setextHeading, thematicBreak, listItem,
+  indentedCode`.
+- Container rules must refuse to start when `container.depth >= MAX_NESTING`
+  (`import { MAX_NESTING } from 'mdlib-pure'`; inside this repo,
+  `'../block/parser.ts'`).
+
+**Containers with a closing marker** (`:::`, `+++`…)
+
+- `continue` runs on every open block, **outer containers first**. If a
+  container closes itself in `continue`, it steals lines that belong to its
+  children (a `:::` inside a fenced code block in the container).
+- Pattern: in `continue`, only *record* that the line is your closer and
+  return `0`; do the closing in `start`, which the parser skips while the
+  deepest open block takes raw lines (code). See `src/plugins/container.ts`.
+
+**Performance**
+
+- `continue` runs once per open block per line, so per-line work there is
+  multiplied by nesting depth (up to `MAX_NESTING`). Memoize per line in
+  `p.env` (see `scan()` in `container.ts`). Time-based tests miss constant
+  factor regressions like this: also test deep nesting explicitly.
 
 ### Render override
 
@@ -165,13 +221,32 @@ type. One object can do both (see the `$$` math example in
   `renderTo`).
 - `r.parent` is the parent node (e.g. paragraphs check for tight lists).
 
+## Adding a first-party plugin
+
+1. Code in `src/plugins/<name>.ts` (or `src/<name>/` if it has several files).
+   Start with a header comment: syntax, AST node shape, HTML output (see
+   `container.ts`).
+2. Tests in `test/<name>.test.ts`: positive, negative, interaction with core
+   and GFM (in both plugin orders), AST shape, adversarial input.
+3. Wire it: entry in `scripts/build.js`, budget in `scripts/size.js`
+   (`external: true`), export in `package.json`.
+
+`templates/plugin/` is the same structure for a minimal inline plugin.
+
 ## Definition of done
 
 - [ ] `npm run verify` passes (typecheck, tests, check, size)
 - [ ] new syntax: positive tests, negative tests, adversarial-input test
-- [ ] new node types documented in the plugin's README/JSDoc (AST shape)
+- [ ] new node types documented in the plugin's header comment (AST shape)
 - [ ] new tokens documented in `docs/tokens.md`
 - [ ] no behavior change to core output unless the task requires it
+
+## CSS (styles/)
+
+- Every rule is in `@layer mdlib` inside `:where()`: zero specificity, so
+  **source order decides** between theme rules. Edge resets
+  (`:first-child`/`:last-child` margins) must stay at the end of the file.
+- Tokens: semantic names only (rule 7); document each in `docs/tokens.md`.
 
 ## Things that look wrong but are intentional
 

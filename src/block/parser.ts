@@ -254,7 +254,13 @@ export class BlockParser {
     this.allClosed = true
   }
 
+  /**
+   * Close `block` at `lineNumber`. Open descendants are closed first, ending on
+   * the previous line, so a container can close itself from `continue` (e.g.
+   * on its own closing fence) without leaving children half-parsed.
+   */
   finalize(block: Block, lineNumber: number): void {
+    if (block.lastChild?.open) while (this.tip !== block) this.finalize(this.tip, lineNumber - 1)
     const parent = block.parent // the rule may remove the block from the tree
     block.open = false
     block.endLine = lineNumber

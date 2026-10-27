@@ -65,7 +65,10 @@ export interface Reference {
 // Plugin contracts
 // ---------------------------------------------------------------------------
 
-/** Result of `BlockRule.start`: 0 = no match, 1 = container opened, 2 = leaf opened. */
+/**
+ * Result of `BlockRule.start`: 0 = no match, 1 = container opened (keep trying
+ * starts inside it), 2 = leaf opened or line otherwise fully handled (stop).
+ */
 export type StartResult = 0 | 1 | 2
 /** Result of `BlockRule.continue`: 0 = matched, 1 = not matched, 2 = line fully consumed. */
 export type ContinueResult = 0 | 1 | 2
@@ -75,7 +78,11 @@ export type ContinueResult = 0 | 1 | 2
  * friends), a block *start* (`start`), or both.
  */
 export interface BlockRule {
-  /** Block type name. Also the AST node `type` of blocks it creates. */
+  /**
+   * Rule name, used by `before`/`after` and to replace a rule. For rules with
+   * `continue` it is also the block type (and default AST node type). A
+   * start-only rule may open blocks of other types (`fencedCode` opens `code`).
+   */
   name: string
   /** Place this rule's `start` before the start of the named rule. */
   before?: string

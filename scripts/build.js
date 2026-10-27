@@ -11,6 +11,7 @@ await build({
     index: 'src/index.ts',
     entities: 'src/entities/index.ts',
     gfm: 'src/gfm/index.ts',
+    container: 'src/plugins/container.ts',
   },
   outdir: 'dist',
   bundle: true,

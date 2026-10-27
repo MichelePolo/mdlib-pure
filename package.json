@@ -21,6 +21,10 @@
       "types": "./dist/types/gfm/index.d.ts",
       "default": "./dist/gfm.js"
     },
+    "./container": {
+      "types": "./dist/types/plugins/container.d.ts",
+      "default": "./dist/container.js"
+    },
     "./theme.css": "./styles/theme.css",
     "./tailwind.css": "./styles/tailwind.css",
     "./package.json": "./package.json"
