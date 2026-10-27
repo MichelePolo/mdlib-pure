@@ -1,0 +1,36 @@
+/*
+ * mdlib-pure × Tailwind CSS v4
+ *
+ *   @import "tailwindcss";
+ *   @import "mdlib-pure/tailwind.css";
+ *
+ * 1. Loads the theme inside Tailwind's `components` layer, so utilities
+ *    always win (a standalone @layer loaded after Tailwind would outrank
+ *    `utilities`, whatever the specificity).
+ * 2. Exposes the tokens as Tailwind theme values: text-md-link,
+ *    bg-md-surface, border-md-border, font-md-mono… They follow the tokens,
+ *    dark mode included (`inline` keeps the var() reference).
+ *
+ * Map the tokens to your design system in your own CSS:
+ *
+ *   :root { --md-color-link: var(--color-primary); --md-font-heading: var(--font-display); }
+ */
+@import './theme.css' layer(components);
+
+@theme inline {
+  --color-md-muted: var(--md-color-muted);
+  --color-md-link: var(--md-color-link);
+  --color-md-link-hover: var(--md-color-link-hover);
+  --color-md-accent: var(--md-color-accent);
+  --color-md-border: var(--md-color-border);
+  --color-md-surface: var(--md-color-surface);
+  --color-md-code-bg: var(--md-color-code-bg);
+  --color-md-mark: var(--md-color-mark);
+  --color-md-note: var(--md-color-note);
+  --color-md-tip: var(--md-color-tip);
+  --color-md-important: var(--md-color-important);
+  --color-md-warning: var(--md-color-warning);
+  --color-md-caution: var(--md-color-caution);
+  --font-md-mono: var(--md-font-mono);
+  --radius-md: var(--md-radius);
+}

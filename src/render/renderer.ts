@@ -45,6 +45,7 @@ export interface RendererOptions {
 }
 
 const toArray = (v: VChild | VChild[]): VChild[] => (Array.isArray(v) ? v : [v])
+const own = (map: Record<string, string>, key: string): string | undefined => (Object.hasOwn(map, key) ? map[key] : undefined)
 
 function addClass(out: VChild | VChild[], cls: string | undefined): void {
   if (!cls || !out || typeof out !== 'object' || Array.isArray(out) || !('tag' in out)) return
@@ -57,12 +58,12 @@ export function createRenderer(opts: RendererOptions): (root: Node) => VChild[] 
   const { renderers, classes, allowUrl } = opts
 
   const renderNode = (node: Node): VChild | VChild[] => {
-    const fn = renderers[node.type]
+    const fn = Object.hasOwn(renderers, node.type) ? renderers[node.type] : undefined
     // Unknown node types degrade gracefully: their children or their text.
     const out = fn ? fn(node, ctx) : node.children ? ctx.children(node) : typeof node.value === 'string' ? node.value : null
     if (classes) {
-      addClass(out, classes[node.type])
-      if (node.type === 'heading') addClass(out, classes[`heading${node.depth}`])
+      addClass(out, own(classes, node.type))
+      if (node.type === 'heading') addClass(out, own(classes, `heading${node.depth}`))
     }
     return out
   }

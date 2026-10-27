@@ -30,8 +30,19 @@ const reWhitespace = /\s/
 export const isPunctuation = (ch: string): boolean => rePunctuation.test(ch)
 export const isUnicodeWhitespace = (ch: string): boolean => reWhitespace.test(ch)
 
-/** Trim spaces, tabs and line endings only (String#trim also strips NBSP). */
-export const trimMd = (s: string): string => s.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, '')
+const isMdSpace = (c: number): boolean => c === C_SPACE || c === C_TAB || c === C_NEWLINE || c === 13
+
+/**
+ * Trim spaces, tabs and line endings only (String#trim also strips NBSP).
+ * A manual scan: `/[ \t]+$/` is quadratic on long inner runs of spaces.
+ */
+export function trimMd(s: string): string {
+  let start = 0
+  let end = s.length
+  while (start < end && isMdSpace(s.charCodeAt(start))) start++
+  while (end > start && isMdSpace(s.charCodeAt(end - 1))) end--
+  return start === 0 && end === s.length ? s : s.slice(start, end)
+}
 
 const reHtmlSpecial = /[&<>"]/g
 const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }

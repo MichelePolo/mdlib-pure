@@ -26,6 +26,12 @@ const cases: Array<[string, string]> = [
   ['unclosed <!--', '</' + '<!--'.repeat(N)],
   ['many references', Array.from({ length: N }, (_, i) => `[${i}]: u`).join('\n') + '\n' + '[0] '.repeat(N)],
   ['long paragraph with breaks', 'word  \n'.repeat(N)],
+  // Regexes with overlapping alternatives or unanchored `x+$` (found in review).
+  ['link title with many escapes', '[a](/u "' + '\\!'.repeat(N)],
+  ['long space run before a soft break', 'a' + ' '.repeat(N * 3) + 'b \nc'],
+  ['long inner space run in a paragraph', 'a' + ' '.repeat(N * 3) + 'b'],
+  ['long space run in an ATX heading', '# a' + ' '.repeat(N * 3) + 'b'],
+  ['HTML block with many trailing blank lines', '<!--\n' + '\n '.repeat(N) + 'x'],
 ]
 
 describe('pathological inputs', () => {

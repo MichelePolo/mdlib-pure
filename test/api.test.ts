@@ -30,6 +30,10 @@ describe('defaults', () => {
     assert.equal(md.render('[a](/path) [b](#frag) [c](https://x.y)'), '<p><a href="/path">a</a> <a href="#frag">b</a> <a href="https://x.y">c</a></p>\n')
   })
 
+  test('entity names never resolve to Object.prototype members', () => {
+    assert.equal(md.render('&constructor; &toString; &hasOwnProperty;'), '<p>&amp;constructor; &amp;toString; &amp;hasOwnProperty;</p>\n')
+  })
+
   test('basic named entities decode without a DOM', () => {
     assert.equal(md.render('&amp; &lt; &copy;'), '<p>&amp; &lt; &amp;copy;</p>\n')
   })

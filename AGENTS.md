@@ -21,6 +21,13 @@ declare any task done; it runs all of them.
 | 5 | **Erasable TypeScript only**: no `enum`, `namespace`, parameter properties. Node runs the sources directly. | `npm run typecheck` |
 | 6 | **Every new syntax ships with tests**, including adversarial input (see `test/pathological.test.ts`). Parsing must stay linear. | `npm test` |
 | 7 | **CSS tokens are semantic** (`--md-color-link`), never primitive (`--md-blue-500`). | review |
+| 8 | **Regexes must be linear** on any input: no alternatives that can match the same text inside a quantifier (`(?:\\.|\\[^x])*`), no unanchored `x+$`/`x*$` (scan by hand instead), always `y`/`g` + `lastIndex` instead of `slice(pos)`. | `test/pathological.test.ts` |
+| 9 | **Lookups keyed by input use `Map` or `Object.hasOwn`**, never a plain object (`&constructor;` must not reach `Object.prototype`). | review + tests |
+
+**Browser support:** Baseline 2024. Features Baseline-available in 2024 or
+earlier (`light-dark()`, `color-mix()`, `:has()`, `text-wrap: balance`, CSS
+nesting, `Object.hasOwn`, regex `\p{…}`) are used without fallbacks. Newer
+features need feature detection and a graceful fallback.
 
 ## Commands
 

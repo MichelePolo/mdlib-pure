@@ -1,0 +1,238 @@
+/*
+ * mdlib-pure — default theme for rendered Markdown.
+ *
+ * Usage: put class="md" on the element that holds the rendered HTML.
+ *
+ * - Every rule is in `@layer mdlib` and inside `:where()`: zero specificity,
+ *   so any class, utility or unlayered rule overrides it.
+ * - Customize through the --md-* tokens, on :root, on .md or on any ancestor.
+ * - Neutral colors derive from `currentColor`, so they fit any background.
+ *   Hued colors use light-dark(): they follow `color-scheme` (set
+ *   `color-scheme: light dark` on :root, or `color-scheme: dark` on `.dark`
+ *   with Tailwind's class-based dark mode).
+ * - Tokens marked "unset" are not defined: the page's value is inherited.
+ *
+ * Browser support: Baseline 2024 (light-dark, color-mix, :has, text-wrap).
+ */
+@layer mdlib {
+  :where(:root, :host) {
+    /* --- Color ------------------------------------------------------------ */
+    /* --md-color-text:     unset → inherits the page color                  */
+    /* --md-color-heading:  unset → inherits                                  */
+    --md-color-muted: color-mix(in oklab, currentColor 68%, transparent);
+    --md-color-link: light-dark(#0969da, #4493f8);
+    --md-color-link-hover: light-dark(#0550ae, #79c0ff);
+    --md-color-accent: var(--md-color-link);
+    --md-color-border: color-mix(in oklab, currentColor 18%, transparent);
+    --md-color-surface: color-mix(in oklab, currentColor 5%, transparent);
+    --md-color-code-bg: color-mix(in oklab, currentColor 9%, transparent);
+    --md-color-quote: var(--md-color-muted);
+    --md-color-quote-border: var(--md-color-border);
+    --md-color-mark: light-dark(#fff3a3, #6b5a0f);
+
+    /* Alerts (> [!NOTE] …) */
+    --md-color-note: light-dark(#0969da, #4493f8);
+    --md-color-tip: light-dark(#1a7f37, #3fb950);
+    --md-color-important: light-dark(#8250df, #ab7df8);
+    --md-color-warning: light-dark(#9a6700, #d29922);
+    --md-color-caution: light-dark(#d1242f, #f85149);
+
+    /* --- Typography ------------------------------------------------------- */
+    /* --md-font-body:     unset → inherits                                   */
+    /* --md-font-heading:  unset → inherits                                   */
+    --md-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    --md-leading: 1.6;
+    --md-leading-heading: 1.25;
+    --md-weight-heading: 600;
+    --md-size-h1: 2em;
+    --md-size-h2: 1.5em;
+    --md-size-h3: 1.25em;
+    --md-size-h4: 1.125em;
+    --md-size-h5: 1em;
+    --md-size-h6: 0.875em;
+    --md-size-code: 0.875em;
+    --md-size-small: 0.875em;
+
+    /* --- Space & shape ---------------------------------------------------- */
+    --md-space-block: 1em;
+    --md-space-heading: 1.5em;
+    --md-space-indent: 1.75em;
+    --md-space-item: 0.25em;
+    --md-pad-code: 0.875em 1em;
+    --md-radius: 0.375rem;
+    --md-border-width: 1px;
+  }
+
+  /* --- Container & flow ---------------------------------------------------- */
+
+  :where(.md) {
+    color: var(--md-color-text);
+    font-family: var(--md-font-body);
+    line-height: var(--md-leading);
+    overflow-wrap: break-word;
+  }
+
+  :where(.md) :where(p, ul, ol, dl, blockquote, pre, table, figure, details, hr, .markdown-alert) {
+    margin-block: 0 var(--md-space-block);
+  }
+
+  :where(.md > :first-child) {
+    margin-block-start: 0;
+  }
+
+  :where(.md > :last-child, .md li > :last-child, .md blockquote > :last-child) {
+    margin-block-end: 0;
+  }
+
+  /* --- Headings ---------------------------------------------------------------- */
+
+  :where(.md) :where(h1, h2, h3, h4, h5, h6) {
+    margin-block: var(--md-space-heading) calc(var(--md-space-block) * 0.5);
+    color: var(--md-color-heading);
+    font-family: var(--md-font-heading);
+    font-weight: var(--md-weight-heading);
+    line-height: var(--md-leading-heading);
+    text-wrap: balance;
+  }
+
+  :where(.md) :where(h1) { font-size: var(--md-size-h1); }
+  :where(.md) :where(h2) { font-size: var(--md-size-h2); }
+  :where(.md) :where(h3) { font-size: var(--md-size-h3); }
+  :where(.md) :where(h4) { font-size: var(--md-size-h4); }
+  :where(.md) :where(h5) { font-size: var(--md-size-h5); }
+  :where(.md) :where(h6) { font-size: var(--md-size-h6); color: var(--md-color-muted); }
+
+  /* --- Inline ------------------------------------------------------------------ */
+
+  :where(.md) :where(a) {
+    color: var(--md-color-link);
+    text-underline-offset: 0.15em;
+  }
+
+  :where(.md) :where(a:hover) {
+    color: var(--md-color-link-hover);
+  }
+
+  :where(.md) :where(a:focus-visible) {
+    outline: 2px solid var(--md-color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  :where(.md) :where(code, kbd, samp) {
+    font-family: var(--md-font-mono);
+    font-size: var(--md-size-code);
+  }
+
+  :where(.md) :where(:not(pre) > code) {
+    padding: 0.15em 0.35em;
+    border-radius: calc(var(--md-radius) * 0.75);
+    background: var(--md-color-code-bg);
+  }
+
+  :where(.md) :where(mark) {
+    padding: 0.05em 0.2em;
+    border-radius: calc(var(--md-radius) * 0.5);
+    background: var(--md-color-mark);
+    color: inherit;
+  }
+
+  :where(.md) :where(img) {
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
+  /* --- Blocks --------------------------------------------------------------------- */
+
+  :where(.md) :where(pre) {
+    padding: var(--md-pad-code);
+    border-radius: var(--md-radius);
+    background: var(--md-color-surface);
+    font-size: var(--md-size-code);
+    line-height: 1.45;
+    overflow-x: auto;
+  }
+
+  :where(.md) :where(pre code) {
+    font-size: inherit;
+  }
+
+  :where(.md) :where(blockquote) {
+    margin-inline: 0;
+    padding-inline-start: 1em;
+    border-inline-start: 0.25em solid var(--md-color-quote-border);
+    color: var(--md-color-quote);
+  }
+
+  :where(.md) :where(hr) {
+    block-size: 0;
+    margin-block: calc(var(--md-space-block) * 1.5);
+    border: 0;
+    border-block-start: var(--md-border-width) solid var(--md-color-border);
+  }
+
+  :where(.md) :where(ul, ol) {
+    padding-inline-start: var(--md-space-indent);
+  }
+
+  :where(.md) :where(li + li, li > ul, li > ol) {
+    margin-block-start: var(--md-space-item);
+  }
+
+  :where(.md) :where(li > ul, li > ol) {
+    margin-block-end: 0;
+  }
+
+  /* Task lists: <li><input type="checkbox" disabled> … */
+  :where(.md) :where(li:has(> input[type='checkbox']:first-child)) {
+    list-style: none;
+  }
+
+  :where(.md) :where(li > input[type='checkbox']:first-child) {
+    margin-inline: calc(var(--md-space-indent) * -1) 0.4em;
+    accent-color: var(--md-color-accent);
+    vertical-align: -0.1em;
+  }
+
+  :where(.md) :where(table) {
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  :where(.md) :where(th, td) {
+    padding: 0.4em 0.8em;
+    border: var(--md-border-width) solid var(--md-color-border);
+  }
+
+  :where(.md) :where(th) {
+    background: var(--md-color-surface);
+    font-weight: var(--md-weight-heading);
+  }
+
+  /* --- GFM extras: footnotes and alerts ------------------------------------------- */
+
+  :where(.md) :where(.footnotes) {
+    margin-block-start: calc(var(--md-space-block) * 2);
+    padding-block-start: var(--md-space-block);
+    border-block-start: var(--md-border-width) solid var(--md-color-border);
+    color: var(--md-color-muted);
+    font-size: var(--md-size-small);
+  }
+
+  :where(.md) :where(.markdown-alert) {
+    --md-alert: var(--md-color-note);
+    padding: 0.5em 1em;
+    border-inline-start: 0.25em solid var(--md-alert);
+  }
+
+  :where(.md) :where(.markdown-alert-tip) { --md-alert: var(--md-color-tip); }
+  :where(.md) :where(.markdown-alert-important) { --md-alert: var(--md-color-important); }
+  :where(.md) :where(.markdown-alert-warning) { --md-alert: var(--md-color-warning); }
+  :where(.md) :where(.markdown-alert-caution) { --md-alert: var(--md-color-caution); }
+
+  :where(.md) :where(.markdown-alert-title) {
+    margin-block-end: 0.25em;
+    color: var(--md-alert);
+    font-weight: var(--md-weight-heading);
+  }
+}

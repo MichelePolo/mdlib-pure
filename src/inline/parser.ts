@@ -15,13 +15,9 @@ import { MAX_NESTING } from '../block/parser.ts'
 /** Parentheses nesting allowed in bare link destinations (the spec allows a limit). */
 const MAX_PAREN_DEPTH = 32
 
-const ESCAPED_CHAR = `\\\\${ESCAPABLE}`
-const reLinkTitle = new RegExp(
-  `"(?:${ESCAPED_CHAR}|\\\\[^\\\\]|[^\\\\"\\x00])*"` +
-    `|'(?:${ESCAPED_CHAR}|\\\\[^\\\\]|[^\\\\'\\x00])*'` +
-    `|\\((?:${ESCAPED_CHAR}|\\\\[^\\\\]|[^\\\\()\\x00])*\\)`,
-  'y',
-)
+// Each alternative is unambiguous: a backslash always pairs with the next
+// char, so the engine never has two ways to match the same input (no ReDoS).
+const reLinkTitle = /"(?:\\[\s\S]|[^\\"\x00])*"|'(?:\\[\s\S]|[^\\'\x00])*'|\((?:\\[\s\S]|[^\\()\x00])*\)/y
 const reLinkDestinationBraces = /<(?:[^<>\n\\\x00]|\\.)*>/y
 const reEscapable = new RegExp(`^${ESCAPABLE}`)
 const reEntityHere = new RegExp(ENTITY, 'iy')
@@ -35,7 +31,6 @@ const reWhitespaceChar = /^[ \t\n\x0b\x0c\x0d]/
 const reInitialSpace = /[ \t]*/y
 const reSpaceAtEndOfLine = /[ \t]*(?:\n|$)/y
 const reLinkLabel = /\[(?:[^\\[\]]|\\.){0,1000}\]/sy
-const reFinalSpace = / *$/
 
 /** Linked-list node used while parsing; converted to plain AST nodes at the end. */
 class Inl {
@@ -226,8 +221,10 @@ export class InlineParser {
     const last = this.root.last
     const value = last?.node.type === 'text' ? (last.node.value as string) : ''
     if (value.endsWith(' ')) {
-      last!.node.value = value.replace(reFinalSpace, '')
-      if (value.endsWith('  ')) this.push({ type: 'break' })
+      let end = value.length
+      while (end > 0 && value.charCodeAt(end - 1) === 32) end--
+      last!.node.value = value.slice(0, end)
+      if (value.length - end >= 2) this.push({ type: 'break' })
       else this.text('\n')
     } else {
       this.text('\n')

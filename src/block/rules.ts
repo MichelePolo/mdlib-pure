@@ -204,6 +204,23 @@ export const heading: BlockRule = {
 
 const reATXHeadingMarker = /^#{1,6}(?:[ \t]+|$)/
 
+/**
+ * Remove the optional closing `#`s of an ATX heading: they must be preceded by
+ * a space or tab, or be the whole content. Scanned by hand because the regex
+ * form (`/[ \t]+#+[ \t]*$/`) is quadratic on long runs of spaces.
+ */
+function stripClosingSequence(s: string): string {
+  let end = s.length
+  while (end > 0 && isSpaceOrTab(s.charCodeAt(end - 1))) end--
+  let hashes = end
+  while (hashes > 0 && s.charCodeAt(hashes - 1) === 35) hashes--
+  if (hashes === end) return s // no closing sequence
+  let before = hashes
+  while (before > 0 && isSpaceOrTab(s.charCodeAt(before - 1))) before--
+  if (before === 0) return '' // only #s and spaces
+  return before === hashes ? s : s.slice(0, before)
+}
+
 export const atxHeading: BlockRule = {
   name: 'atxHeading',
   triggers: '#',
@@ -215,11 +232,7 @@ export const atxHeading: BlockRule = {
     p.closeUnmatchedBlocks()
     const b = p.addChild('heading', p.nextNonspace)
     b.node.depth = m[0].trim().length
-    // Strip the optional closing sequence of #s.
-    b.content = p.line
-      .slice(p.offset)
-      .replace(/^[ \t]*#+[ \t]*$/, '')
-      .replace(/[ \t]+#+[ \t]*$/, '')
+    b.content = stripClosingSequence(p.line.slice(p.offset))
     p.advanceOffset(p.line.length - p.offset)
     return 2
   },
@@ -355,7 +368,16 @@ export const html: BlockRule = {
   acceptsLines: true,
   continue: (p, b) => (p.blank && b.data.kind >= 6 ? 1 : 0),
   finalize(_p, b) {
-    b.node.value = b.content.replace(/(\n *)+$/, '')
+    // Drop trailing blank lines: same as /(\n *)+$/, which is quadratic.
+    const s = b.content
+    let end = s.length
+    for (;;) {
+      let i = end
+      while (i > 0 && s.charCodeAt(i - 1) === 32) i--
+      if (i > 0 && s.charCodeAt(i - 1) === 10) end = i - 1
+      else break
+    }
+    b.node.value = s.slice(0, end)
     b.node.block = true
     b.content = ''
   },

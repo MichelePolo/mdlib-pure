@@ -9,13 +9,21 @@ import { C_BACKSLASH, ENTITY, ESCAPABLE } from './common.ts'
 /** Decodes an entity name (without `&` and `;`). Returns `undefined` if unknown. */
 export type EntityDecoder = (name: string) => string | undefined
 
-const BASIC: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' }
+// A Map, not an object literal: "&constructor;" must not find Object.prototype.
+const BASIC = new Map([
+  ['amp', '&'],
+  ['lt', '<'],
+  ['gt', '>'],
+  ['quot', '"'],
+  ['apos', "'"],
+  ['nbsp', '\u00a0'],
+])
 
 let textarea: HTMLTextAreaElement | undefined
 
 /** Default decoder: DOM-based in browsers, a handful of common entities elsewhere. */
 export const defaultEntityDecoder: EntityDecoder = (name) => {
-  if (typeof document === 'undefined') return BASIC[name]
+  if (typeof document === 'undefined') return BASIC.get(name)
   if (!/^[a-z][a-z0-9]{1,31}$/i.test(name)) return undefined
   textarea ??= document.createElement('textarea')
   const src = `&${name};`
@@ -35,7 +43,8 @@ export function decodeReference(ref: string, named: EntityDecoder): string {
     const cp = parseInt(ref.slice(hex ? 3 : 2, -1), hex ? 16 : 10)
     return cp === 0 || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff) ? '�' : String.fromCodePoint(cp)
   }
-  return named(ref.slice(1, -1)) ?? ref
+  const out = named(ref.slice(1, -1)) // user-supplied decoders may return anything
+  return typeof out === 'string' ? out : ref
 }
 
 const reEntityOrEscaped = new RegExp(`\\\\${ESCAPABLE}|${ENTITY}`, 'gi')
