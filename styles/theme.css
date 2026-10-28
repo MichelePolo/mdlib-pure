@@ -228,6 +228,20 @@
     font-weight: var(--md-weight-heading);
   }
 
+  /* --- Definition lists (deflist plugin) ----------------------------------------- */
+
+  :where(.md) :where(dt) {
+    font-weight: var(--md-weight-heading);
+  }
+
+  :where(.md) :where(dd) {
+    margin-inline-start: var(--md-space-indent);
+  }
+
+  :where(.md) :where(dd + dt) {
+    margin-block-start: calc(var(--md-space-block) * 0.5);
+  }
+
   /* --- Math (math plugin) ------------------------------------------------------- */
 
   :where(.md) :where(.math-display) {

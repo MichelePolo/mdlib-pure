@@ -16,6 +16,7 @@ const budgets = [
   { name: 'mdlib-pure/math', entry: 'src/plugins/math.ts', limit: 1.25 * 1024, external: true },
   { name: 'mdlib-pure/mark', entry: 'src/plugins/mark.ts', limit: 0.25 * 1024, external: true },
   { name: 'mdlib-pure/frontmatter', entry: 'src/plugins/frontmatter.ts', limit: 1 * 1024, external: true },
+  { name: 'mdlib-pure/deflist', entry: 'src/plugins/deflist.ts', limit: 1.5 * 1024, external: true },
 ]
 
 let failed = false

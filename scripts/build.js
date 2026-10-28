@@ -17,6 +17,7 @@ await build({
     math: 'src/plugins/math.ts',
     mark: 'src/plugins/mark.ts',
     frontmatter: 'src/plugins/frontmatter.ts',
+    deflist: 'src/plugins/deflist.ts',
   },
   outdir: 'dist',
   bundle: true,

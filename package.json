@@ -53,6 +53,10 @@
       "types": "./dist/types/plugins/frontmatter.d.ts",
       "default": "./dist/frontmatter.js"
     },
+    "./deflist": {
+      "types": "./dist/types/plugins/deflist.d.ts",
+      "default": "./dist/deflist.js"
+    },
     "./theme.css": "./styles/theme.css",
     "./tailwind.css": "./styles/tailwind.css",
     "./package.json": "./package.json"

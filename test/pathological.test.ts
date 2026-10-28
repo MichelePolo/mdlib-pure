@@ -49,6 +49,8 @@ const cases: Array<[string, string]> = [
   ['interleaved *_ nested past the nesting cap', '*_a '.repeat(2 * N) + '_*'.repeat(2 * N)],
   ['interleaved ** __ nested past the nesting cap', '**__a '.repeat(N) + '__**'.repeat(N)],
   ['interleaved ~~ ** nested past the nesting cap', '~~**a '.repeat(N) + '**~~'.repeat(N)],
+  ['many setext headings (sibling replacement)', 'a\n=\n'.repeat(4 * N)],
+  ['many single-row GFM tables', '|a|\n|-|\n\n'.repeat(2 * N)],
   ['tilde runs of many lengths', Array.from({ length: 800 }, (_, k) => '~'.repeat(k + 1) + 'a' + '~'.repeat(k + 2) + ' ').join('')],
 ]
 

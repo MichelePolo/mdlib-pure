@@ -12,6 +12,7 @@ Entry points (all ES modules, all tree-shakable):
 | `mdlib-pure/adapter` | `toElements()` for React, Preact, Vue |
 | `mdlib-pure/math` | `math()` for `$…$`, `$$…$$` and `$$` blocks |
 | `mdlib-pure/mark` | `mark()` for `==…==` |
+| `mdlib-pure/deflist` | `deflist()` for definition lists |
 | `mdlib-pure/frontmatter` | `frontmatter()`, `getFrontmatter()` |
 | `mdlib-pure/theme.css` | default theme ([tokens](tokens.md)) |
 | `mdlib-pure/tailwind.css` | Tailwind CSS v4 bridge |
@@ -181,6 +182,28 @@ for (const el of root.querySelectorAll('.math'))
 
 `mark()`: `==text==` → `mark { children }` → `<mark>`. Same flanking rules as
 `*`; `Title\n==` stays a setext heading.
+
+## mdlib-pure/deflist
+
+`deflist()`:
+
+```
+Term
+: Definition (continuation lines may be lazy)
+: Another definition
+
+Term A
+Term B
+:   Definition with blocks
+
+    Second paragraph, indented to the content column.
+```
+
+The paragraph right above a `: ` line becomes the terms (one per line). One
+blank line between terms and `:` is allowed (Pandoc); it makes the list
+loose. Nodes: `definitionList { spread }` › `definitionTerm` (inline) and
+`definitionDescription { spread }` (blocks). HTML: `<dl>`, `<dt>`, `<dd>`;
+tight lists render definitions without `<p>`.
 
 ## mdlib-pure/frontmatter
 

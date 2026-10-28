@@ -178,6 +178,8 @@ First-party plugins:
 - `mdlib-pure/math`: `$inline$`, `$$display$$` and `$$` blocks; bring your
   own renderer: `math({ render: (tex, display) => katex.renderToString(tex, { displayMode: display }) })`.
 - `mdlib-pure/mark`: `==highlight==` → `<mark>`.
+- `mdlib-pure/deflist`: definition lists (`Term` / `: Definition`, Pandoc and
+  PHP Markdown Extra style) → `<dl>`.
 - `mdlib-pure/frontmatter`: YAML (`---`) / TOML (`+++`) front matter, kept
   out of the output; `getFrontmatter(root)` returns the raw text.
 

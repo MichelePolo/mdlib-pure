@@ -228,7 +228,9 @@ type. One object can do both. Models: the `$$` math leaf in
 - Text children are plain strings: the serializer escapes them. Use
   `r.raw(html)` only for trusted HTML (it forces the string path in
   `renderTo`).
-- `r.parent` is the parent node (e.g. paragraphs check for tight lists).
+- `r.parent` is the parent node. A parent with `spread: false` renders its
+  paragraphs without `<p>` (tight lists): set `node.spread` on your own
+  containers to get the same behavior.
 
 ## Adding a first-party plugin
 

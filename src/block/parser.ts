@@ -48,14 +48,15 @@ export class Block {
   /** Remove this block from its parent. */
   remove(): void {
     const siblings = this.parent?.children
-    if (siblings) siblings.splice(siblings.indexOf(this), 1)
+    // From the end: the block is almost always the last child (O(1), not O(n)).
+    if (siblings) siblings.splice(siblings.lastIndexOf(this), 1)
     this.parent = null
   }
 
   /** Put `other` where this block is, and detach this block. */
   replaceWith(other: Block): void {
     const siblings = this.parent?.children
-    if (siblings) siblings[siblings.indexOf(this)] = other
+    if (siblings) siblings[siblings.lastIndexOf(this)] = other
     other.parent = this.parent
     other.depth = this.depth
     this.parent = null

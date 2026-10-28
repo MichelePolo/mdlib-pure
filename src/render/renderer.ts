@@ -7,8 +7,9 @@ import { h, type Props, raw, type RenderContext, type UrlKind, type VChild, type
 
 export const coreRenderers: Record<string, RenderFn> = {
   root: (n, r) => r.children(n),
-  // In tight lists, paragraphs are rendered without <p>.
-  paragraph: (n, r) => (r.parent?.type === 'listItem' && !r.parent.spread ? r.children(n) : h('p', null, r.children(n))),
+  // Inside a tight parent (`spread: false`: list items, plugin containers),
+  // paragraphs are rendered without <p>.
+  paragraph: (n, r) => (r.parent?.spread === false ? r.children(n) : h('p', null, r.children(n))),
   heading: (n, r) => h(`h${(n as Heading).depth}`, null, r.children(n)),
   thematicBreak: () => h('hr'),
   blockquote: (n, r) => h('blockquote', null, r.children(n)),
