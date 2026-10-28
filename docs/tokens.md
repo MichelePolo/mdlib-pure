@@ -44,7 +44,7 @@ Browser support: Baseline 2024.
 | `--md-color-quote` | `var(--md-color-muted)` | blockquote text |
 | `--md-color-quote-border` | `var(--md-color-border)` | blockquote bar |
 | `--md-color-mark` | `light-dark(#fff3a3, #6b5a0f)` | `<mark>` background |
-| `--md-color-note` · `-tip` · `-important` · `-warning` · `-caution` | GitHub alert hues | `> [!NOTE]` alerts |
+| `--md-color-note` · `-tip` · `-important` · `-warning` · `-caution` | GitHub alert hues | `> [!NOTE]` alerts; `:::` containers of the same kinds (`info` = note, `danger` = caution) |
 
 ## Typography
 

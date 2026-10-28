@@ -70,6 +70,8 @@
   ],
   "scripts": {
     "build": "node scripts/build.js",
+    "site:build": "node scripts/build-site.js",
+    "site:serve": "node scripts/build-site.js --serve",
     "test": "node --test \"test/**/*.test.ts\" \"templates/**/*.test.ts\"",
     "test:browser": "node --test \"test/browser/**/*.browser.ts\"",
     "spec": "node test/spec-report.ts",

@@ -154,7 +154,9 @@ Node `container { kind, title, children }`, rendered as
 
 - Inline `$x^2$` (pandoc rules: no space after the opening `$`, the closing
   `$` not preceded by a space nor followed by a digit, so `$5 and $6` stays
-  text).
+  text). The closing `$` is the *next* unescaped one, wherever it is in the
+  paragraph: in ``$6 per item, or `$` alone`` the `$` inside the code span
+  closes math opened at `$6`. Escape stray dollars (`\$6`) in text with math.
 - `$$…$$` inside a paragraph is display math.
 - A `$$` line opens a block (like a code fence); text after it is `meta`.
 
@@ -182,6 +184,26 @@ HTML (string), VNodes or `null`; its output replaces the delimited TeX:
 ```js
 import katex from 'katex'
 math({ render: (tex, display) => katex.renderToString(tex, { displayMode: display, throwOnError: false }) })
+```
+
+## Localizing generated text
+
+Plugins write a few English strings: GFM alert titles (`Note`, `Tip`…), the
+footnote back-link label (`Back to reference 1`) and the headings permalink
+label (`Permalink: …`). Translate them with a render override, which takes
+precedence over the plugin's renderer when the plugin comes first:
+
+```js
+const titles = { note: 'Nota', tip: 'Suggerimento', important: 'Importante', warning: 'Attenzione', caution: 'Cautela' }
+createMarkdown({
+  plugins: [
+    ...gfm(),
+    { name: 'it', render: {
+      alert: (n, r) => r.h('div', { class: `markdown-alert markdown-alert-${n.kind}` },
+        r.h('p', { class: 'markdown-alert-title' }, titles[n.kind]), r.children(n)),
+    } },
+  ],
+})
 ```
 
 ## mdlib-pure/mark

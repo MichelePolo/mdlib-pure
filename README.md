@@ -4,7 +4,7 @@ Lightweight Markdown renderer for the browser.
 
 - **100% CommonMark 0.31.2**: all 652 spec examples pass
 - **GFM** as an opt-in plugin (~4 KB): tables, strikethrough, autolinks, task lists, footnotes, alerts. 54/54 GFM extension examples pass
-- **Zero dependencies**, ~10 KB gzipped core
+- **Zero dependencies**, ~11 KB gzipped core
 - **Safe by default**: raw HTML off, `javascript:` URLs blocked, DOM output without HTML parsing
 - **Extensible**: block, inline and delimiter rules, AST transforms, render overrides
 - **Framework-neutral output**: HTML string, DOM nodes, or React/Vue/Preact elements
@@ -222,7 +222,7 @@ Details and threat model: [docs/security.md](docs/security.md).
 ## Development
 
 ```sh
-npm test         # 820+ tests, TypeScript runs natively in Node ≥ 22.18
+npm test         # 1000+ tests, TypeScript runs natively in Node ≥ 22.18
 npm run test:browser  # DOM path, theme and Tailwind build in Chromium
 npm run spec     # CommonMark conformance report
 npm run verify   # typecheck + tests + invariants + size budgets

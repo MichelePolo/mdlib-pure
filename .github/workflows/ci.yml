@@ -29,6 +29,8 @@ jobs:
       # typecheck, unit + spec + pathological tests, invariants, size budgets
       - run: npm run verify
       - run: npm run build
+      # The demo site build also fails on broken internal links and anchors.
+      - run: npm run site:build
 
   browser:
     name: browser (Chromium)

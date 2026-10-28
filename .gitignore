@@ -5,3 +5,4 @@ dist/
 coverage/
 .playwright-mcp/
 .claude/worktrees/
+site/out/
