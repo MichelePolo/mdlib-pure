@@ -2,6 +2,8 @@
 
 Lightweight Markdown renderer for the browser.
 
+**Website, docs and playground: <https://michelepolo.github.io/mdlib-pure/>** · for AI agents: [llms.txt](https://michelepolo.github.io/mdlib-pure/llms.txt)
+
 - **100% CommonMark 0.31.2**: all 652 spec examples pass
 - **GFM** as an opt-in plugin (~4 KB): tables, strikethrough, autolinks, task lists, footnotes, alerts. 54/54 GFM extension examples pass
 - **Zero dependencies**, ~11 KB gzipped core
