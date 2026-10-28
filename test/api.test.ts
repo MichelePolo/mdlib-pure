@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
-import { createMarkdown, type Plugin } from '../src/index.ts'
+import { createMarkdown, h, type Plugin } from '../src/index.ts'
 
 describe('defaults', () => {
   const md = createMarkdown()
@@ -262,5 +262,38 @@ describe('gfm extras', async () => {
 
   test('autolinks pass through the URL policy', () => {
     assert.equal(md.render('see https://x.y/z.'), '<p>see <a href="https://x.y/z">https://x.y/z</a>.</p>\n')
+  })
+})
+
+describe('highlight option', () => {
+  const src = '```js title="x"\nlet a = 1 < 2\n```'
+
+  test('string: trusted HTML inside <code>, receives lang and meta', () => {
+    const calls: unknown[] = []
+    const md = createMarkdown({
+      highlight: (code, lang, meta) => {
+        calls.push([code, lang, meta])
+        return `<span class="k">let</span> a = 1 &lt; 2\n`
+      },
+    })
+    assert.equal(md.render(src), '<pre><code class="language-js"><span class="k">let</span> a = 1 &lt; 2\n</code></pre>\n')
+    assert.deepEqual(calls, [['let a = 1 < 2\n', 'js', 'title="x"']])
+  })
+
+  test('string starting with <pre: replaces the whole block (shiki style)', () => {
+    const md = createMarkdown({ highlight: () => '<pre class="shiki"><code>x</code></pre>' })
+    assert.equal(md.render(`${src}\n\npara`), '<pre class="shiki"><code>x</code></pre>\n<p>para</p>\n')
+  })
+
+  test('VNodes: safe path, text still escaped, no raw HTML in the tree', () => {
+    const md = createMarkdown({ highlight: (code) => [h('span', { class: 'k' }, code.slice(0, 3)), code.slice(3)] })
+    assert.equal(md.render(src), '<pre><code class="language-js"><span class="k">let</span> a = 1 &lt; 2\n</code></pre>\n')
+    assert.ok(!JSON.stringify(md.toVNodes(src)).includes('"raw"'))
+  })
+
+  test('null falls back to default rendering; plugins still override', () => {
+    assert.equal(createMarkdown({ highlight: () => null }).render(src), '<pre><code class="language-js">let a = 1 &lt; 2\n</code></pre>\n')
+    const md = createMarkdown({ highlight: () => 'ignored', plugins: [{ name: 'x', render: { code: () => 'plugin' } }] })
+    assert.equal(md.render(src), 'plugin')
   })
 })

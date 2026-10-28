@@ -8,7 +8,7 @@ import { hasRaw, toDom } from './render/dom.ts'
 import { toHtml } from './render/html.ts'
 import { coreRenderers, createRenderer } from './render/renderer.ts'
 import type { UrlKind, VChild } from './render/vnode.ts'
-import type { BlockRule, DelimiterRule, InlineRule, Node, Plugin, Reference, RenderFn, Root, TransformContext } from './types.ts'
+import type { BlockRule, Code, DelimiterRule, InlineRule, Node, Plugin, Reference, RenderFn, Root, TransformContext } from './types.ts'
 import { trimMd } from './util/common.ts'
 import { defaultEntityDecoder, type EntityDecoder } from './util/entities.ts'
 import { isSafeUrl } from './util/url.ts'
@@ -28,6 +28,14 @@ export interface Options {
   decodeEntity?: EntityDecoder
   /** CSS classes per node type, e.g. `{ paragraph: 'my-4', heading1: 'text-3xl' }`. */
   classes?: Record<string, string>
+  /**
+   * Syntax highlighting for code blocks. Return:
+   * - a string: **trusted** HTML for inside `<code>` (highlight.js, Prism), or a
+   *   whole `<pre>…</pre>` that replaces the block (shiki);
+   * - VNodes (`h(...)`): rendered safely, keeping `renderTo` on the DOM path;
+   * - `null`/`undefined`: default (escaped text).
+   */
+  highlight?: (code: string, lang: string | null, meta: string | null) => string | VChild | VChild[]
 }
 
 export interface Markdown {
@@ -123,7 +131,19 @@ export function createMarkdown(options: Options = {}): Markdown {
     return root
   }
 
-  const renderers: Record<string, RenderFn> = Object.assign({}, coreRenderers, ...plugins.map((p) => p.render ?? {}))
+  const { highlight } = options
+  const highlighted: Record<string, RenderFn> = {}
+  if (highlight) {
+    highlighted.code = (n, r) => {
+      const { lang, meta, value } = n as Code
+      const out = highlight(value, lang, meta)
+      if (out === null || out === undefined || out === false) return coreRenderers.code(n, r)
+      if (typeof out === 'string' && /^\s*<pre[\s>]/i.test(out)) return r.raw(out, true)
+      return r.h('pre', null, r.h('code', lang ? { class: `language-${lang}` } : null, typeof out === 'string' ? r.raw(out) : out))
+    }
+  }
+  // Plugin render overrides win over the `highlight` option.
+  const renderers: Record<string, RenderFn> = Object.assign({}, coreRenderers, highlighted, ...plugins.map((p) => p.render ?? {}))
   const renderTree = createRenderer({ renderers, classes: options.classes, allowUrl: options.allowUrl ?? isSafeUrl })
   const toVNodes = (src: string | Root): VChild[] => renderTree(typeof src === 'string' ? parse(src) : src)
   const sanitize = options.sanitize ?? ((s: string) => s)

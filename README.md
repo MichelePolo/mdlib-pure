@@ -34,6 +34,7 @@ createMarkdown({
   allowUrl: isSafeUrl,    // (url, 'link' | 'image') => boolean
   decodeEntity: undefined,// named-entity decoder (default: the browser's DOM)
   classes: {},            // CSS classes per node type
+  highlight: undefined,   // (code, lang, meta) => html | VNodes | null
 })
 ```
 
@@ -49,6 +50,26 @@ const md = createMarkdown({ plugins: gfm() })
 
 Also exported one by one: `table`, `strikethrough`, `autolink`, `tasklist`,
 `footnotes`, `tagfilter`, `alerts`.
+
+### Syntax highlighting
+
+Bring your own highlighter through `highlight(code, lang, meta)`:
+
+```js
+import hljs from 'highlight.js/lib/core'
+createMarkdown({
+  // a string is trusted HTML for inside <code>
+  highlight: (code, lang) => (lang && hljs.getLanguage(lang) ? hljs.highlight(code, { language: lang }).value : null),
+})
+
+// shiki returns a whole <pre>: it replaces the block
+createMarkdown({ highlight: (code, lang) => shiki.codeToHtml(code, { lang: lang ?? 'text', theme: 'github-dark' }) })
+```
+
+Return `null` for the default rendering, or VNodes (`h('span', { class: 'kw' }, 'let')`)
+to stay on the DOM-safe path of `renderTo()`. Strings are treated as trusted
+HTML: with untrusted input, use a highlighter that escapes code (all of the
+above do) or set `sanitize`.
 
 ### Node, SSR, workers
 
