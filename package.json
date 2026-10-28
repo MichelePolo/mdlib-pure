@@ -68,7 +68,7 @@
   "files": [
     "dist",
     "styles",
-    "docs",
+    "docs/*.md",
     "AGENTS.md",
     "CHANGELOG.md"
   ],
