@@ -166,9 +166,9 @@ A plugin can provide:
 
 First-party plugins:
 
-- `mdlib-pure/headings`: GitHub-style heading ids (prefixed with
-  `user-content-` by default, against DOM clobbering), optional `#`
-  permalinks, and `toc(root)` for a table of contents.
+- `mdlib-pure/headings`: GitHub-style heading ids, optional `#` permalinks,
+  and `toc(root)` for a table of contents. For untrusted input, use
+  `headings({ prefix: 'user-content-' })` (see docs/security.md).
 - `mdlib-pure/container`: fenced containers (`::: warning Title` … `:::`,
   nestable with longer fences).
 

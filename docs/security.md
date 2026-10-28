@@ -70,9 +70,9 @@ createMarkdown({
 
 Element ids become globals (`window.config`), so ids derived from content
 could let a document shadow names your scripts read. The `headings` plugin
-therefore prefixes ids with `user-content-` by default (as GitHub does);
-pass `prefix: ''` only for trusted content. GFM footnote ids are prefixed
-with `fn-`/`fnref-`.
+produces clean ids by default (`#install`); for untrusted input, prefix them
+as GitHub does: `headings({ prefix: 'user-content-' })`. GFM footnote ids
+are already prefixed with `fn-`/`fnref-`.
 
 ## Plugins
 
