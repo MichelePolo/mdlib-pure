@@ -195,10 +195,14 @@ results](bench/RESULTS.md); differences under ~10% are noise):
 
 | | CommonMark examples (exact) | spec.txt MB/s | README MB/s | min + gzip |
 |---|---:|---:|---:|---:|
-| **mdlib-pure** | **652/652** | 44.2 | 36.4 | **10.9 KB** |
-| marked | 503/652 | 44.7 | 32.3 | 14.0 KB |
-| markdown-it | 649/652 | 35.8 | 22.1 | 40.6 KB |
-| commonmark.js | 652/652 | 46.9 | 47.8 | 46.8 KB |
+| **mdlib-pure** | **652/652** | 43.5 | 36.4 | **10.9 KB** |
+| marked | 503/652 | 44.6 | 32.7 | 14.0 KB |
+| markdown-it | 649/652 | 35.6 | 22.0 | 40.6 KB |
+| commonmark.js | 652/652 | 47.4 | 48.2 | 46.8 KB |
+
+With GFM: mdlib-pure + `gfm()` 39.6 / 25.1 MB/s, marked 38.8 / 27.2,
+markdown-it 28.7 / 17.4 (mdlib-pure also does footnotes, task lists and
+alerts).
 
 Reproduce: `npm run build && npm install --prefix bench && node bench/run.js`.
 
