@@ -26,6 +26,27 @@ describe('defaults', () => {
     assert.equal(md.render('![x](javascript:alert(1))'), '<p><img src="" alt="x" /></p>\n')
   })
 
+  test('URL policy: allowlisted schemes are kept', () => {
+    assert.equal(md.render('[a](tel:+390612345) [b](sms:+390612345) [c](mailto:a@b.c)'), '<p><a href="tel:+390612345">a</a> <a href="sms:+390612345">b</a> <a href="mailto:a@b.c">c</a></p>\n')
+    assert.equal(md.render('[a](TEL:123) [b](Https://x.y)'), '<p><a href="TEL:123">a</a> <a href="Https://x.y">b</a></p>\n')
+  })
+
+  test('URL policy: anything outside the allowlist is emptied', () => {
+    for (const url of ['vbscript:msgbox(1)', 'file:///etc/passwd', 'ftp://x.y/f', 'vscode://open', 'about:blank']) {
+      assert.equal(md.render(`[x](${url})`), '<p><a href="">x</a></p>\n', url)
+    }
+  })
+
+  test('URL policy: data: only for raster images', () => {
+    const png = 'data:image/png;base64,iVBORw0KGgo='
+    assert.equal(md.render(`![x](${png})`), `<p><img src="${png}" alt="x" /></p>\n`)
+    assert.equal(md.render('![x](data:image/webp;base64,UklGRg==)'), '<p><img src="data:image/webp;base64,UklGRg==" alt="x" /></p>\n')
+    assert.equal(md.render(`[x](${png})`), '<p><a href="">x</a></p>\n') // not as a link
+    assert.equal(md.render('![x](data:image/svg+xml;base64,PHN2Zz4=)'), '<p><img src="" alt="x" /></p>\n') // SVG can script
+    assert.equal(md.render('![x](data:text/html;base64,PHNjcmlwdD4=)'), '<p><img src="" alt="x" /></p>\n')
+    assert.equal(md.render('![x](data:image/pngx;base64,AA==)'), '<p><img src="" alt="x" /></p>\n')
+  })
+
   test('relative and http(s) URLs are kept', () => {
     assert.equal(md.render('[a](/path) [b](#frag) [c](https://x.y)'), '<p><a href="/path">a</a> <a href="#frag">b</a> <a href="https://x.y">c</a></p>\n')
   })

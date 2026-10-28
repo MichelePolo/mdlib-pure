@@ -137,8 +137,9 @@ complete, tested plugin to copy.
 ## Security
 
 - `html: false` (default): HTML in the source is not recognized and renders as text.
-- Every `href`/`src` passes through `allowUrl`. The default allows relative
-  URLs, `http:`, `https:` and `mailto:`.
+- Every `href`/`src` passes through `allowUrl`. The default is an allowlist:
+  relative URLs, `http:`, `https:`, `mailto:`, `tel:`, `sms:`, plus
+  `data:image/{png,gif,jpeg,webp}` for images only.
 - `renderTo()` builds DOM with `createElement`/`createTextNode`. Only when raw
   HTML is present (you enabled `html`, or a plugin emits raw HTML) does it
   assign `innerHTML`, after `sanitize`.

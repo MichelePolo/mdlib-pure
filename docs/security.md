@@ -38,13 +38,28 @@ createMarkdown({ html: true, sanitize: DOMPurify.sanitize })
 
 ## URL policy
 
-`isSafeUrl(url, kind)` currently allows relative URLs, `http:`, `https:` and
-`mailto:` (the default policy is being finalized: see `src/util/url.ts`).
-Replace it:
+The default `isSafeUrl(url, kind)` is an **allowlist**:
+
+| URL | Links | Images |
+|---|---|---|
+| relative (`/a`, `a/b`, `#frag`, `?q`, `//host/path`) | ✓ | ✓ |
+| `http:`, `https:` | ✓ | ✓ |
+| `mailto:`, `tel:`, `sms:` | ✓ | ✓ |
+| `data:image/png`, `gif`, `jpeg`, `webp` | ✗ | ✓ |
+| `data:image/svg+xml` (can carry scripts), any other `data:` | ✗ | ✗ |
+| everything else (`javascript:`, `vbscript:`, `file:`, `ftp:`, app links…) | ✗ | ✗ |
+
+Rejected URLs render as `href=""` / `src=""`: the link text stays visible.
+Note that GFM autolinks like `ftp://host` are therefore not clickable by
+default.
+
+Replace or extend the policy:
 
 ```js
+import { createMarkdown, isSafeUrl } from 'mdlib-pure'
+
 createMarkdown({
-  allowUrl: (url, kind) => kind === 'image' ? url.startsWith('https://cdn.example.com/') : isSafeUrl(url, kind),
+  allowUrl: (url, kind) => isSafeUrl(url, kind) || /^vscode:/i.test(url),
 })
 ```
 

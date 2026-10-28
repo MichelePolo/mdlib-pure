@@ -13,16 +13,15 @@ import type { UrlKind } from '../render/vnode.ts'
 
 const reScheme = /^([a-z][a-z0-9+.-]*):/i
 
+/** Allowlist: anything not listed (javascript:, vbscript:, file:, ftp:, app links…) is rejected. */
+const SAFE_SCHEMES = new Set(['http', 'https', 'mailto', 'tel', 'sms'])
+
+/** Raster images only: `image/svg+xml` can carry scripts. */
+const reDataImage = /^data:image\/(?:png|gif|jpeg|webp)[;,]/i
+
 export function isSafeUrl(url: string, kind: UrlKind): boolean {
   const scheme = reScheme.exec(url)?.[1].toLowerCase()
   if (scheme === undefined) return true // relative URL, fragment or path
-
-  // TODO(michele): define the default scheme policy. Questions to decide:
-  //  - allowlist (only known-good schemes) or blocklist (javascript:, vbscript:…)?
-  //  - `data:` for images only (data:image/png, gif, jpeg, webp — but not svg+xml,
-  //    which can carry scripts)?
-  //  - `tel:`, `sms:`, `ftp:`, app deep links (`vscode:`, `slack:`)?
-  // Temporary conservative policy until then:
-  void kind
-  return scheme === 'http' || scheme === 'https' || scheme === 'mailto'
+  if (scheme === 'data') return kind === 'image' && reDataImage.test(url)
+  return SAFE_SCHEMES.has(scheme)
 }
