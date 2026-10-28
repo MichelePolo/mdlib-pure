@@ -10,6 +10,9 @@ Entry points (all ES modules, all tree-shakable):
 | `mdlib-pure/headings` | `headings()`, `toc()`, `slug()`, `slugger()`, `headingText()` |
 | `mdlib-pure/container` | `container()` for `:::` blocks |
 | `mdlib-pure/adapter` | `toElements()` for React, Preact, Vue |
+| `mdlib-pure/math` | `math()` for `$…$`, `$$…$$` and `$$` blocks |
+| `mdlib-pure/mark` | `mark()` for `==…==` |
+| `mdlib-pure/frontmatter` | `frontmatter()`, `getFrontmatter()` |
 | `mdlib-pure/theme.css` | default theme ([tokens](tokens.md)) |
 | `mdlib-pure/tailwind.css` | Tailwind CSS v4 bridge |
 
@@ -143,6 +146,50 @@ exported.
 `container()`: `::: kind Title` … `:::` blocks, nestable with longer fences.
 Node `container { kind, title, children }`, rendered as
 `<div class="md-container md-container-KIND">`.
+
+## mdlib-pure/math
+
+`math({ render? })`.
+
+- Inline `$x^2$` (pandoc rules: no space after the opening `$`, the closing
+  `$` not preceded by a space nor followed by a digit, so `$5 and $6` stays
+  text).
+- `$$…$$` inside a paragraph is display math.
+- A `$$` line opens a block (like a code fence); text after it is `meta`.
+
+Nodes: `inlineMath { value, display? }`, `math { value, meta }`. Default HTML:
+`<span class="math math-inline">TEX</span>` and
+`<div class="math math-display">TEX</div>` (TeX escaped, no delimiters).
+
+`render(tex, display)` returns trusted HTML (string), VNodes or `null`. With
+KaTeX:
+
+```js
+import katex from 'katex'
+math({ render: (tex, display) => katex.renderToString(tex, { displayMode: display, throwOnError: false }) })
+```
+
+Or render in the browser after `renderTo` (the default markup has no `\(…\)`
+delimiters, so KaTeX auto-render will not find it; target the classes):
+
+```js
+for (const el of root.querySelectorAll('.math'))
+  katex.render(el.textContent, el, { displayMode: el.classList.contains('math-display'), throwOnError: false })
+```
+
+## mdlib-pure/mark
+
+`mark()`: `==text==` → `mark { children }` → `<mark>`. Same flanking rules as
+`*`; `Title\n==` stays a setext heading.
+
+## mdlib-pure/frontmatter
+
+`frontmatter()`: YAML (`---` … `---`/`...`) or TOML (`+++` … `+++`) on the
+first line of the document becomes `yaml`/`toml { value }`, first child of
+`root`, not rendered. Unclosed front matter is not front matter (the document
+parses as without the plugin). `getFrontmatter(root)` returns
+`{ type, value } | null`; the value is raw text (no YAML parser: zero
+dependencies).
 
 ## mdlib-pure/adapter
 

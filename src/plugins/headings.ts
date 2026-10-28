@@ -38,8 +38,9 @@ export interface TocEntry {
 export function headingText(node: Node): string {
   let s = ''
   for (const child of node.children ?? []) {
-    if (child.type === 'text' || child.type === 'inlineCode') s += child.value as string
-    else if (child.type !== 'image' && child.type !== 'html') s += headingText(child)
+    // Any literal node counts: text, inlineCode, plugin nodes like inlineMath.
+    if (typeof child.value === 'string' && child.type !== 'html') s += child.value
+    else if (child.type !== 'image') s += headingText(child)
   }
   return s
 }

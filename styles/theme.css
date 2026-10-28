@@ -228,6 +228,16 @@
     font-weight: var(--md-weight-heading);
   }
 
+  /* --- Math (math plugin) ------------------------------------------------------- */
+
+  :where(.md) :where(.math-display) {
+    overflow-x: auto;
+  }
+
+  :where(.md) :where(div.math-display) {
+    margin-block: 0 var(--md-space-block);
+  }
+
   /* --- Heading permalinks (headings plugin) ------------------------------------ */
 
   :where(.md) :where(.md-anchor) {

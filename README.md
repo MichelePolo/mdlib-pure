@@ -175,6 +175,11 @@ First-party plugins:
   `headings({ prefix: 'user-content-' })` (see docs/security.md).
 - `mdlib-pure/container`: fenced containers (`::: warning Title` … `:::`,
   nestable with longer fences).
+- `mdlib-pure/math`: `$inline$`, `$$display$$` and `$$` blocks; bring your
+  own renderer: `math({ render: (tex, display) => katex.renderToString(tex, { displayMode: display }) })`.
+- `mdlib-pure/mark`: `==highlight==` → `<mark>`.
+- `mdlib-pure/frontmatter`: YAML (`---`) / TOML (`+++`) front matter, kept
+  out of the output; `getFrontmatter(root)` returns the raw text.
 
 The full guide, written for both humans and AI agents, is
 [`AGENTS.md`](AGENTS.md). [`templates/plugin`](templates/plugin) is a

@@ -41,6 +41,18 @@
       "types": "./dist/types/adapter.d.ts",
       "default": "./dist/adapter.js"
     },
+    "./math": {
+      "types": "./dist/types/plugins/math.d.ts",
+      "default": "./dist/math.js"
+    },
+    "./mark": {
+      "types": "./dist/types/plugins/mark.d.ts",
+      "default": "./dist/mark.js"
+    },
+    "./frontmatter": {
+      "types": "./dist/types/plugins/frontmatter.d.ts",
+      "default": "./dist/frontmatter.js"
+    },
     "./theme.css": "./styles/theme.css",
     "./tailwind.css": "./styles/tailwind.css",
     "./package.json": "./package.json"

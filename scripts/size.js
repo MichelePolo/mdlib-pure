@@ -13,6 +13,9 @@ const budgets = [
   { name: 'mdlib-pure/container', entry: 'src/plugins/container.ts', limit: 1.5 * 1024, external: true },
   { name: 'mdlib-pure/headings', entry: 'src/plugins/headings.ts', limit: 1 * 1024, external: true },
   { name: 'mdlib-pure/adapter', entry: 'src/adapter.ts', limit: 1 * 1024, external: true },
+  { name: 'mdlib-pure/math', entry: 'src/plugins/math.ts', limit: 1.25 * 1024, external: true },
+  { name: 'mdlib-pure/mark', entry: 'src/plugins/mark.ts', limit: 0.25 * 1024, external: true },
+  { name: 'mdlib-pure/frontmatter', entry: 'src/plugins/frontmatter.ts', limit: 1 * 1024, external: true },
 ]
 
 let failed = false
@@ -21,7 +24,7 @@ let failed = false
 const externalCore = {
   name: 'external-core',
   setup(b) {
-    b.onResolve({ filter: /^\.\.\/(block|util|render|types)/ }, (args) => ({ path: args.path, external: true }))
+    b.onResolve({ filter: /^\.\.\/(block|inline|util|render|types)/ }, (args) => ({ path: args.path, external: true }))
   },
 }
 
