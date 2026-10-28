@@ -9,9 +9,13 @@ import { math } from '../src/plugins/math.ts'
 import { normalize } from './helpers.ts'
 
 const md = createMarkdown({ plugins: [math()] })
-const inline = (tex: string) => `<span class="math math-inline">${tex}</span>`
-const display = (tex: string) => `<span class="math math-display">${tex}</span>`
-const block = (tex: string) => `<div class="math math-display">\n${tex}\n</div>\n`
+const inline = (tex: string) => `<span class="math math-inline">\\(${tex}\\)</span>`
+const display = (tex: string) => `<span class="math math-display">\\[${tex}\\]</span>`
+const block = (tex: string) => `<div class="math math-display">\n\\[${tex}\\]\n</div>\n`
+// Output of the `render` option goes inside the elements, without delimiters.
+const rInline = (html: string) => `<span class="math math-inline">${html}</span>`
+const rDisplay = (html: string) => `<span class="math math-display">${html}</span>`
+const rBlock = (html: string) => `<div class="math math-display">\n${html}\n</div>\n`
 const p = (html: string) => `<p>${html}</p>\n`
 
 describe('math: inline $…$', () => {
@@ -199,13 +203,13 @@ describe('math: render option', () => {
         }),
       ],
     })
-    assert.equal(md2.render(src), p(`${inline('<b>a</b>')} ${display('<b>b</b>')}`) + block('<b>c</b>'))
+    assert.equal(md2.render(src), p(`${rInline('<b>a</b>')} ${rDisplay('<b>b</b>')}`) + rBlock('<b>c</b>'))
     assert.deepEqual(calls, [['a', false], ['b', true], ['c', true]])
   })
 
   test('VNodes: safe path, text still escaped, no raw HTML in the tree', () => {
     const md2 = createMarkdown({ plugins: [math({ render: (tex, isDisplay) => (isDisplay ? [h('i', null, '='), tex] : h('em', null, tex)) })] })
-    assert.equal(md2.render('$a<b$\n\n$$\nc\n$$'), p(inline('<em>a&lt;b</em>')) + block('<i>=</i>c'))
+    assert.equal(md2.render('$a<b$\n\n$$\nc\n$$'), p(rInline('<em>a&lt;b</em>')) + rBlock('<i>=</i>c'))
     assert.ok(!JSON.stringify(md2.toVNodes(src)).includes('"raw"'))
   })
 
@@ -218,7 +222,7 @@ describe('math: render option', () => {
 
   test('classes map applies to the elements', () => {
     const md2 = createMarkdown({ plugins: [math()], classes: { inlineMath: 'i', math: 'm' } })
-    assert.equal(md2.render('$a$\n\n$$\nb\n$$'), p('<span class="math math-inline i">a</span>') + '<div class="math math-display m">\nb\n</div>\n')
+    assert.equal(md2.render('$a$\n\n$$\nb\n$$'), p('<span class="math math-inline i">\\(a\\)</span>') + '<div class="math math-display m">\n\\[b\\]\n</div>\n')
   })
 })
 

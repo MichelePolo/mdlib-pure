@@ -158,24 +158,30 @@ Node `container { kind, title, children }`, rendered as
 - `$$…$$` inside a paragraph is display math.
 - A `$$` line opens a block (like a code fence); text after it is `meta`.
 
-Nodes: `inlineMath { value, display? }`, `math { value, meta }`. Default HTML:
-`<span class="math math-inline">TEX</span>` and
-`<div class="math math-display">TEX</div>` (TeX escaped, no delimiters).
+Nodes: `inlineMath { value, display? }`, `math { value, meta }`. Default HTML
+(pandoc style, TeX escaped):
 
-`render(tex, display)` returns trusted HTML (string), VNodes or `null`. With
-KaTeX:
+```html
+<span class="math math-inline">\(e^{i\pi}\)</span>
+<span class="math math-display">\[\sum_k a_k\]</span>   <!-- $$…$$ in a paragraph -->
+<div class="math math-display">\[\int_0^1 x\,dx\]</div> <!-- $$ block -->
+```
+
+The `\(…\)`/`\[…\]` delimiters are the defaults of **KaTeX auto-render**
+and **MathJax**, so either works with no configuration (tested with KaTeX in
+Chromium):
+
+```js
+md.renderTo(el, src)
+renderMathInElement(el) // KaTeX auto-render; or MathJax.typesetPromise([el])
+```
+
+Or render at build time with `render(tex, display)`, which returns trusted
+HTML (string), VNodes or `null`; its output replaces the delimited TeX:
 
 ```js
 import katex from 'katex'
 math({ render: (tex, display) => katex.renderToString(tex, { displayMode: display, throwOnError: false }) })
-```
-
-Or render in the browser after `renderTo` (the default markup has no `\(…\)`
-delimiters, so KaTeX auto-render will not find it; target the classes):
-
-```js
-for (const el of root.querySelectorAll('.math'))
-  katex.render(el.textContent, el, { displayMode: el.classList.contains('math-display'), throwOnError: false })
 ```
 
 ## mdlib-pure/mark

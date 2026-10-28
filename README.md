@@ -175,8 +175,9 @@ First-party plugins:
   `headings({ prefix: 'user-content-' })` (see docs/security.md).
 - `mdlib-pure/container`: fenced containers (`::: warning Title` … `:::`,
   nestable with longer fences).
-- `mdlib-pure/math`: `$inline$`, `$$display$$` and `$$` blocks; bring your
-  own renderer: `math({ render: (tex, display) => katex.renderToString(tex, { displayMode: display }) })`.
+- `mdlib-pure/math`: `$inline$`, `$$display$$` and `$$` blocks. The output
+  works as-is with KaTeX auto-render or MathJax, or pass
+  `math({ render: (tex, display) => katex.renderToString(tex, { displayMode: display }) })`.
 - `mdlib-pure/mark`: `==highlight==` → `<mark>`.
 - `mdlib-pure/deflist`: definition lists (`Term` / `: Definition`, Pandoc and
   PHP Markdown Extra style) → `<dl>`.

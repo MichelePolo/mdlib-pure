@@ -31,10 +31,12 @@
 // AST (mdast-util-math names): `inlineMath { value }`, plus `display: true`
 // for `$$…$$` in a paragraph (see `InlineMath`); `math { value, meta }`, value
 // without the final line ending (see `Math`).
-// HTML, TEX escaped: <span class="math math-inline">TEX</span>, `math-display`
-// for inline `$$`; blocks: <div class="math math-display">TEX</div> (the HTML
-// string puts TEX on its own line, as for every <div>). With `render`, its
-// output goes inside these elements.
+// HTML, TEX escaped, pandoc style so that KaTeX auto-render and MathJax find
+// it with their default delimiters: <span class="math math-inline">\(TEX\)</span>,
+// `math-display` with \[TEX\] for inline `$$`; blocks:
+// <div class="math math-display">\[TEX\]</div> (the HTML string puts it on
+// its own line, as for every <div>). With `render`, its output goes inside
+// these elements, without delimiters.
 
 import type { InlineParser } from '../inline/parser.ts'
 import type { RenderContext, VChild } from '../render/vnode.ts'
@@ -166,7 +168,10 @@ export function math(options: MathOptions = {}): Plugin {
   const { render } = options
   const element = (r: RenderContext, tag: string, display: boolean, tex: string): VChild => {
     const out = render?.(tex, display)
-    return r.h(tag, { class: display ? 'math math-display' : 'math math-inline' }, typeof out === 'string' ? r.raw(out) : out || tex)
+    // Default: TeX in \(…\) / \[…\] (pandoc style), the delimiters KaTeX
+    // auto-render and MathJax look for out of the box.
+    const fallback = tex === '' ? '' : display ? `\\[${tex}\\]` : `\\(${tex}\\)`
+    return r.h(tag, { class: display ? 'math math-display' : 'math math-inline' }, typeof out === 'string' ? r.raw(out) : out || fallback)
   }
   return {
     name: 'math',

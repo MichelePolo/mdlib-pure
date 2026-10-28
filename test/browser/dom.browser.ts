@@ -5,11 +5,12 @@ import { after, before, describe, test } from 'node:test'
 import type { Browser } from 'playwright'
 import { launch, openPage, readRepoFile } from './harness.ts'
 
-type Lib = typeof import('../../src/index.ts') & typeof import('../../src/gfm/index.ts')
+type Lib = typeof import('../../src/index.ts') & typeof import('../../src/gfm/index.ts') & typeof import('../../src/plugins/math.ts')
 declare global {
   interface Window {
     mdlib: Lib
     pwned?: number
+    renderMathInElement?: (el: Element) => void
   }
 }
 
@@ -194,5 +195,25 @@ describe('Tailwind CSS v4 integration (real build)', () => {
     assert.equal(r.roundedMdUntouched, '6px') // Tailwind's own rounded-md (0.375rem), not shadowed
     assert.deepEqual(r.preflightRestoredByTheme, { h1Size: '32px', ulPadding: '28px' })
     assert.equal(r.mappedHeading, 'rgb(10, 20, 30)') // --md-color-heading: var(--color-primary)
+  })
+})
+
+describe('math plugin with KaTeX auto-render (no configuration)', () => {
+  test('default output is found and typeset by renderMathInElement', async () => {
+    const page = await openPage(browser)
+    await page.addScriptTag({ content: readRepoFile('node_modules/katex/dist/katex.min.js') })
+    await page.addScriptTag({ content: readRepoFile('node_modules/katex/dist/contrib/auto-render.min.js') })
+    const r = await page.evaluate(() => {
+      const out = document.querySelector('#out')!
+      window.mdlib.createMarkdown({ plugins: [window.mdlib.math()] }).renderTo(out, 'Euler: $e^{i\\pi}+1=0$ and $$\\sum_k a_k$$\n\n$$\n\\int_0^1 x\\,dx\n$$')
+      window.renderMathInElement!(out)
+      return {
+        katex: out.querySelectorAll('.math .katex').length, // auto-render wraps each formula in a span
+        display: out.querySelectorAll('.math-display .katex-display').length,
+        errors: out.querySelectorAll('.katex-error').length,
+        leftover: /\\[([]/.test(out.textContent ?? ''),
+      }
+    })
+    assert.deepEqual(r, { katex: 3, display: 2, errors: 0, leftover: false })
   })
 })

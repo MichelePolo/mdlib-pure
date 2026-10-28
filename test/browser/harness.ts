@@ -15,6 +15,7 @@ function bundle(): Promise<string> {
         export * from './src/index.ts'
         export { gfm } from './src/gfm/index.ts'
         export { container } from './src/plugins/container.ts'
+        export { math } from './src/plugins/math.ts'
       `,
       resolveDir: root,
       loader: 'ts',
