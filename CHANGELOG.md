@@ -25,6 +25,7 @@ First release.
   mailto, tel, sms, relative; raster `data:` images only); `sanitize`
   applied on every output path.
 - Linear time on adversarial input; nesting capped at `MAX_NESTING`.
+- Throughput on par with marked, ahead of markdown-it (see `bench/`).
 
 ### Plugins and integrations
 
@@ -32,6 +33,10 @@ First release.
   footnotes, tag filter, GitHub alerts (54/54 GFM extension examples).
 - `mdlib-pure/headings`: GitHub-compatible heading ids, permalinks, `toc()`.
 - `mdlib-pure/container`: `:::` container blocks.
+- `mdlib-pure/math`: `$…$`, `$$…$$`, `$$` blocks, `render` hook for KaTeX/MathJax.
+- `mdlib-pure/deflist`: definition lists.
+- `mdlib-pure/mark`: `==highlight==`.
+- `mdlib-pure/frontmatter`: YAML/TOML front matter.
 - `mdlib-pure/adapter`: React, Preact and Vue elements.
 - `mdlib-pure/entities`: full entity table for non-browser environments.
 - `theme.css` with semantic `--md-*` tokens (light/dark via `color-scheme`);
