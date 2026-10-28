@@ -38,6 +38,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "test": "node --test \"test/**/*.test.ts\" \"templates/**/*.test.ts\"",
+    "test:browser": "node --test \"test/browser/**/*.browser.ts\"",
     "spec": "node test/spec-report.ts",
     "typecheck": "tsc --noEmit",
     "size": "node scripts/size.js",
@@ -60,6 +61,7 @@
   "devDependencies": {
     "@types/node": "26.6.5",
     "esbuild": "0.28.2",
+    "playwright": "1.64.1",
     "typescript": "7.0.2"
   }
 }

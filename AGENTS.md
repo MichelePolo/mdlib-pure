@@ -34,6 +34,7 @@ features need feature detection and a graceful fallback.
 ```sh
 npm ci              # once, on a fresh checkout (dev tools only: esbuild, typescript)
 npm test            # all tests (node:test, runs TypeScript directly)
+npm run test:browser  # DOM path + theme in Chromium (once: npx playwright install chromium)
 npm run spec        # CommonMark report per section
 npm run spec -- 42  # show expected/actual for example 42
 npm run typecheck
@@ -236,6 +237,7 @@ type. One object can do both. Models: the `$$` math leaf in
 ## Definition of done
 
 - [ ] `npm run verify` passes (typecheck, tests, check, size)
+- [ ] DOM, rendering or CSS changes: `npm run test:browser` passes (CI runs both)
 - [ ] new syntax: positive tests, negative tests, adversarial-input test
 - [ ] new node types documented in the plugin's header comment (AST shape)
 - [ ] new tokens documented in `docs/tokens.md`
