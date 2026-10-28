@@ -32,5 +32,6 @@
   --color-md-warning: var(--md-color-warning);
   --color-md-caution: var(--md-color-caution);
   --font-md-mono: var(--md-font-mono);
-  --radius-md: var(--md-radius);
+  /* No radius token: `--radius-md` is Tailwind's own (rounded-md). Use
+     rounded-[var(--md-radius)] instead. Never shadow built-in theme keys. */
 }

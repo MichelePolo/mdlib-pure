@@ -89,7 +89,8 @@ Browser support: Baseline 2024.
 `tailwind.css` loads the theme into Tailwind's `components` layer, so
 utilities always win. It also exposes the tokens as theme values:
 `text-md-link`, `bg-md-surface`, `border-md-border`, `bg-md-code-bg`,
-`text-md-muted`, `font-md-mono`, `rounded-md`.
+`text-md-muted`, `font-md-mono`. No radius utility is added: `rounded-md`
+belongs to Tailwind (use `rounded-[var(--md-radius)]`).
 
 Without the theme, plain semantic output works with `@tailwindcss/typography`
 (`<article class="prose">`), or add utilities per node type with the

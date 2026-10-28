@@ -148,3 +148,51 @@ describe('theme.css in the browser', () => {
     assert.deepEqual(r, ['rgb(1, 2, 3)', '7px'])
   })
 })
+
+describe('Tailwind CSS v4 integration (real build)', () => {
+  let css = ''
+  before(async () => {
+    const { execFileSync } = await import('node:child_process')
+    const { mkdtempSync, readFileSync, rmSync } = await import('node:fs')
+    const { tmpdir } = await import('node:os')
+    const dir = mkdtempSync(`${tmpdir()}/mdlib-tw-`)
+    execFileSync('npx', ['@tailwindcss/cli', '-i', 'test/browser/tailwind/input.css', '-o', `${dir}/out.css`], { stdio: 'ignore' })
+    css = readFileSync(`${dir}/out.css`, 'utf8')
+    rmSync(dir, { recursive: true })
+  })
+
+  const probe = (css: string) => async () => {
+    const page = await openPage(browser, { css })
+    return page.evaluate(() => {
+      const out = document.querySelector('#out')!
+      window.mdlib.createMarkdown().renderTo(out, '# Title\n\nText [plain](/a) and [red](/b).\n\n- item')
+      out.querySelectorAll('a')[1].className = 'text-red-500'
+      const probe = document.createElement('p')
+      probe.className = 'text-md-link rounded-md mt-9'
+      document.body.append(probe)
+      const red = document.createElement('span')
+      red.className = 'text-red-500'
+      document.body.append(red)
+      const cs = (el: Element) => getComputedStyle(el)
+      const [plain, styled] = out.querySelectorAll('a')
+      return {
+        utilityBeatsTheme: cs(styled).color === cs(red).color && cs(styled).color !== cs(plain).color,
+        themeLinkColor: cs(plain).color,
+        tokenUtility: cs(probe).color,
+        roundedMdUntouched: cs(probe).borderTopLeftRadius,
+        preflightRestoredByTheme: { h1Size: cs(out.querySelector('h1')!).fontSize, ulPadding: cs(out.querySelector('ul')!).paddingInlineStart },
+        mappedHeading: cs(out.querySelector('h1')!).color,
+      }
+    })
+  }
+
+  test('utilities win, tokens become utilities, mapping works, preflight does not break the theme', async () => {
+    const r = await probe(css)()
+    assert.equal(r.utilityBeatsTheme, true)
+    assert.equal(r.themeLinkColor, 'rgb(9, 105, 218)')
+    assert.equal(r.tokenUtility, 'rgb(9, 105, 218)') // text-md-link follows --md-color-link
+    assert.equal(r.roundedMdUntouched, '6px') // Tailwind's own rounded-md (0.375rem), not shadowed
+    assert.deepEqual(r.preflightRestoredByTheme, { h1Size: '32px', ulPadding: '28px' })
+    assert.equal(r.mappedHeading, 'rgb(10, 20, 30)') // --md-color-heading: var(--color-primary)
+  })
+})

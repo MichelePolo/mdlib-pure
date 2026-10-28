@@ -1,0 +1,13 @@
+/* Written exactly as a user would. */
+@import "tailwindcss" source(none);
+@import "mdlib-pure/tailwind.css";
+@source "./sample.html";
+
+@theme {
+  --color-primary: rgb(10, 20, 30);
+}
+
+/* Map a token to the design system. */
+:root {
+  --md-color-heading: var(--color-primary);
+}
