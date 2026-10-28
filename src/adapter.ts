@@ -13,9 +13,10 @@
 // <div> (block) or <span> (inline).
 //
 // Raw HTML is only present with `html: true` or a string-returning
-// `highlight`. With `html: true`, inline HTML arrives as separate fragments
-// (`<b>`, text, `</b>`), which cannot be rendered as framework elements: for
-// that case use `md.render()` with `sanitize` on a container instead.
+// `highlight`. If the instance has `sanitize`, `md.toVNodes()` has already
+// passed every raw node through it. With `html: true`, inline HTML arrives as
+// separate fragments (`<b>`, text, `</b>`), which cannot be rendered as
+// framework elements: for that case use `md.render()` on a container.
 
 import type { VChild } from './render/vnode.ts'
 
@@ -44,8 +45,8 @@ export function toElements<T>(nodes: VChild[], h: CreateElement<T>, preset: Pres
     if (c === null || c === undefined || c === false) return null
     if (typeof c === 'string') return c
     if ('raw' in c) {
-      // Raw nodes only exist for HTML the caller declared trusted (`html: true`,
-      // which `sanitize` covers in render(), or a string from `highlight`).
+      // Raw nodes only exist for HTML the caller declared trusted (`html: true`
+      // or a `highlight` string); `md.toVNodes()` applies `sanitize` to each.
       const props: Record<string, unknown> = vue ? { innerHTML: c.raw } : { dangerouslySetInnerHTML: { __html: c.raw } } // check:allow-innerHTML
       if (key !== undefined) props.key = key
       return h(c.block ? 'div' : 'span', props)

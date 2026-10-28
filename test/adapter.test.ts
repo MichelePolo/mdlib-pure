@@ -54,6 +54,25 @@ describe('adapter: React (real react-dom/server)', () => {
   })
 })
 
+describe('adapter: sanitize', () => {
+  const evil = '<div onclick="steal()">x</div>\n\n```js\ny\n```'
+  const stripHandlers = (html: string) => html.replace(/\son\w+="[^"]*"/g, '')
+  const highlight = () => '<span onmouseover="steal()">y</span>'
+
+  test('toVNodes() applies sanitize to every raw node (HTML blocks and highlight output)', () => {
+    const md = createMarkdown({ html: true, sanitize: stripHandlers, highlight })
+    const html = renderToStaticMarkup(createElement('div', null, ...toElements(md.toVNodes(evil), createElement)))
+    assert.ok(!html.includes('steal'), html)
+  })
+
+  test('render() still sanitizes the whole string once (inline HTML fragments stay intact)', () => {
+    const calls: string[] = []
+    const md = createMarkdown({ html: true, sanitize: (s) => (calls.push(s), s) })
+    assert.equal(md.render('a <b>c</b>'), '<p>a <b>c</b></p>\n')
+    assert.deepEqual(calls, ['<p>a <b>c</b></p>\n'])
+  })
+})
+
 describe('adapter: Vue and Preact conventions (recording h)', () => {
   type Call = { tag: string; props: Record<string, unknown> | null; children: unknown[] }
   const record = (tag: string, props: Record<string, unknown> | null, ...children: unknown[]): Call => ({ tag, props, children })

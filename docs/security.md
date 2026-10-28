@@ -27,6 +27,9 @@ createMarkdown({ html: true, sanitize: DOMPurify.sanitize })
 ```
 
 - `render()` applies `sanitize` to the final HTML string.
+- `toVNodes()` (and so the React/Vue/Preact adapter) applies `sanitize` to
+  every raw HTML node: each fragment reaching `dangerouslySetInnerHTML` or
+  `innerHTML` has been sanitized.
 - `renderTo()` builds DOM nodes directly when the tree has no raw HTML.
   With raw HTML (or a plugin emitting `r.raw()`), it serializes and assigns
   `innerHTML`, after `sanitize`. This is the only `innerHTML` in the library

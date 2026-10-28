@@ -45,7 +45,10 @@ export interface Markdown {
   render(src: string | Root): string
   /** Render into an element. Builds DOM nodes directly unless raw HTML is present. */
   renderTo(el: Element, src: string | Root): void
-  /** Markdown (or AST) → VNodes, for custom serializers. */
+  /**
+   * Markdown (or AST) → VNodes, for custom serializers and framework adapters.
+   * With `sanitize`, every raw HTML node has already been passed through it.
+   */
   toVNodes(src: string | Root): VChild[]
 }
 
@@ -145,15 +148,20 @@ export function createMarkdown(options: Options = {}): Markdown {
   // Plugin render overrides win over the `highlight` option.
   const renderers: Record<string, RenderFn> = Object.assign({}, coreRenderers, highlighted, ...plugins.map((p) => p.render ?? {}))
   const renderTree = createRenderer({ renderers, classes: options.classes, allowUrl: options.allowUrl ?? isSafeUrl })
-  const toVNodes = (src: string | Root): VChild[] => renderTree(typeof src === 'string' ? parse(src) : src)
+  const toTree = (src: string | Root): VChild[] => renderTree(typeof src === 'string' ? parse(src) : src)
   const sanitize = options.sanitize ?? ((s: string) => s)
+  // render()/renderTo() sanitize the whole HTML string (inline HTML comes in
+  // fragments like `<b>`…`</b>` that only make sense together). VNodes leave
+  // the library as separate fragments, so each raw node is sanitized instead.
+  const sanitizeRaw = (nodes: VChild[]): VChild[] =>
+    nodes.map((c) => (!c || typeof c === 'string' ? c : 'raw' in c ? { raw: sanitize(c.raw), block: c.block } : { ...c, children: sanitizeRaw(c.children) }))
 
   return {
     parse,
-    toVNodes,
-    render: (src) => sanitize(toHtml(toVNodes(src))),
+    toVNodes: (src) => (options.sanitize ? sanitizeRaw(toTree(src)) : toTree(src)),
+    render: (src) => sanitize(toHtml(toTree(src))),
     renderTo(el, src) {
-      const tree = toVNodes(src)
+      const tree = toTree(src)
       if (hasRaw(tree)) {
         // Raw HTML fragments may be partial tags (`<span>` … `</span>`), so they
         // can only be parsed as a whole document fragment.
