@@ -61,6 +61,11 @@ from the commits that fixed it:
   with zero-specificity rules, source order decides: the first heading kept
   its top margin and alerts had extra space below. The edge resets moved to
   the end of the theme ([ea3dfd8]; the screenshot is below).
+- **A timing test that only failed on CI.** A 4 MB adversarial input took
+  2.2 s on the CI runner, over the 2 s limit, while parsing was linear
+  (~130 ms/MB). The first attempted fix made paragraphs quadratic; measuring
+  caught it and it was reverted. The input shrank to 1 MB and every timing
+  limit became `budget(ms)`, tripled on CI ([a593dd7]).
 
 ## The maintainer decides
 
@@ -75,6 +80,12 @@ Agents propose; Michele decides. Some of the decisions in the history:
   ([caf2d63]).
 - Pandoc-style math output, so that KaTeX auto-render and MathJax work with
   no configuration ([691260a]).
+- Mermaid diagrams: costs and benefits were laid out before any code
+  (Mermaid 12 measured at 215 KB gzip on first load). Chosen: no dependency
+  on Mermaid, lazy loading, theme from the tokens with redraw on light/dark,
+  pre-rendered output only through a `render` option ([287334c]).
+- The repository made public and this site published on GitHub Pages
+  ([ba0b3a4]).
 
 ## Checked on every change
 
@@ -90,7 +101,11 @@ Markdown unable to run script, the theme, and a real Tailwind build
 This site was built the same way: an agent in Claude Code wrote the build
 script, the pages and the playground. The docs are the repository's Markdown
 rendered by mdlib-pure itself, and the screenshots below were taken with
-Playwright.
+Playwright. Checking the Mermaid sample in a real browser found two problems
+that unit tests had not: this site switches themes through
+`<meta name="color-scheme">`, which the redraw did not watch, and Mermaid's
+black default edge-label background in dark mode. Both were fixed in the
+library ([287334c]).
 
 [5a482ba]: https://github.com/MichelePolo/mdlib-pure/commit/5a482ba
 [1c4dd87]: https://github.com/MichelePolo/mdlib-pure/commit/1c4dd87
@@ -107,3 +122,6 @@ Playwright.
 [caf2d63]: https://github.com/MichelePolo/mdlib-pure/commit/caf2d63
 [691260a]: https://github.com/MichelePolo/mdlib-pure/commit/691260a
 [297d6af]: https://github.com/MichelePolo/mdlib-pure/commit/297d6af
+[a593dd7]: https://github.com/MichelePolo/mdlib-pure/commit/a593dd7
+[287334c]: https://github.com/MichelePolo/mdlib-pure/commit/287334c
+[ba0b3a4]: https://github.com/MichelePolo/mdlib-pure/commit/ba0b3a4

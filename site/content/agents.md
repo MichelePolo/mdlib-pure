@@ -56,6 +56,13 @@ the `:::` container") so the agent reads the container recipe, its pitfalls
 (`canContain`, `endLine`, deferred closers) and the per-line cost of
 `continue`.
 
+For syntax rendered by a heavy library (diagrams, math, charts), ask for the
+pattern in the guide's "Integrating an external library" section: the plugin
+outputs the markup the library already recognizes and never imports it, a
+browser helper loads the library only when a page needs it, and a `render`
+option accepts pre-rendered output. `mdlib-pure/mermaid` and
+`mdlib-pure/math` follow it.
+
 ## It has been done
 
 The `container`, `math`, `mark`, `frontmatter` and `deflist` plugins were

@@ -8,7 +8,7 @@ import { decodeEntity } from '../../../src/entities/index.ts'
 import { toc } from '../../../src/plugins/headings.ts'
 import { getFrontmatter } from '../../../src/plugins/frontmatter.ts'
 import { escapeHtml, fenceFor, kb, makeMarkdown, rel, siteLinks } from '../context.js'
-import { page } from '../layout.js'
+import { asset, page } from '../layout.js'
 import { codeBlock, katexHead, pair } from './parts.js'
 
 const PATH = '/plugins/'
@@ -63,6 +63,18 @@ export const PLUGIN_CARDS = [
     plugins: ['math'],
     example: 'Inline $e^{i\\pi} + 1 = 0$, and a block:\n\n$$\n\\int_0^1 x^2 \\, dx = \\frac{1}{3}\n$$\n',
     docs: 'mdlib-pure/math',
+  },
+  {
+    id: 'mermaid',
+    name: 'mdlib-pure/mermaid',
+    adds: '` ```mermaid ` diagrams, no dependency on Mermaid',
+    import: "import { mermaid, renderMermaid } from 'mdlib-pure/mermaid'",
+    use: "createMarkdown({ plugins: [mermaid()] }) · await renderMermaid(el, { load: () => import('mermaid') })",
+    syntax: 'fenced code blocks with the info string `mermaid` (as on GitHub and GitLab); `renderMermaid()` loads Mermaid only when a page has diagrams, uses `securityLevel: \'strict\'`, colors them from the `--md-*` tokens and redraws them when the color scheme changes',
+    ast: '`mermaid { value }` (replaces the `code` node)',
+    plugins: ['mermaid'],
+    example: '```mermaid\nflowchart LR\n  md[Markdown] --> mdlib[mdlib-pure] --> svg[Diagram]\n```\n',
+    docs: 'mdlib-pure/mermaid',
   },
   {
     id: 'deflist',
@@ -138,6 +150,7 @@ export function plugins({ sizes, tocs }) {
     return `/docs/${slug}/${entry ? `#${entry.id}` : ''}`
   }
   let usesMath = false
+  let usesMermaid = false
 
   const sections = PLUGIN_CARDS.map((card) => {
     const md = makeMarkdown(card.plugins, { highlighted: false })
@@ -163,6 +176,8 @@ export function plugins({ sizes, tocs }) {
     }
     const math = card.plugins.includes('math')
     usesMath ||= math
+    const diagrams = card.plugins.includes('mermaid')
+    usesMermaid ||= diagrams
     const docs = docsLink(card)
     const html = `
     <section class="item wrap" id="${card.id}" aria-labelledby="${card.id}-title">
@@ -177,7 +192,7 @@ export function plugins({ sizes, tocs }) {
         <dt>Reference</dt><dd><a href="${rel(PATH, docs)}">${card.id === 'entities' ? 'Getting started: Node, SSR, workers' : `API reference: ${card.name}`}</a></dd>
       </dl>
       ${card.id === 'gfm' ? gfmParts(sizes) : ''}
-      ${pair(card.example, output, { math, label: card.extra === 'react' ? 'Result (React SSR)' : 'Result' })}
+      ${pair(card.example, output, { math, label: card.extra === 'react' ? 'Result (React SSR)' : 'Result', outAttrs: diagrams ? ' data-mermaid' : '' })}
       ${extra}
     </section>`
     const fence = fenceFor(card.example)
@@ -216,9 +231,9 @@ ${extraMd}`
     path: PATH,
     section: 'plugins',
     title: 'Plugins',
-    description: 'The first-party plugins of mdlib-pure: GFM, headings, containers, math, definition lists, mark, front matter, the framework adapter and the entity table.',
+    description: 'The first-party plugins of mdlib-pure: GFM, headings, containers, math, Mermaid diagrams, definition lists, mark, front matter, the framework adapter and the entity table.',
     body,
-    head: usesMath ? katexHead(PATH) : '',
+    head: `${usesMath ? katexHead(PATH) : ''}${usesMermaid ? `\n  <script type="module" src="${asset(PATH, 'js/mermaid-init.js')}"></script>` : ''}`,
   })
 
   const twin = `# Plugins

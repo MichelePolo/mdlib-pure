@@ -38,6 +38,7 @@ export const ENTRIES = [
   { id: 'mark', name: 'mdlib-pure/mark', entry: 'src/plugins/mark.ts', external: true },
   { id: 'frontmatter', name: 'mdlib-pure/frontmatter', entry: 'src/plugins/frontmatter.ts', external: true },
   { id: 'deflist', name: 'mdlib-pure/deflist', entry: 'src/plugins/deflist.ts', external: true },
+  { id: 'mermaid', name: 'mdlib-pure/mermaid', entry: 'src/plugins/mermaid.ts', external: true },
 ]
 
 export const GFM_PARTS = ['table', 'strikethrough', 'autolink', 'tasklist', 'footnotes', 'tagfilter', 'alerts']

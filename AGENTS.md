@@ -61,20 +61,25 @@ src/
   util/               escaping, entities, URL normalization and safety policy, visit()
   entities/           optional full entity table (`mdlib-pure/entities`)
   gfm/                GFM plugins (`mdlib-pure/gfm`): table, autolink, footnotes, …
-  plugins/            other first-party plugins, one entry each (`mdlib-pure/container`, `/headings`)
+  plugins/            other first-party plugins, one entry each (`mdlib-pure/<name>`): container,
+                      headings, math, mermaid, deflist, mark, frontmatter
   adapter.ts          VNodes → React/Preact/Vue elements (`mdlib-pure/adapter`)
 styles/               theme.css (tokens), tailwind.css (Tailwind v4 bridge)
-docs/                 tokens.md, security.md
+docs/                 api.md, tokens.md, security.md, screenshots/
 templates/plugin/     a complete tested plugin to copy (runs in `npm test`)
-demo/                 live editor (needs `npm run build`)
+demo/                 the first live editor (needs `npm run build`)
+site/                 the website: `npm run site:build` → site/out/ (pages, samples, playground)
+bench/                benchmark against other libraries (own package.json)
 test/
   spec.test.ts        the 652 CommonMark examples
   gfm.test.ts         GFM extension examples
   api.test.ts         options, AST shape, plugin examples
   container.test.ts   a full block-container plugin test suite (good model)
   adapter.test.ts     whole corpus through real React 19, zero warnings
-  helpers.ts          shared test helpers (HTML normalization)
-  browser/            Chromium suite (npm run test:browser): DOM path, theme, real Tailwind v4 build
+  mermaid.test.ts     a plugin that integrates an external library (Node side)
+  helpers.ts          shared test helpers (HTML normalization, budget())
+  browser/            Chromium suite (npm run test:browser): DOM path, theme, real
+                      Tailwind v4 build, KaTeX auto-render, real Mermaid
   pathological.test.ts  linear-time guarantees
 ```
 
@@ -140,8 +145,11 @@ const mention: Plugin = {
 - Nested inline content: `p.parse(text)` returns `Node[]` (re-entrant).
 - `p.inBracket()` is true inside potential link/image text: rules that create
   links must not fire there (no links in links).
-- A rule may consume more than its trigger (e.g. a whole word) when it does
-  not match: fewer, longer text runs keep parsing fast.
+- Every trigger character costs a dispatch each time it appears, whether
+  the rule matches or not: prefer rare characters (`@`, `:`, `$`) to letters.
+  When the syntax is only recognizable late (a URL scheme at `:`), fire on the
+  rare character and take back the text already emitted with
+  `p.trimText(suffix)` (see `gfm/autolink.ts`).
 - Rules for the same char run in order; use `before`/`after` to position
   relative to a core rule (`codeSpan`, `openBracket`, `autolink`…).
 
@@ -214,7 +222,9 @@ type. One object can do both. Models: the `$$` math leaf in
 - Timing tests assert `ms < budget(2000)` (`test/helpers.ts`): the limit is
   tripled on CI, whose machines are slower. Size inputs so they run in a few
   hundred ms locally; a quadratic regression still blows past the limit.
-
+- Never read the end of a string you keep appending to (`endsWith`,
+  `charCodeAt`, `slice`) inside a loop: V8 flattens the growing string each
+  time, which is O(n²). Keep separate pieces instead.
 - `continue` runs once per open block per line, so per-line work there is
   multiplied by nesting depth (up to `MAX_NESTING`). Memoize per line in
   `p.env` (see `scan()` in `container.ts`). Time-based tests miss constant
@@ -236,6 +246,26 @@ type. One object can do both. Models: the `$$` math leaf in
   paragraphs without `<p>` (tight lists): set `node.spread` on your own
   containers to get the same behavior.
 
+## Integrating an external library (diagrams, math, charts)
+
+Libraries like Mermaid (~215 KB gzip at first load) or KaTeX must never
+become dependencies. The pattern of `mdlib-pure/mermaid` and
+`mdlib-pure/math`:
+
+1. Parse into your own node (`mermaid { value }`). Fenced blocks need no new
+   syntax: convert `code` nodes with your `lang` in a transform.
+2. Render the markup the library already recognizes (`<pre class="mermaid">`,
+   `\(…\)`): pages that load the library need no configuration, and without
+   JavaScript the source stays readable.
+3. Offer `render(source)` for pre-rendered output: a string is trusted HTML,
+   VNodes are safe, `null` keeps the default (like the core `highlight`).
+4. A browser helper takes `load: () => import('lib')` and calls it only when
+   the page has your nodes. Never hard-code a CDN URL.
+5. The library writes to the DOM outside mdlib-pure's safe path: default to
+   its strictest mode and document it in `docs/security.md`.
+6. Test the Node side in `test/<name>.test.ts` and the real library in
+   `test/browser/` (as a dev dependency only).
+
 ## Adding a first-party plugin
 
 1. Code in `src/plugins/<name>.ts` (or `src/<name>/` if it has several files).
@@ -245,6 +275,12 @@ type. One object can do both. Models: the `$$` math leaf in
    and GFM (in both plugin orders), AST shape, adversarial input.
 3. Wire it: entry in `scripts/build.js`, budget in `scripts/size.js`
    (`external: true`), export in `package.json`.
+4. Docs: a section in `docs/api.md`, a line in `README.md` and
+   `CHANGELOG.md`; styles in `styles/theme.css` if it renders new elements.
+5. Site: register it in `site/lib/plugins.js` (`playground: false` if it
+   needs a loader the playground does not have), add it to
+   `site/build/sizes.js`, a card in `site/build/pages/plugins.js`, a sample in
+   `site/content/samples/` and `site/lib/samples.js`.
 
 `templates/plugin/` is the same structure for a minimal inline plugin.
 
@@ -255,6 +291,8 @@ type. One object can do both. Models: the `$$` math leaf in
 - [ ] new syntax: positive tests, negative tests, adversarial-input test
 - [ ] new node types documented in the plugin's header comment (AST shape)
 - [ ] new tokens documented in `docs/tokens.md`
+- [ ] new plugin: docs and site updated, `npm run site:build` passes (it fails
+      on broken internal links)
 - [ ] no behavior change to core output unless the task requires it
 
 ## CSS (styles/)
@@ -263,6 +301,8 @@ type. One object can do both. Models: the `$$` math leaf in
   **source order decides** between theme rules. Edge resets
   (`:first-child`/`:last-child` margins) must stay at the end of the file.
 - Tokens: semantic names only (rule 7); document each in `docs/tokens.md`.
+- First-party plugins that render new elements are styled in `theme.css`
+  (containers, alerts, definition lists, diagrams), with existing tokens.
 
 ## Things that look wrong but are intentional
 
