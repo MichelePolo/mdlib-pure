@@ -24,6 +24,8 @@ export class Block {
   /** Number of ancestors (root = 0). */
   depth = 0
   startLine: number
+  /** 1-based column where the block starts (after container markers). */
+  startColumn = 1
   endLine: number
   /** Raw text accumulated by leaf blocks (paragraph, code, html...). */
   content = ''
@@ -233,9 +235,10 @@ export class BlockParser {
   }
 
   /** Open a new block of `type` as a child of the tip, closing blocks that cannot contain it. */
-  addChild(type: string, _offset: number): Block {
+  addChild(type: string, offset: number): Block {
     while (!this.rule(this.tip.type).canContain?.(type)) this.finalize(this.tip, this.lineNumber - 1)
     const block = new Block(type, this.lineNumber)
+    block.startColumn = offset + 1
     block.depth = this.tip.depth + 1
     block.parent = this.tip
     this.tip.children.push(block)

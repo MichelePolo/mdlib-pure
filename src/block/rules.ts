@@ -250,6 +250,7 @@ export const setextHeading: BlockRule = {
     consumeReferences(p, container)
     if (container.content.length === 0) return 0
     const b = new Block('heading', container.startLine)
+    b.startColumn = container.startColumn
     b.node.depth = m[0][0] === '=' ? 1 : 2
     b.content = container.content
     container.replaceWith(b)

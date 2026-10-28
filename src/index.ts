@@ -7,8 +7,8 @@ import { coreInlineRules } from './inline/rules.ts'
 import { hasRaw, toDom } from './render/dom.ts'
 import { toHtml } from './render/html.ts'
 import { coreRenderers, createRenderer } from './render/renderer.ts'
-import type { UrlKind, VChild } from './render/vnode.ts'
-import type { BlockRule, Code, DelimiterRule, InlineRule, Node, Plugin, Reference, RenderFn, Root, TransformContext } from './types.ts'
+import type { Props, UrlKind, VChild } from './render/vnode.ts'
+import type { BlockRule, Code, DelimiterRule, InlineRule, Node, Plugin, Point, Position, Reference, RenderFn, Root, TransformContext } from './types.ts'
 import { trimMd } from './util/common.ts'
 import { defaultEntityDecoder, type EntityDecoder } from './util/entities.ts'
 import { isSafeUrl } from './util/url.ts'
@@ -28,6 +28,10 @@ export interface Options {
   decodeEntity?: EntityDecoder
   /** CSS classes per node type, e.g. `{ paragraph: 'my-4', heading1: 'text-3xl' }`. */
   classes?: Record<string, string>
+  /** Extra attributes per node, merged into the element it renders to (`class` is appended). */
+  attributes?: (node: Node) => Props | null | undefined
+  /** Add `position` (line, column, offset) to block nodes. */
+  positions?: boolean
   /**
    * Syntax highlighting for code blocks. Return:
    * - a string: **trusted** HTML for inside `<code>` (highlight.js, Prism), or a
@@ -78,6 +82,34 @@ function order<T extends Ordered>(core: T[], extra: T[], disabled: Set<string>):
 
 const escapeClass = (chars: string): string => chars.replace(/[\\\]^-]/g, '\\$&')
 
+/** Start offset and length of every source line. */
+interface Lines {
+  starts: number[]
+  lengths: number[]
+}
+
+function lineTable(src: string): Lines {
+  const starts = [0]
+  const lengths: number[] = []
+  const re = /\r\n|\n|\r/g
+  for (let m: RegExpExecArray | null; (m = re.exec(src)); ) {
+    lengths.push(m.index - starts[starts.length - 1])
+    starts.push(m.index + m[0].length)
+  }
+  lengths.push(src.length - starts[starts.length - 1])
+  return { starts, lengths }
+}
+
+/** Block range: exact start; the end is the end of the block's last line. */
+function blockPosition(b: Block, lines: Lines): Position {
+  const at = (line: number, column: number): Point => {
+    const i = Math.min(Math.max(line, 1), lines.starts.length) - 1
+    return { line: i + 1, column, offset: lines.starts[i] + column - 1 }
+  }
+  const last = Math.min(Math.max(b.endLine, b.startLine, 1), lines.starts.length)
+  return { start: at(b.startLine, b.startColumn), end: at(last, lines.lengths[last - 1] + 1) }
+}
+
 export function createMarkdown(options: Options = {}): Markdown {
   const plugins = options.plugins ?? []
   const disabled = new Set(options.html ? [] : ['htmlBlock', 'htmlInline'])
@@ -115,11 +147,12 @@ export function createMarkdown(options: Options = {}): Markdown {
   const triggers = String.fromCharCode(...byChar.keys())
   const inlineConfig: InlineConfig = { rules: byChar, delimiters, reText: new RegExp(`[^${escapeClass(triggers)}]+`, 'y'), decodeEntity }
 
-  const toAst = (b: Block, inline: InlineParser): Node => {
+  const toAst = (b: Block, inline: InlineParser, lines: Lines | null): Node => {
     const node = b.node
+    if (lines) node.position = blockPosition(b, lines)
     const content = types.get(b.type)?.content
     if (content === 'inline') node.children = inline.parse(trimMd(b.content))
-    else if (content === 'block') node.children = b.children.map((c) => toAst(c, inline))
+    else if (content === 'block') node.children = b.children.map((c) => toAst(c, inline, lines))
     return node
   }
 
@@ -128,7 +161,7 @@ export function createMarkdown(options: Options = {}): Markdown {
     const env: Record<string, unknown> = {}
     const inline = new InlineParser(inlineConfig, refs, env)
     const doc = new BlockParser(types, starts, inline, refs, env).parse(src)
-    let root = toAst(doc, inline) as Root
+    let root = toAst(doc, inline, options.positions ? lineTable(src) : null) as Root
     const ctx: TransformContext = { parseInline: (s) => inline.parse(s), references: refs, env }
     for (const p of plugins) if (p.transform) root = p.transform(root, ctx) ?? root
     return root
@@ -147,7 +180,7 @@ export function createMarkdown(options: Options = {}): Markdown {
   }
   // Plugin render overrides win over the `highlight` option.
   const renderers: Record<string, RenderFn> = Object.assign({}, coreRenderers, highlighted, ...plugins.map((p) => p.render ?? {}))
-  const renderTree = createRenderer({ renderers, classes: options.classes, allowUrl: options.allowUrl ?? isSafeUrl })
+  const renderTree = createRenderer({ renderers, classes: options.classes, attributes: options.attributes, allowUrl: options.allowUrl ?? isSafeUrl })
   const toTree = (src: string | Root): VChild[] => renderTree(typeof src === 'string' ? parse(src) : src)
   const sanitize = options.sanitize ?? ((s: string) => s)
   // render()/renderTo() sanitize the whole HTML string (inline HTML comes in

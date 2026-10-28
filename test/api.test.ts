@@ -297,3 +297,36 @@ describe('highlight option', () => {
     assert.equal(md.render(src), 'plugin')
   })
 })
+
+describe('positions and attributes', () => {
+  const src = '# Title\n\n> quote\n> more\n\n- a\n  - b\r\n\r\nPara\nline two\n'
+  const md = createMarkdown({ positions: true })
+  const pos = (n: { position?: { start: { line: number; column: number; offset: number }; end: { line: number; column: number; offset: number } } }) =>
+    n.position && [n.position.start.line, n.position.start.column, n.position.start.offset, n.position.end.line, n.position.end.column, n.position.end.offset]
+
+  test('block nodes get unist positions (exact start, end of last line), CRLF aware', () => {
+    const root = md.parse(src)
+    const [h1, quote, list, para] = root.children
+    assert.deepEqual(pos(h1), [1, 1, 0, 1, 8, 7])
+    assert.deepEqual(pos(quote), [3, 1, 9, 4, 7, 23])
+    assert.deepEqual(pos(quote.children![0]), [3, 3, 11, 4, 7, 23])
+    const inner = list.children![0].children![1]
+    assert.deepEqual(pos(inner), [7, 3, 31, 7, 6, 34])
+    assert.deepEqual(pos(para), [9, 1, 38, 10, 9, 51]) // two CRLFs before it: +2 bytes
+    assert.equal(src.slice(para.position!.start.offset, para.position!.end.offset), 'Para\nline two')
+  })
+
+  test('inline nodes have no position; off by default', () => {
+    assert.equal(md.parse('*a*').children[0].children![0].position, undefined)
+    assert.equal(createMarkdown().parse('# a').children[0].position, undefined)
+  })
+
+  test('attributes hook: data-sourcepos recipe for editors, merged with classes', () => {
+    const md2 = createMarkdown({
+      positions: true,
+      classes: { paragraph: 'my-4' },
+      attributes: (n) => n.position && { 'data-line': n.position.start.line, class: 'synced' },
+    })
+    assert.equal(md2.render('# T\n\ntext'), '<h1 data-line="1" class="synced">T</h1>\n<p data-line="3" class="synced my-4">text</p>\n')
+  })
+})

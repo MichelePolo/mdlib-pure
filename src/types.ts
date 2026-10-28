@@ -11,10 +11,25 @@ import type { RenderContext, VChild } from './render/vnode.ts'
 // AST
 // ---------------------------------------------------------------------------
 
+/** A place in the source (unist). `line` and `column` are 1-based. */
+export interface Point {
+  line: number
+  column: number
+  offset: number
+}
+
+/** Source range (unist): `end` is the point just after the node. */
+export interface Position {
+  start: Point
+  end: Point
+}
+
 /** Any AST node. Core nodes are described below; plugins add their own types. */
 export interface Node {
   type: string
   children?: Node[]
+  /** Block nodes only, with the `positions` option. */
+  position?: Position
   [prop: string]: unknown
 }
 

@@ -34,9 +34,13 @@ createMarkdown({
   allowUrl: isSafeUrl,    // (url, 'link' | 'image') => boolean
   decodeEntity: undefined,// named-entity decoder (default: the browser's DOM)
   classes: {},            // CSS classes per node type
+  attributes: undefined,  // (node) => extra attributes, e.g. data-sourcepos
   highlight: undefined,   // (code, lang, meta) => html | VNodes | null
+  positions: false,       // line/column/offset on block nodes
 })
 ```
+
+Full reference: [docs/api.md](docs/api.md).
 
 ### GitHub Flavored Markdown
 

@@ -4,6 +4,14 @@
   "description": "Lightweight, zero-dependency, CommonMark-compliant Markdown renderer for the browser. Extensible via plugins, styled with semantic tokens, Tailwind-friendly.",
   "license": "MIT",
   "author": "Michele Polo <michele.polo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichelePolo/mdlib-pure.git"
+  },
+  "homepage": "https://github.com/MichelePolo/mdlib-pure#readme",
+  "bugs": {
+    "url": "https://github.com/MichelePolo/mdlib-pure/issues"
+  },
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -41,7 +49,8 @@
     "dist",
     "styles",
     "docs",
-    "AGENTS.md"
+    "AGENTS.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "node scripts/build.js",
@@ -52,7 +61,8 @@
     "size": "node scripts/size.js",
     "check": "node scripts/check.js",
     "verify": "npm run typecheck && npm test && npm run check && npm run size",
-    "gen:entities": "node scripts/gen-entities.js"
+    "gen:entities": "node scripts/gen-entities.js",
+    "prepublishOnly": "npm run verify && npm run build"
   },
   "keywords": [
     "markdown",
@@ -77,5 +87,8 @@
     "react-dom": "19.3.1",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
