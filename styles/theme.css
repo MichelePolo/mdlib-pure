@@ -228,6 +228,22 @@
     font-weight: var(--md-weight-heading);
   }
 
+  /* --- Heading permalinks (headings plugin) ------------------------------------ */
+
+  :where(.md) :where(.md-anchor) {
+    color: var(--md-color-muted);
+    text-decoration: none;
+    opacity: 0;
+  }
+
+  :where(.md) :where(:is(h1, h2, h3, h4, h5, h6):hover > .md-anchor, .md-anchor:focus-visible) {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    :where(.md) :where(.md-anchor) { opacity: 0.6; }
+  }
+
   /* --- Edge resets: MUST stay last ---------------------------------------------
    * Every rule above has zero specificity, so source order decides. These
    * resets beat the margins above only because they come after them. */

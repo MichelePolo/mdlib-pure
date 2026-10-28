@@ -148,8 +148,12 @@ A plugin can provide:
 | `transform` | changes to the AST after parsing (heading ids, TOC) |
 | `render` | HTML output per node type, including core nodes |
 
-First-party plugin: `mdlib-pure/container` for fenced containers
-(`::: warning Title` … `:::`, nestable with longer fences).
+First-party plugins:
+
+- `mdlib-pure/headings`: GitHub-style heading ids, optional `#` permalinks,
+  and `toc(root)` for a table of contents.
+- `mdlib-pure/container`: fenced containers (`::: warning Title` … `:::`,
+  nestable with longer fences).
 
 The full guide, written for both humans and AI agents, is
 [`AGENTS.md`](AGENTS.md). [`templates/plugin`](templates/plugin) is a

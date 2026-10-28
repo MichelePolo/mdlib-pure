@@ -11,6 +11,7 @@ const budgets = [
   // Measured on its own; shared core code is not counted twice by bundlers.
   { name: 'mdlib-pure/gfm', entry: 'src/gfm/index.ts', limit: 5 * 1024, external: true },
   { name: 'mdlib-pure/container', entry: 'src/plugins/container.ts', limit: 1.5 * 1024, external: true },
+  { name: 'mdlib-pure/headings', entry: 'src/plugins/headings.ts', limit: 1 * 1024, external: true },
 ]
 
 let failed = false

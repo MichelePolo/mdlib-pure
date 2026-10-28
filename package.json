@@ -25,6 +25,10 @@
       "types": "./dist/types/plugins/container.d.ts",
       "default": "./dist/container.js"
     },
+    "./headings": {
+      "types": "./dist/types/plugins/headings.d.ts",
+      "default": "./dist/headings.js"
+    },
     "./theme.css": "./styles/theme.css",
     "./tailwind.css": "./styles/tailwind.css",
     "./package.json": "./package.json"
