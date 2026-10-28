@@ -3,6 +3,7 @@ import { describe, test } from 'node:test'
 import { gfm } from '../src/gfm/index.ts'
 import { createMarkdown } from '../src/index.ts'
 import { container } from '../src/plugins/container.ts'
+import { budget } from './helpers.ts'
 
 const md = createMarkdown({ plugins: [container()] })
 const open = (kind: string) => `<div class="md-container md-container-${kind}">\n`
@@ -153,7 +154,9 @@ describe('container: pathological inputs', () => {
     ['deep nesting, then closers with long trailing space', '::: a\n'.repeat(100) + (':::' + ' '.repeat(1000) + 'x\n').repeat(1000)],
     [
       'decreasing fences, then increasing closers',
-      Array.from({ length: 2000 }, (_, i) => ':'.repeat(2003 - i) + ' a').join('\n') + '\n' + Array.from({ length: 2000 }, (_, i) => ':'.repeat(i + 3)).join('\n'),
+      // ~1 MB: linear (~130 ms/MB with GFM, whose ':' autolink trigger is
+      // dispatched per char); larger inputs only test the CI machine's speed.
+      Array.from({ length: 1000 }, (_, i) => ':'.repeat(1003 - i) + ' a').join('\n') + '\n' + Array.from({ length: 1000 }, (_, i) => ':'.repeat(i + 3)).join('\n'),
     ],
     ['long colon run', ':'.repeat(N * 10)],
     ['long space run before the kind', ':::' + ' '.repeat(N * 10) + '1'],
@@ -167,7 +170,7 @@ describe('container: pathological inputs', () => {
       const t0 = performance.now()
       all.render(input)
       const ms = performance.now() - t0
-      assert.ok(ms < 2000, `${name}: ${ms.toFixed(0)} ms`)
+      assert.ok(ms < budget(2000), `${name}: ${ms.toFixed(0)} ms`)
     })
   }
 })

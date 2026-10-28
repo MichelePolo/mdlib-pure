@@ -13,3 +13,10 @@ export function normalize(html: string): string {
     .replace(/>\s+</g, '><')
     .trim()
 }
+
+/**
+ * Time limit for linear-time tests. CI machines are several times slower
+ * than a laptop; a quadratic regression is off by orders of magnitude, so a
+ * 3x allowance on CI keeps the tests meaningful without flaking.
+ */
+export const budget = (ms: number): number => (process.env.CI ? ms * 3 : ms)

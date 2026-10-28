@@ -5,6 +5,9 @@ import { describe, test } from 'node:test'
 import { createMarkdown } from '../../src/index.ts'
 import { emoji } from './plugin.ts'
 
+// Linear-time check with a 3x allowance on slow CI machines (GitHub sets CI).
+const budget = (ms: number): number => (process.env.CI ? ms * 3 : ms)
+
 const md = createMarkdown({ plugins: [emoji({ emoji: { custom: '🧩' } })] })
 
 describe('template plugin: emoji', () => {
@@ -34,7 +37,7 @@ describe('template plugin: emoji', () => {
     for (const input of [':'.repeat(100_000), ':a'.repeat(50_000), ':tada'.repeat(30_000)]) {
       const t0 = performance.now()
       md.render(input)
-      assert.ok(performance.now() - t0 < 1000)
+      assert.ok(performance.now() - t0 < budget(1000))
     }
   })
 })

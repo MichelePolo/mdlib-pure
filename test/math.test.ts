@@ -6,7 +6,7 @@ import { gfm } from '../src/gfm/index.ts'
 import { createMarkdown, h } from '../src/index.ts'
 import { container } from '../src/plugins/container.ts'
 import { math } from '../src/plugins/math.ts'
-import { normalize } from './helpers.ts'
+import { normalize, budget } from './helpers.ts'
 
 const md = createMarkdown({ plugins: [math()] })
 const inline = (tex: string) => `<span class="math math-inline">\\(${tex}\\)</span>`
@@ -309,7 +309,7 @@ describe('math: pathological inputs', () => {
       const t0 = performance.now()
       all.render(input)
       const ms = performance.now() - t0
-      assert.ok(ms < 2000, `${name}: ${ms.toFixed(0)} ms`)
+      assert.ok(ms < budget(2000), `${name}: ${ms.toFixed(0)} ms`)
     })
   }
 })

@@ -3,6 +3,7 @@ import { describe, test } from 'node:test'
 import { gfm } from '../src/gfm/index.ts'
 import { createMarkdown } from '../src/index.ts'
 import { mark } from '../src/plugins/mark.ts'
+import { budget } from './helpers.ts'
 
 const md = createMarkdown({ plugins: [mark()] })
 const p = (html: string) => `<p>${html}</p>\n`
@@ -159,7 +160,7 @@ describe('mark: pathological inputs', () => {
       const t0 = performance.now()
       all.render(input)
       const ms = performance.now() - t0
-      assert.ok(ms < 2000, `${name}: ${ms.toFixed(0)} ms`)
+      assert.ok(ms < budget(2000), `${name}: ${ms.toFixed(0)} ms`)
     })
   }
 

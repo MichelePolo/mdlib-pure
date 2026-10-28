@@ -5,6 +5,7 @@ import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
 import { gfm } from '../src/gfm/index.ts'
 import { createMarkdown } from '../src/index.ts'
+import { budget } from './helpers.ts'
 
 const md = createMarkdown({ html: true, plugins: gfm() })
 const N = 30_000
@@ -60,7 +61,7 @@ describe('pathological inputs', () => {
       const t0 = performance.now()
       md.render(input)
       const ms = performance.now() - t0
-      assert.ok(ms < 2000, `${name}: ${ms.toFixed(0)} ms`)
+      assert.ok(ms < budget(2000), `${name}: ${ms.toFixed(0)} ms`)
     })
   }
 })

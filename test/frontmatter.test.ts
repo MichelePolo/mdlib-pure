@@ -6,6 +6,7 @@ import { container } from '../src/plugins/container.ts'
 import { frontmatter, getFrontmatter } from '../src/plugins/frontmatter.ts'
 import { headings } from '../src/plugins/headings.ts'
 import { mark } from '../src/plugins/mark.ts'
+import { budget } from './helpers.ts'
 
 const md = createMarkdown({ plugins: [frontmatter()] })
 const core = createMarkdown()
@@ -221,7 +222,7 @@ describe('frontmatter: pathological inputs', () => {
       const t0 = performance.now()
       all.render(input)
       const ms = performance.now() - t0
-      assert.ok(ms < 2000, `${name}: ${ms.toFixed(0)} ms`)
+      assert.ok(ms < budget(2000), `${name}: ${ms.toFixed(0)} ms`)
     })
   }
 })

@@ -3,6 +3,7 @@ import { describe, test } from 'node:test'
 import { gfm } from '../src/gfm/index.ts'
 import { createMarkdown } from '../src/index.ts'
 import { headings, slug, slugger, toc } from '../src/plugins/headings.ts'
+import { budget } from './helpers.ts'
 
 describe('headings: slugs (GitHub-compatible)', () => {
   test('basic rules', () => {
@@ -69,6 +70,6 @@ describe('headings: plugin', () => {
   test('adversarial: many duplicate headings stay fast', () => {
     const t0 = performance.now()
     md.render('# a\n'.repeat(20_000))
-    assert.ok(performance.now() - t0 < 2000)
+    assert.ok(performance.now() - t0 < budget(2000))
   })
 })

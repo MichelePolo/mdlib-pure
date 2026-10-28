@@ -211,6 +211,10 @@ type. One object can do both. Models: the `$$` math leaf in
 
 **Performance**
 
+- Timing tests assert `ms < budget(2000)` (`test/helpers.ts`): the limit is
+  tripled on CI, whose machines are slower. Size inputs so they run in a few
+  hundred ms locally; a quadratic regression still blows past the limit.
+
 - `continue` runs once per open block per line, so per-line work there is
   multiplied by nesting depth (up to `MAX_NESTING`). Memoize per line in
   `p.env` (see `scan()` in `container.ts`). Time-based tests miss constant
