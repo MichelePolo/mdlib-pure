@@ -42,7 +42,9 @@ export class Block {
   }
 
   get lastChild(): Block | undefined {
-    return this.children[this.children.length - 1]
+    const c = this.children
+    // Reading c[-1] on an empty array is a slow (dictionary) lookup in V8.
+    return c.length ? c[c.length - 1] : undefined
   }
 
   /** Remove this block from its parent. */

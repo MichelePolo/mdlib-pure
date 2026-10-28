@@ -47,4 +47,7 @@ export function trimMd(s: string): string {
 const reHtmlSpecial = /[&<>"]/g
 const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }
 
-export const escapeHtml = (s: string): string => s.replace(reHtmlSpecial, (c) => HTML_ESCAPES[c])
+const reHasSpecial = /[&<>"]/
+
+// Most strings need no escaping: test first (no callback, no new string).
+export const escapeHtml = (s: string): string => (reHasSpecial.test(s) ? s.replace(reHtmlSpecial, (c) => HTML_ESCAPES[c]) : s)

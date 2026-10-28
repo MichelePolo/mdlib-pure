@@ -23,7 +23,8 @@ export interface VRaw {
 export type VChild = string | VElement | VRaw | null | undefined | false
 
 export function h(tag: string, props?: Props | null, ...children: Array<VChild | VChild[]>): VElement {
-  return { tag, props: props ?? null, children: children.flat() }
+  // flat() allocates: skip it when no child is an array (the common case).
+  return { tag, props: props ?? null, children: children.some(Array.isArray) ? children.flat() : (children as VChild[]) }
 }
 
 export function raw(html: string, block = false): VRaw {

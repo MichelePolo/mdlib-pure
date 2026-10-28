@@ -187,6 +187,20 @@ The full guide, written for both humans and AI agents, is
 [`AGENTS.md`](AGENTS.md). [`templates/plugin`](templates/plugin) is a
 complete, tested plugin to copy.
 
+## Performance
+
+Node 22, render to HTML string, median of 15 runs ([full method and
+results](bench/RESULTS.md); differences under ~10% are noise):
+
+| | CommonMark examples (exact) | spec.txt MB/s | README MB/s | min + gzip |
+|---|---:|---:|---:|---:|
+| **mdlib-pure** | **652/652** | 44.2 | 36.4 | **10.9 KB** |
+| marked | 503/652 | 44.7 | 32.3 | 14.0 KB |
+| markdown-it | 649/652 | 35.8 | 22.1 | 40.6 KB |
+| commonmark.js | 652/652 | 46.9 | 47.8 | 46.8 KB |
+
+Reproduce: `npm run build && npm install --prefix bench && node bench/run.js`.
+
 ## Security
 
 - `html: false` (default): HTML in the source is not recognized and renders as text.
