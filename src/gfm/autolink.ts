@@ -1,7 +1,9 @@
 // GFM extended autolinks: www.example.com, https://example.com, a@b.co,
 // mailto:a@b.co, xmpp:a@b.co/resource. Rules follow cmark-gfm:
 // - www. and http(s)/ftp URLs are an inline rule, so a URL is consumed before
-//   emphasis sees its `__` or `**` (https://x.com/__init__.py stays one link);
+//   emphasis sees its `__` or `**` (https://x.com/__init__.py stays one link).
+//   It fires on the rare `:` and `.`, then takes back the scheme or `www`
+//   already emitted as text (p.trimText), so ordinary words cost nothing;
 // - emails are a transform over text nodes (links, code and HTML untouched).
 // Every scan only moves forward or back over a bounded run: linear time.
 
@@ -135,6 +137,7 @@ function matchEmail(s: string, at: number, floor: number): Match | null {
 
 /** Split one text value into text and link nodes, or return null if nothing links. */
 function linkify(s: string): Node[] | null {
+  if (s.indexOf('@') < 0) return null // native scan: most text has no email
   let out: Node[] | null = null
   let last = 0
   for (let i = 0; i < s.length; i++) {
@@ -153,29 +156,22 @@ function linkify(s: string): Node[] | null {
 
 const SKIP = new Set(['link', 'inlineCode', 'html', 'code', 'image'])
 
-const reScheme = /(?:https?|ftp):\/\//iy
-const reWord = /[A-Za-z0-9]+/y
-
 const urlRule: InlineRule = {
   name: 'gfmAutolink',
-  triggers: 'hHfFw',
+  triggers: ':.',
   parse(p) {
+    // Like cmark-gfm: no autolinks inside link or image text (`[http://a](b)`).
+    if (p.inBracket()) return false
     const s = p.src
     const i = p.pos
     let m: Match | null = null
-    // Like cmark-gfm: no autolinks inside link or image text (`[http://a](b)`).
-    if (!p.inBracket() && (i === 0 || !isAlnum(s.charCodeAt(i - 1)))) {
-      if (s.startsWith('www.', i)) m = matchWww(s, i)
-      else {
-        reScheme.lastIndex = i
-        if (reScheme.test(s)) m = matchUrl(s, s.indexOf(':', i), i)
-      }
+    if (s.charCodeAt(i) === 58 /* : */) {
+      if (s.startsWith('//', i + 1)) m = matchUrl(s, i, 0) // rewinds over the scheme letters
+    } else if (i >= 3 && s.startsWith('www', i - 3)) {
+      m = matchWww(s, i - 3)
     }
-    if (!m) {
-      // Not a URL: take the whole word as text rather than one char at a time.
-      p.text(p.match(reWord)!)
-      return true
-    }
+    // The scheme or `www` was already emitted as text: take it back.
+    if (!m || m.start >= i || !p.trimText(s.slice(m.start, i))) return false
     p.push({ type: 'link', url: normalizeUrl(m.url), title: null, children: [{ type: 'text', value: s.slice(m.start, m.end) }] })
     p.pos = m.end
     return true

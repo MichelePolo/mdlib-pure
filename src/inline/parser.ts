@@ -193,6 +193,19 @@ export class InlineParser {
     return this.brackets !== null
   }
 
+  /**
+   * Take back `suffix` from the end of the text emitted last, e.g. a URL
+   * scheme recognized only on reaching `:`. Returns false (and changes
+   * nothing) unless the last node is plain text ending with `suffix`.
+   */
+  trimText(suffix: string): boolean {
+    const last = this.root.last
+    const value = last && !last.container && last.node.type === 'text' ? (last.node.value as string) : ''
+    if (!suffix || !value.endsWith(suffix)) return false
+    last!.node.value = value.slice(0, -suffix.length)
+    return true
+  }
+
   /** Append a finished AST node. */
   push(node: Node): void {
     this.root.append(new Inl(node))

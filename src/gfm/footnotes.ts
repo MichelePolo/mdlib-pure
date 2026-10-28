@@ -9,7 +9,7 @@
 
 import { MAX_NESTING } from '../block/parser.ts'
 import type { VChild, VElement } from '../render/vnode.ts'
-import type { BlockRule, InlineRule, Node, Plugin, RenderFn } from '../types.ts'
+import type { BlockRule, InlineRule, Node, Plugin, RenderFn, TransformContext } from '../types.ts'
 import { normalizeLabel, normalizeUrl } from '../util/normalize.ts'
 
 interface FootnoteEnv {
@@ -79,7 +79,9 @@ const referenceRule: InlineRule = {
   },
 }
 
-function transform(root: Node): void {
+function transform(root: Node, ctx: TransformContext): void {
+  // Nothing to do (and no tree walk) when the document defines no footnotes.
+  if (!(ctx.env.footnotes as FootnoteEnv | undefined)?.defined.size) return
   // 1. Detach definitions (first one wins for duplicate labels).
   const defs = new Map<string, Node>()
   const detach = (node: Node): void => {

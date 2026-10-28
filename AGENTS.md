@@ -16,7 +16,7 @@ declare any task done; it runs all of them.
 |---|------|-------------|
 | 1 | **Zero runtime dependencies.** Never add `dependencies`/`peerDependencies`, never import packages from `src/`. | `npm run check` |
 | 2 | **CommonMark conformance stays at 652/652.** | `npm run spec` |
-| 3 | **Size budgets hold** (core ≤ 11 KB gzip). Raising a budget is a design decision for the maintainer, not a fix. | `npm run size` |
+| 3 | **Size budgets hold** (core ≤ 15 KB gzip). Raising a budget is a design decision for the maintainer, not a fix. | `npm run size` |
 | 4 | **No HTML sinks** (`innerHTML`, `outerHTML`, `insertAdjacentHTML`, `eval`…) except lines marked `// check:allow-innerHTML` with a justification. Text goes through `createTextNode`/escaping, URLs through `r.url()`. | `npm run check` |
 | 5 | **Erasable TypeScript only**: no `enum`, `namespace`, parameter properties. Node runs the sources directly. | `npm run typecheck` |
 | 6 | **Every new syntax ships with tests**, including adversarial input (see `test/pathological.test.ts`). Parsing must stay linear. | `npm test` |

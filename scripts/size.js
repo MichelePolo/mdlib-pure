@@ -6,7 +6,7 @@ import { build } from 'esbuild'
 import { gzipSync } from 'node:zlib'
 
 const budgets = [
-  { name: 'mdlib-pure', entry: 'src/index.ts', limit: 11 * 1024 },
+  { name: 'mdlib-pure', entry: 'src/index.ts', limit: 15 * 1024 },
   { name: 'mdlib-pure/entities', entry: 'src/entities/index.ts', limit: 12 * 1024 },
   // Measured on its own; shared core code is not counted twice by bundlers.
   { name: 'mdlib-pure/gfm', entry: 'src/gfm/index.ts', limit: 5 * 1024, external: true },

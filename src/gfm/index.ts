@@ -7,6 +7,9 @@
 // Each extension is also exported on its own.
 
 import type { Node, Plugin } from '../types.ts'
+
+/** Block-level syntax never sits inside these: walks need not descend. */
+const LEAF = new Set(['paragraph', 'heading', 'table', 'code', 'html'])
 import { autolink } from './autolink.ts'
 import { footnotes } from './footnotes.ts'
 import { table } from './table.ts'
@@ -41,7 +44,7 @@ export const tasklist = (): Plugin => ({
             para.children!.unshift({ type: 'taskCheckbox', checked: child.checked })
           }
         }
-        walk(child)
+        if (!LEAF.has(child.type)) walk(child)
       }
     }
     walk(root)
@@ -89,7 +92,7 @@ export const alerts = (): Plugin => ({
             children[i] = { type: 'alert', kind: m[1].toLowerCase(), children: child.children }
           }
         }
-        walk(children[i])
+        if (!LEAF.has(children[i].type)) walk(children[i])
       }
     }
     walk(root)
