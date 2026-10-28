@@ -8,6 +8,7 @@ import { describe, test } from 'node:test'
 import { decodeEntity } from '../src/entities/index.ts'
 import { gfm } from '../src/gfm/index.ts'
 import { createMarkdown } from '../src/index.ts'
+import { normalize } from './helpers.ts'
 
 interface Example {
   example: number
@@ -20,16 +21,6 @@ interface Example {
 
 export const examples: Example[] = JSON.parse(readFileSync(new URL('./fixtures/gfm.json', import.meta.url), 'utf8'))
 export const md = createMarkdown({ html: true, decodeEntity, allowUrl: () => true, plugins: gfm({ alerts: false }) })
-
-export function normalize(html: string): string {
-  return html
-    .replace(/<([a-zA-Z][a-zA-Z0-9-]*)((?:\s+[^\s=>/]+(?:="[^"]*")?)*)\s*\/?>/g, (_, tag: string, attrs: string) => {
-      const list = (attrs.match(/[^\s=]+(?:="[^"]*")?/g) ?? []).map((a) => a.replace(/=""$/, '')).sort()
-      return `<${tag.toLowerCase()}${list.map((a) => ' ' + a).join('')}>`
-    })
-    .replace(/>\s+</g, '><')
-    .trim()
-}
 
 describe('GFM', () => {
   for (const ex of examples) {

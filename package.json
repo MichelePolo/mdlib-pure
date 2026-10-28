@@ -29,6 +29,10 @@
       "types": "./dist/types/plugins/headings.d.ts",
       "default": "./dist/headings.js"
     },
+    "./adapter": {
+      "types": "./dist/types/adapter.d.ts",
+      "default": "./dist/adapter.js"
+    },
     "./theme.css": "./styles/theme.css",
     "./tailwind.css": "./styles/tailwind.css",
     "./package.json": "./package.json"
@@ -65,8 +69,12 @@
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",
     "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "esbuild": "0.28.2",
     "playwright": "1.64.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2"
   }

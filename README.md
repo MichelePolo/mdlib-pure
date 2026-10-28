@@ -7,7 +7,7 @@ Lightweight Markdown renderer for the browser.
 - **Zero dependencies**, ~10 KB gzipped core
 - **Safe by default**: raw HTML off, `javascript:` URLs blocked, DOM output without HTML parsing
 - **Extensible**: block, inline and delimiter rules, AST transforms, render overrides
-- **Framework-neutral output**: HTML string, DOM nodes, or VNodes for your own `h()`
+- **Framework-neutral output**: HTML string, DOM nodes, or React/Vue/Preact elements
 - **Tailwind-friendly**: semantic HTML with no classes by default, or a class map per node type
 - **Linear time** on adversarial input
 - MIT licensed
@@ -70,6 +70,22 @@ Return `null` for the default rendering, or VNodes (`h('span', { class: 'kw' }, 
 to stay on the DOM-safe path of `renderTo()`. Strings are treated as trusted
 HTML: with untrusted input, use a highlighter that escapes code (all of the
 above do) or set `sanitize`.
+
+### React, Vue, Preact
+
+```jsx
+import { createElement } from 'react'
+import { toElements } from 'mdlib-pure/adapter'
+
+<article className="md">{toElements(md.toVNodes(src), createElement, 'react')}</article>
+// Vue: toElements(vnodes, h, 'vue') · Preact: toElements(vnodes, h, 'preact')
+```
+
+The adapter applies each framework's conventions (`className`, uncontrolled
+checkboxes, Vue's array children, `dangerouslySetInnerHTML`/`innerHTML` for
+trusted raw HTML from `highlight`). Tested against the real React 19 on all
+CommonMark and GFM examples. With `html: true`, inline HTML arrives in
+fragments: use `md.render()` + `sanitize` on a container instead.
 
 ### Node, SSR, workers
 
@@ -176,7 +192,8 @@ Details and threat model: [docs/security.md](docs/security.md).
 ## Development
 
 ```sh
-npm test         # 800+ tests, TypeScript runs natively in Node ≥ 22.18
+npm test         # 820+ tests, TypeScript runs natively in Node ≥ 22.18
+npm run test:browser  # DOM path, theme and Tailwind build in Chromium
 npm run spec     # CommonMark conformance report
 npm run verify   # typecheck + tests + invariants + size budgets
 npm run build    # dist/

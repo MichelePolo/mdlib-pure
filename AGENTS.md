@@ -61,7 +61,8 @@ src/
   util/               escaping, entities, URL normalization and safety policy, visit()
   entities/           optional full entity table (`mdlib-pure/entities`)
   gfm/                GFM plugins (`mdlib-pure/gfm`): table, autolink, footnotes, …
-  plugins/            other first-party plugins, one entry each (`mdlib-pure/container`)
+  plugins/            other first-party plugins, one entry each (`mdlib-pure/container`, `/headings`)
+  adapter.ts          VNodes → React/Preact/Vue elements (`mdlib-pure/adapter`)
 styles/               theme.css (tokens), tailwind.css (Tailwind v4 bridge)
 docs/                 tokens.md, security.md
 templates/plugin/     a complete tested plugin to copy (runs in `npm test`)
@@ -71,6 +72,9 @@ test/
   gfm.test.ts         GFM extension examples
   api.test.ts         options, AST shape, plugin examples
   container.test.ts   a full block-container plugin test suite (good model)
+  adapter.test.ts     whole corpus through real React 19, zero warnings
+  helpers.ts          shared test helpers (HTML normalization)
+  browser/            Chromium suite (npm run test:browser): DOM path, theme, real Tailwind v4 build
   pathological.test.ts  linear-time guarantees
 ```
 

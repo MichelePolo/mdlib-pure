@@ -13,6 +13,7 @@ await build({
     gfm: 'src/gfm/index.ts',
     container: 'src/plugins/container.ts',
     headings: 'src/plugins/headings.ts',
+    adapter: 'src/adapter.ts',
   },
   outdir: 'dist',
   bundle: true,
