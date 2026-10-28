@@ -55,6 +55,10 @@ describe('defaults', () => {
     assert.equal(md.render('&constructor; &toString; &hasOwnProperty;'), '<p>&amp;constructor; &amp;toString; &amp;hasOwnProperty;</p>\n')
   })
 
+  test('a leading byte order mark is ignored', () => {
+    assert.equal(md.render('\uFEFF# Title'), '<h1>Title</h1>\n')
+  })
+
   test('basic named entities decode without a DOM', () => {
     assert.equal(md.render('&amp; &lt; &copy;'), '<p>&amp; &lt; &amp;copy;</p>\n')
   })
@@ -258,6 +262,16 @@ describe('gfm extras', async () => {
   test('extensions can be turned off', () => {
     const plain = createMarkdown({ plugins: gfm({ table: false, autolink: false }) })
     assert.equal(plain.render('www.x.com ~~y~~'), '<p>www.x.com <del>y</del></p>\n')
+  })
+
+  test('URL autolinks are consumed before emphasis (cmark-gfm behavior)', () => {
+    assert.equal(md.render('see https://x.com/__init__.py now'), '<p>see <a href="https://x.com/__init__.py">https://x.com/__init__.py</a> now</p>\n')
+    assert.equal(md.render('www.x.org/__a__/b'), '<p><a href="http://www.x.org/__a__/b">www.x.org/__a__/b</a></p>\n')
+  })
+
+  test('no autolinks inside link or image text', () => {
+    assert.equal(md.render('[http://a.b](http://c.d)'), '<p><a href="http://c.d">http://a.b</a></p>\n')
+    assert.equal(md.render('![www.x.y](/i.png)'), '<p><img src="/i.png" alt="www.x.y" /></p>\n')
   })
 
   test('autolinks pass through the URL policy', () => {

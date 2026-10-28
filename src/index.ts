@@ -157,6 +157,7 @@ export function createMarkdown(options: Options = {}): Markdown {
   }
 
   function parse(src: string): Root {
+    if (src.charCodeAt(0) === 0xfeff) src = src.slice(1) // byte order mark
     const refs = new Map<string, Reference>()
     const env: Record<string, unknown> = {}
     const inline = new InlineParser(inlineConfig, refs, env)

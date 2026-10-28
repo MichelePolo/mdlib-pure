@@ -138,6 +138,10 @@ const mention: Plugin = {
 - `p.match(re)` requires a `y` (sticky) or `g` regex. Never `src.slice(pos)`
   in a loop: that is O(n²).
 - Nested inline content: `p.parse(text)` returns `Node[]` (re-entrant).
+- `p.inBracket()` is true inside potential link/image text: rules that create
+  links must not fire there (no links in links).
+- A rule may consume more than its trigger (e.g. a whole word) when it does
+  not match: fewer, longer text runs keep parsing fast.
 - Rules for the same char run in order; use `before`/`after` to position
   relative to a core rule (`codeSpan`, `openBracket`, `autolink`…).
 

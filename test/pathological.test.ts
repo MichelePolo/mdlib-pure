@@ -45,6 +45,11 @@ const cases: Array<[string, string]> = [
   ['footnotes: many [^ without ]', '[^'.repeat(N)],
   ['footnotes: many ![^ without ]', '![^'.repeat(N)],
   ['table: alternating mismatched delimiter rows', 'a|b\n' + ':-\n-|-\n'.repeat(N / 2)],
+  // Interleaved delimiters nested past MAX_NESTING (found by an agent review).
+  ['interleaved *_ nested past the nesting cap', '*_a '.repeat(2 * N) + '_*'.repeat(2 * N)],
+  ['interleaved ** __ nested past the nesting cap', '**__a '.repeat(N) + '__**'.repeat(N)],
+  ['interleaved ~~ ** nested past the nesting cap', '~~**a '.repeat(N) + '**~~'.repeat(N)],
+  ['tilde runs of many lengths', Array.from({ length: 800 }, (_, k) => '~'.repeat(k + 1) + 'a' + '~'.repeat(k + 2) + ' ').join('')],
 ]
 
 describe('pathological inputs', () => {

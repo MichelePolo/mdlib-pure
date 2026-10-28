@@ -188,6 +188,11 @@ export class InlineParser {
     return m[0]
   }
 
+  /** True inside the text of a potential link or image (`[…` not yet closed). */
+  inBracket(): boolean {
+    return this.brackets !== null
+  }
+
   /** Append a finished AST node. */
   push(node: Node): void {
     this.root.append(new Inl(node))
@@ -355,7 +360,10 @@ export class InlineParser {
     this.pos += res.numdelims
     const inl = new Inl({ type: 'text', value: this.src.slice(start, this.pos) })
     this.root.append(inl)
-    if (res.canOpen || res.canClose) {
+    // A plugin run whose length is not in `sizes` can never match: keep it off
+    // the stack, so it cannot slow down searches (runs of many lengths).
+    const custom = this.cfg.delimiters.get(cc)
+    if ((res.canOpen || res.canClose) && !(custom && !custom.sizes.includes(res.numdelims))) {
       this.delimiters = {
         cc,
         numdelims: res.numdelims,
@@ -380,6 +388,10 @@ export class InlineParser {
   private processEmphasis(stackBottom: Delimiter | null): void {
     // Lower bound for opener searches, per closer kind (spec: "openers_bottom").
     const openersBottom = new Map<string, Delimiter | null>()
+    // Set when a match is refused for depth: the too-deep node lies between
+    // that opener and its closer, so any later match reaching back past the
+    // opener would contain it too. No search goes below it (keeps O(n)).
+    let floor: Delimiter | null = null
     let closer = this.delimiters
     while (closer !== null && closer.previous !== stackBottom) closer = closer.previous
 
@@ -396,7 +408,7 @@ export class InlineParser {
 
       let opener = closer.previous
       let found = false
-      while (opener !== null && opener !== stackBottom && opener !== bottom) {
+      while (opener !== null && opener !== stackBottom && opener !== bottom && opener !== floor) {
         if (opener.cc === closer.cc && opener.canOpen) {
           if (custom) {
             if (opener.numdelims === closer.numdelims && custom.sizes.includes(closer.numdelims)) {
@@ -420,7 +432,10 @@ export class InlineParser {
       }
 
       // Refuse to nest deeper than MAX_NESTING: the delimiters stay literal.
-      if (found && opener && wrapDepth(opener.inl.next, closer.inl) > MAX_NESTING) found = false
+      if (found && opener && wrapDepth(opener.inl.next, closer.inl) > MAX_NESTING) {
+        floor = opener
+        found = false
+      }
 
       const oldCloser = closer
       if (!found || opener === null) {

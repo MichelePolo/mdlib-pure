@@ -1,9 +1,11 @@
 // GFM extended autolinks: www.example.com, https://example.com, a@b.co,
-// mailto:a@b.co, xmpp:a@b.co/resource. Implemented as a transform over text
-// nodes (links, code and HTML are left alone). Rules follow cmark-gfm.
+// mailto:a@b.co, xmpp:a@b.co/resource. Rules follow cmark-gfm:
+// - www. and http(s)/ftp URLs are an inline rule, so a URL is consumed before
+//   emphasis sees its `__` or `**` (https://x.com/__init__.py stays one link);
+// - emails are a transform over text nodes (links, code and HTML untouched).
 // Every scan only moves forward or back over a bounded run: linear time.
 
-import type { Node, Plugin } from '../types.ts'
+import type { InlineRule, Node, Plugin } from '../types.ts'
 import { normalizeUrl } from '../util/normalize.ts'
 
 const isAlnum = (c: number): boolean => (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122)
@@ -137,10 +139,7 @@ function linkify(s: string): Node[] | null {
   let last = 0
   for (let i = 0; i < s.length; i++) {
     const c = s.charCodeAt(i)
-    let m: Match | null = null
-    if (c === 119 && s.startsWith('www.', i)) m = matchWww(s, i)
-    else if (c === 58 && s.startsWith('//', i + 1)) m = matchUrl(s, i, last)
-    else if (c === 64) m = matchEmail(s, i, last)
+    const m = c === 64 ? matchEmail(s, i, last) : null
     if (!m) continue
     out ??= []
     if (m.start > last) out.push({ type: 'text', value: s.slice(last, m.start) })
@@ -153,6 +152,35 @@ function linkify(s: string): Node[] | null {
 }
 
 const SKIP = new Set(['link', 'inlineCode', 'html', 'code', 'image'])
+
+const reScheme = /(?:https?|ftp):\/\//iy
+const reWord = /[A-Za-z0-9]+/y
+
+const urlRule: InlineRule = {
+  name: 'gfmAutolink',
+  triggers: 'hHfFw',
+  parse(p) {
+    const s = p.src
+    const i = p.pos
+    let m: Match | null = null
+    // Like cmark-gfm: no autolinks inside link or image text (`[http://a](b)`).
+    if (!p.inBracket() && (i === 0 || !isAlnum(s.charCodeAt(i - 1)))) {
+      if (s.startsWith('www.', i)) m = matchWww(s, i)
+      else {
+        reScheme.lastIndex = i
+        if (reScheme.test(s)) m = matchUrl(s, s.indexOf(':', i), i)
+      }
+    }
+    if (!m) {
+      // Not a URL: take the whole word as text rather than one char at a time.
+      p.text(p.match(reWord)!)
+      return true
+    }
+    p.push({ type: 'link', url: normalizeUrl(m.url), title: null, children: [{ type: 'text', value: s.slice(m.start, m.end) }] })
+    p.pos = m.end
+    return true
+  },
+}
 
 function walk(node: Node): void {
   const children = node.children
@@ -173,5 +201,6 @@ function walk(node: Node): void {
 
 export const autolink = (): Plugin => ({
   name: 'gfm-autolink',
+  inline: [urlRule],
   transform: (root) => walk(root),
 })

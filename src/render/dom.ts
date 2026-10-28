@@ -23,7 +23,7 @@ export function toDom(nodes: VChild[], doc: Document = document): DocumentFragme
       parent.appendChild(doc.createTextNode(c))
       return
     }
-    if ('raw' in c) throw new Error('mdlib-pure: raw HTML cannot be built as DOM; render it as a string instead')
+    if ('raw' in c) throw new Error('mdlib-pure: toDom() got raw HTML (see hasRaw)')
     const el = doc.createElement(c.tag)
     if (c.props) {
       for (const key in c.props) {
