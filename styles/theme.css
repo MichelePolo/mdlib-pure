@@ -264,6 +264,20 @@
     margin-block-start: calc(var(--md-space-block) * 0.5);
   }
 
+  /* --- Diagrams (mermaid plugin) ------------------------------------------------ */
+
+  /* Before Mermaid runs (or without JS) the source looks like a code block;
+     once rendered, the SVG sits on the page background, centered. */
+  :where(.md) :where(pre.mermaid[data-processed]) {
+    padding: 0;
+    background: none;
+    text-align: center;
+  }
+
+  :where(.md) :where(pre.mermaid-error) {
+    border-inline-start: 0.25em solid var(--md-color-caution);
+  }
+
   /* --- Math (math plugin) ------------------------------------------------------- */
 
   :where(.md) :where(.math-display) {

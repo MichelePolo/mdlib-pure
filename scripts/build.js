@@ -18,6 +18,7 @@ await build({
     mark: 'src/plugins/mark.ts',
     frontmatter: 'src/plugins/frontmatter.ts',
     deflist: 'src/plugins/deflist.ts',
+    mermaid: 'src/plugins/mermaid.ts',
   },
   outdir: 'dist',
   bundle: true,

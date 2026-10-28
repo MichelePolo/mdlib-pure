@@ -3,14 +3,18 @@
 import assert from 'node:assert/strict'
 import { after, before, describe, test } from 'node:test'
 import type { Browser } from 'playwright'
-import { launch, openPage, readRepoFile } from './harness.ts'
+import { launch, mermaidBundle, openPage, readRepoFile } from './harness.ts'
 
-type Lib = typeof import('../../src/index.ts') & typeof import('../../src/gfm/index.ts') & typeof import('../../src/plugins/math.ts')
+type Lib = typeof import('../../src/index.ts') &
+  typeof import('../../src/gfm/index.ts') &
+  typeof import('../../src/plugins/math.ts') &
+  typeof import('../../src/plugins/mermaid.ts')
 declare global {
   interface Window {
     mdlib: Lib
     pwned?: number
     renderMathInElement?: (el: Element) => void
+    __mermaid?: import('../../src/plugins/mermaid.ts').MermaidLike
   }
 }
 
@@ -215,5 +219,89 @@ describe('math plugin with KaTeX auto-render (no configuration)', () => {
       }
     })
     assert.deepEqual(r, { katex: 3, display: 2, errors: 0, leftover: false })
+  })
+})
+
+describe('mermaid plugin with real Mermaid 12', () => {
+  const css = readRepoFile('styles/theme.css') + ':root { color-scheme: light dark }'
+  const setup = async () => {
+    const page = await openPage(browser, { css })
+    await page.addScriptTag({ content: await mermaidBundle() })
+    return page
+  }
+
+  test('no diagrams: Mermaid is never loaded', async () => {
+    const page = await setup()
+    const loaded = await page.evaluate(async () => {
+      const out = document.querySelector('#out')!
+      window.mdlib.createMarkdown({ plugins: [window.mdlib.mermaid()] }).renderTo(out, '# No diagrams\n\n```js\nx\n```')
+      let called = false
+      await window.mdlib.renderMermaid(out, { load: async () => ((called = true), window.__mermaid!) })
+      return called
+    })
+    assert.equal(loaded, false)
+  })
+
+  test('valid diagrams become SVG, invalid ones keep their source, strict mode blocks script', async () => {
+    const page = await setup()
+    const r = await page.evaluate(async () => {
+      const out = document.querySelector('#out')!
+      const src = [
+        '```mermaid\ngraph TD\n  A-->B\n```',
+        '```mermaid\nthis is not a diagram\n```',
+        '```mermaid\ngraph TD\n  X["<img src=x onerror=window.pwned=1>"]\n  click X call pwn()\n```',
+      ].join('\n\n')
+      window.mdlib.createMarkdown({ plugins: [window.mdlib.mermaid()] }).renderTo(out, src)
+      await window.mdlib.renderMermaid(out, { load: async () => window.__mermaid!, watch: false })
+      await new Promise((res) => setTimeout(res, 100))
+      return {
+        svgs: out.querySelectorAll('pre.mermaid svg').length,
+        errors: out.querySelectorAll('pre.mermaid-error').length,
+        errorSource: out.querySelector('pre.mermaid-error')?.textContent,
+        pwned: window.pwned,
+        handlers: [...out.querySelectorAll('*')].filter((el) => [...el.attributes].some((a) => a.name.startsWith('on'))).length,
+      }
+    })
+    assert.deepEqual(r, { svgs: 2, errors: 1, errorSource: 'this is not a diagram\n', pwned: undefined, handlers: 0 })
+  })
+
+  test('theme from tokens, redrawn when the color scheme changes; the returned function stops watching', async () => {
+    const page = await setup()
+    const r = await page.evaluate(async () => {
+      const out = document.querySelector('#out')!
+      window.mdlib.createMarkdown({ plugins: [window.mdlib.mermaid()] }).renderTo(out, '```mermaid\ngraph TD\n  A-->B\n```')
+      const stop = await window.mdlib.renderMermaid(out, { load: async () => window.__mermaid! })
+      const svg = () => out.querySelector('pre.mermaid svg')?.outerHTML ?? ''
+      const light = svg()
+      const until = async (ok: () => boolean) => {
+        for (let i = 0; i < 60 && !ok(); i++) await new Promise((res) => setTimeout(res, 50))
+        return ok()
+      }
+      document.documentElement.style.colorScheme = 'dark'
+      const dark = await until(() => svg().includes('#4493f8'))
+      stop()
+      document.documentElement.style.colorScheme = 'light'
+      await new Promise((res) => setTimeout(res, 300))
+      return { light: light.includes('#0969da'), dark, stillDark: svg().includes('#4493f8') }
+    })
+    assert.deepEqual(r, { light: true, dark: true, stillDark: true })
+  })
+
+  test('also redraws when <meta name="color-scheme"> changes (how many sites switch themes)', async () => {
+    const page = await setup()
+    const dark = await page.evaluate(async () => {
+      document.querySelector('style')!.textContent += ':root { color-scheme: normal }'
+      const meta = Object.assign(document.createElement('meta'), { name: 'color-scheme', content: 'light' })
+      document.head.append(meta)
+      const out = document.querySelector('#out')!
+      window.mdlib.createMarkdown({ plugins: [window.mdlib.mermaid()] }).renderTo(out, '```mermaid\ngraph TD\n  A-->B\n```')
+      const stop = await window.mdlib.renderMermaid(out, { load: async () => window.__mermaid! })
+      const svg = () => out.querySelector('pre.mermaid svg')?.outerHTML ?? ''
+      meta.content = 'dark'
+      for (let i = 0; i < 60 && !svg().includes('#4493f8'); i++) await new Promise((res) => setTimeout(res, 50))
+      stop()
+      return svg().includes('#4493f8')
+    })
+    assert.equal(dark, true)
   })
 })

@@ -66,6 +66,14 @@ createMarkdown({
 })
 ```
 
+## Mermaid diagrams
+
+The `mermaid` plugin itself only outputs escaped text. The SVG is created
+and inserted by Mermaid, outside mdlib-pure's DOM-safe path, so its safety
+is Mermaid's: `renderMermaid` uses `securityLevel: 'strict'` by default
+(labels sanitized, no click callbacks); for untrusted input consider
+`'sandbox'` and keep Mermaid up to date.
+
 ## DOM clobbering
 
 Element ids become globals (`window.config`), so ids derived from content

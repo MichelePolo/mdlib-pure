@@ -181,6 +181,9 @@ First-party plugins:
   works as-is with KaTeX auto-render or MathJax, or pass
   `math({ render: (tex, display) => katex.renderToString(tex, { displayMode: display }) })`.
 - `mdlib-pure/mark`: `==highlight==` → `<mark>`.
+- `mdlib-pure/mermaid`: ` ```mermaid ` diagrams, with no dependency on
+  Mermaid: `renderMermaid(el, { load: () => import('mermaid') })` loads it
+  only when a page has diagrams, themed from the tokens (light and dark).
 - `mdlib-pure/deflist`: definition lists (`Term` / `: Definition`, Pandoc and
   PHP Markdown Extra style) → `<dl>`.
 - `mdlib-pure/frontmatter`: YAML (`---`) / TOML (`+++`) front matter, kept

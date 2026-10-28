@@ -16,6 +16,7 @@ function bundle(): Promise<string> {
         export { gfm } from './src/gfm/index.ts'
         export { container } from './src/plugins/container.ts'
         export { math } from './src/plugins/math.ts'
+        export { mermaid, renderMermaid } from './src/plugins/mermaid.ts'
       `,
       resolveDir: root,
       loader: 'ts',
@@ -30,6 +31,22 @@ function bundle(): Promise<string> {
 }
 
 export const readRepoFile = (path: string): string => readFileSync(root + path, 'utf8')
+
+let mermaidCode: Promise<string> | undefined
+
+/** Real Mermaid (dev dependency) as a classic script setting `window.__mermaid`. */
+export function mermaidBundle(): Promise<string> {
+  mermaidCode ??= build({
+    stdin: { contents: "import m from 'mermaid'; window.__mermaid = m", resolveDir: root, loader: 'js' },
+    bundle: true,
+    format: 'iife',
+    target: 'es2022',
+    minify: true,
+    write: false,
+    logLevel: 'silent',
+  }).then((r) => r.outputFiles[0].text)
+  return mermaidCode
+}
 
 export const launch = (): Promise<Browser> => chromium.launch()
 

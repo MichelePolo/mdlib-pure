@@ -13,6 +13,7 @@ Entry points (all ES modules, all tree-shakable):
 | `mdlib-pure/math` | `math()` for `$…$`, `$$…$$` and `$$` blocks |
 | `mdlib-pure/mark` | `mark()` for `==…==` |
 | `mdlib-pure/deflist` | `deflist()` for definition lists |
+| `mdlib-pure/mermaid` | `mermaid()`, `renderMermaid()` for diagrams |
 | `mdlib-pure/frontmatter` | `frontmatter()`, `getFrontmatter()` |
 | `mdlib-pure/theme.css` | default theme ([tokens](tokens.md)) |
 | `mdlib-pure/tailwind.css` | Tailwind CSS v4 bridge |
@@ -210,6 +211,39 @@ createMarkdown({
 
 `mark()`: `==text==` → `mark { children }` → `<mark>`. Same flanking rules as
 `*`; `Title\n==` stays a setext heading.
+
+## mdlib-pure/mermaid
+
+`mermaid({ render? })` turns ` ```mermaid ` fences into `mermaid { value }`
+nodes, rendered as `<pre class="mermaid">SOURCE</pre>`: the markup Mermaid
+looks for, readable without JavaScript. mdlib-pure does not depend on
+Mermaid (~215 KB gzip at first load for Mermaid 12).
+
+```js
+import { mermaid, renderMermaid } from 'mdlib-pure/mermaid'
+
+const md = createMarkdown({ plugins: [mermaid()] })
+md.renderTo(el, src)
+const stop = await renderMermaid(el, { load: () => import('mermaid') })
+// later, if el is replaced: stop()
+```
+
+`renderMermaid(root, options)`:
+
+| Option | Default | |
+|---|---|---|
+| `load` | required | returns Mermaid (module or default export); called only if `root` has diagrams |
+| `theme` | `'tokens'` | the `--md-*` tokens, flattened onto the page background, as Mermaid's `base` theme; or a Mermaid theme name (`'dark'`, `'neutral'`…) |
+| `securityLevel` | `'strict'` | `'sandbox'` renders each diagram in an iframe: consider it for untrusted input |
+| `watch` | `true` with `'tokens'` | redraw when the color scheme changes (media query, class/style/data-* on `<html>`, `<meta name="color-scheme">`) |
+| `config` | — | extra `mermaid.initialize()` settings |
+
+Invalid diagrams keep their source, with the class `mermaid-error`. The
+returned function stops watching.
+
+Pre-rendered diagrams (e.g. SVG generated at build time with your own
+tooling): `mermaid({ render: (source) => svgFor(source) })`. A string is
+trusted HTML, VNodes are safe, `null` keeps the default markup.
 
 ## mdlib-pure/deflist
 

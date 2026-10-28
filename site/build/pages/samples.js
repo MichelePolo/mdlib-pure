@@ -58,6 +58,7 @@ export function samples() {
   const prose = makeMarkdown([])
   const inline = (s) => prose.render(s).replace(/^<p>|<\/p>\n$/g, '')
   let usesMath = false
+  let usesMermaid = false
   const twinParts = []
 
   const sections = SAMPLES.map((s) => {
@@ -93,6 +94,10 @@ export function samples() {
     }
     const math = s.plugins.includes('math')
     usesMath ||= math
+    if (s.plugins.includes('mermaid')) {
+      usesMermaid = true
+      outAttrs += ' data-mermaid'
+    }
     const playground = s.playground === false ? '' : `<a href="${rel(PATH, '/playground/')}#sample=${s.id}">Open in the playground</a>`
     const fence = fenceFor(source)
     twinParts.push(`## ${s.title}
@@ -134,7 +139,7 @@ ${afterMd ? `\n${afterMd}` : ''}`)
     body,
     // The document also loads the Tailwind build: @property rules only register
     // at document level, and the shadow root's utilities rely on them.
-    head: `${usesMath ? katexHead(PATH) : ''}\n  <link rel="stylesheet" href="${asset(PATH, 'tailwind-sample.css')}">`,
+    head: `${usesMath ? katexHead(PATH) : ''}${usesMermaid ? `\n  <script type="module" src="${asset(PATH, 'js/mermaid-init.js')}"></script>` : ''}\n  <link rel="stylesheet" href="${asset(PATH, 'tailwind-sample.css')}">`,
   })
   const twin = `# Samples\n\n${intro}\n\n${twinParts.join('\n')}`
   return { path: PATH, html, md: twin }

@@ -19,7 +19,7 @@ const status = $('pg-status')
 const count = $('pg-count')
 const tabs = [...document.querySelectorAll('[role="tab"]')]
 const DRAFT = 'mdlib-pure:playground'
-const KNOWN = new Set(PLUGINS.map((p) => p.id))
+const KNOWN = new Set(PLUGINS.filter((p) => p.playground !== false).map((p) => p.id))
 
 const state = { plugins: new Set(['gfm']), highlight: true, tab: 'preview' }
 let md = build()

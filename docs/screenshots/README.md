@@ -17,3 +17,5 @@ Screenshots taken with Playwright (Chromium) while developing mdlib-pure.
 | `2026-10-28-site-playground-light.png` | The playground, light: the demo editor's top bar and two panes, extended with a sample picker, plugin toggles, Share and Preview/HTML/AST tabs (GFM sample). |
 | `2026-10-28-site-playground-dark.png` | The same playground in dark mode. |
 | `2026-10-28-site-home-mobile.png` | The home page at 390 px wide, full page: menu button for the navigation, hero and live example stacked. |
+| `2026-10-28-site-mermaid-light.png` | Samples page, Mermaid section, light: diagrams rendered by `renderMermaid()` with colors from the site's `--md-*` tokens. |
+| `2026-10-28-site-mermaid-dark.png` | The same section after switching the site to dark: redrawn automatically from the dark tokens. |

@@ -37,6 +37,8 @@ First release.
 - `mdlib-pure/deflist`: definition lists.
 - `mdlib-pure/mark`: `==highlight==`.
 - `mdlib-pure/frontmatter`: YAML/TOML front matter.
+- `mdlib-pure/mermaid`: Mermaid diagrams without depending on Mermaid;
+  lazy loading, strict security level, theme from the tokens.
 - `mdlib-pure/adapter`: React, Preact and Vue elements.
 - `mdlib-pure/entities`: full entity table for non-browser environments.
 - `theme.css` with semantic `--md-*` tokens (light/dark via `color-scheme`);

@@ -14,7 +14,7 @@ export function playground() {
   const source = read(`site/content/samples/${WELCOME.id}.md`)
   const md = makeMarkdown(WELCOME.plugins)
   const options = PLAYGROUND_SAMPLES.map((s) => `<option value="${s.id}">${escapeHtml(s.title)}</option>`).join('')
-  const toggles = PLUGINS.map(
+  const toggles = PLUGINS.filter((p) => p.playground !== false).map(
     (p) => `<label class="check"><input type="checkbox" name="plugin" value="${p.id}"${WELCOME.plugins.includes(p.id) ? ' checked' : ''}> <span><strong>${escapeHtml(p.label)}</strong> <small>${escapeHtml(p.hint)}</small></span></label>`,
   ).join('\n            ')
 
@@ -75,7 +75,7 @@ An editor with a live preview: Markdown on the left, the output of mdlib-pure
 on the right, rendered in the browser as you type.
 
 - **Samples**: ${PLAYGROUND_SAMPLES.map((s) => s.title).join(', ')}.
-- **Plugins** to toggle: ${PLUGINS.map((p) => `${p.label} (${p.hint})`).join('; ')}; plus the \`highlight\` option.
+- **Plugins** to toggle: ${PLUGINS.filter((p) => p.playground !== false).map((p) => `${p.label} (${p.hint})`).join('; ')}; plus the \`highlight\` option.
 - **Views**: Preview (\`renderTo()\`), HTML (\`render()\`), AST (\`parse()\`).
 - **Theme**: system, light or dark.
 - **Share**: the source and the settings are compressed into the URL hash (\`#v1=…\`); \`#sample=<id>\` opens a sample.

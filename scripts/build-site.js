@@ -75,6 +75,25 @@ async function buildSite() {
   })
   await build({ entryPoints: ['site/client/katex-init.js'], absWorkingDir: ROOT, outfile: join(OUT, 'assets/js/katex-init.js'), bundle: true, format: 'iife', minify: true, target: 'es2022' })
 
+  // --- Mermaid (dev dependency), split per diagram type, loaded on demand ------
+  await build({ entryPoints: ['site/client/mermaid-init.js'], absWorkingDir: ROOT, outfile: join(OUT, 'assets/js/mermaid-init.js'), bundle: true, format: 'esm', minify: true, target: 'es2022' })
+  await build({
+    stdin: { contents: "export { default } from 'mermaid'", resolveDir: ROOT, loader: 'js' },
+    absWorkingDir: ROOT,
+    outdir: join(OUT, 'assets/mermaid'),
+    entryNames: 'mermaid',
+    chunkNames: 'chunks/[name]-[hash]',
+    bundle: true,
+    splitting: true,
+    format: 'esm',
+    platform: 'browser',
+    target: 'es2022',
+    minify: true,
+    legalComments: 'none',
+    logLevel: 'error',
+  })
+  copyFileSync(join(ROOT, 'node_modules/mermaid/LICENSE'), join(OUT, 'assets/mermaid/LICENSE'))
+
   // --- Tailwind sample: a real Tailwind CSS v4 build of the classes map ---------
   const tw = join(OUT, '.tailwind')
   mkdirSync(tw)

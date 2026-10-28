@@ -21,6 +21,13 @@ export const SAMPLES = [
     description: 'The `math` plugin outputs `\\(…\\)` and `\\[…\\]`, the default delimiters of KaTeX auto-render: here KaTeX typesets the formulas in the browser with no configuration.',
   },
   {
+    id: 'mermaid',
+    title: 'Mermaid diagrams',
+    plugins: ['mermaid'],
+    description: 'The `mermaid` plugin turns ```` ```mermaid ```` fences into `<pre class="mermaid">`. Here `renderMermaid()` loads Mermaid only because this page has diagrams, and themes them from the `--md-*` tokens: switch the color scheme and they are redrawn. Without JavaScript you would see the source.',
+    playground: false,
+  },
+  {
     id: 'deflist',
     title: 'Definition lists',
     plugins: ['deflist'],
