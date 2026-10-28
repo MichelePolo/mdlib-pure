@@ -14,14 +14,16 @@
 // HTML: <h2 id="ID">…</h2>, plus with `permalink`:
 //       <a class="md-anchor" href="#ID" aria-label="Permalink: TEXT">#</a>
 //
-// Untrusted input: ids from content can shadow globals (`window.config`,
-// "DOM clobbering"). Use a prefix such as `user-content-` there.
+// Ids are prefixed with `user-content-` by default (like GitHub): an id taken
+// from content would otherwise become a global (`window.config`) that a
+// document could use to shadow names your scripts read ("DOM clobbering").
+// Pass `prefix: ''` for trusted content only.
 
 import type { Heading, Node, Plugin } from '../types.ts'
 import { visit } from '../util/visit.ts'
 
 export interface HeadingsOptions {
-  /** Prepended to every id. Default `''`. */
+  /** Prepended to every id. Default `'user-content-'`; `''` for trusted content only. */
   prefix?: string
   /** Append a `#` permalink inside each heading. Default `false`. */
   permalink?: boolean
@@ -73,7 +75,7 @@ export function toc(root: Node): TocEntry[] {
 }
 
 export function headings(options: HeadingsOptions = {}): Plugin {
-  const prefix = options.prefix ?? ''
+  const prefix = options.prefix ?? 'user-content-'
   return {
     name: 'headings',
     transform(root) {

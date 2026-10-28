@@ -65,11 +65,11 @@ createMarkdown({
 
 ## DOM clobbering
 
-Element ids become globals (`window.config`). Plugins that derive ids from
-content (`headings`, GFM footnotes) can let a document shadow names your
-scripts read. For untrusted input, prefix them:
-`headings({ prefix: 'user-content-' })` (footnotes are already prefixed
-with `fn-`/`fnref-`).
+Element ids become globals (`window.config`), so ids derived from content
+could let a document shadow names your scripts read. The `headings` plugin
+therefore prefixes ids with `user-content-` by default (as GitHub does);
+pass `prefix: ''` only for trusted content. GFM footnote ids are prefixed
+with `fn-`/`fnref-`.
 
 ## Plugins
 

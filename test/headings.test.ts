@@ -28,7 +28,11 @@ describe('headings: slugs (GitHub-compatible)', () => {
 })
 
 describe('headings: plugin', () => {
-  const md = createMarkdown({ plugins: [headings()] })
+  const md = createMarkdown({ plugins: [headings({ prefix: '' })] })
+
+  test('ids are prefixed by default (DOM clobbering)', () => {
+    assert.equal(createMarkdown({ plugins: [headings()] }).render('# config'), '<h1 id="user-content-config">config</h1>\n')
+  })
 
   test('ids from visible text (inline code yes, image alt no)', () => {
     assert.equal(md.render('# Install `npm` *now*\n\n## ![logo](/l.png) Docs'), '<h1 id="install-npm-now">Install <code>npm</code> <em>now</em></h1>\n<h2 id="-docs"><img src="/l.png" alt="logo" /> Docs</h2>\n')
@@ -53,7 +57,7 @@ describe('headings: plugin', () => {
   })
 
   test('works with GFM and the classes map', () => {
-    const md3 = createMarkdown({ plugins: [...gfm(), headings()], classes: { heading2: 'text-2xl' } })
+    const md3 = createMarkdown({ plugins: [...gfm(), headings({ prefix: '' })], classes: { heading2: 'text-2xl' } })
     assert.equal(md3.render('## ~~Old~~ New'), '<h2 id="old-new" class="text-2xl"><del>Old</del> New</h2>\n')
   })
 
