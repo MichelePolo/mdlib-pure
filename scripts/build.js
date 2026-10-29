@@ -19,6 +19,7 @@ await build({
     frontmatter: 'src/plugins/frontmatter.ts',
     deflist: 'src/plugins/deflist.ts',
     mermaid: 'src/plugins/mermaid.ts',
+    element: 'src/element.ts',
   },
   outdir: 'dist',
   bundle: true,

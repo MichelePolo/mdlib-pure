@@ -1,0 +1,170 @@
+// <mdlib-markdown> and <mdlib-editor> in real Chromium.
+import assert from 'node:assert/strict'
+import { after, before, describe, test } from 'node:test'
+import type { Browser, Page } from 'playwright'
+import { launch, mermaidBundle, openPage, readRepoFile } from './harness.ts'
+
+let browser: Browser
+before(async () => {
+  browser = await launch()
+})
+after(() => browser.close())
+
+const css = readRepoFile('styles/theme.css') + readRepoFile('styles/editor.css')
+
+/** A page with the elements defined, KaTeX and Mermaid available through loaders. */
+async function setup(): Promise<Page> {
+  const page = await openPage(browser, { css })
+  await page.addScriptTag({ content: readRepoFile('node_modules/katex/dist/katex.min.js') })
+  await page.addScriptTag({ content: readRepoFile('node_modules/katex/dist/contrib/auto-render.min.js') })
+  await page.addScriptTag({ content: await mermaidBundle() })
+  await page.evaluate(() => {
+    const w = window as any
+    w.mdlib.defineElements({
+      loaders: { mermaid: async () => w.__mermaid, katex: async () => w.renderMathInElement },
+      configs: { shout: { highlight: (code: string) => code.toUpperCase() } },
+    })
+  })
+  return page
+}
+
+const until = `async (ok) => { for (let i = 0; i < 80 && !ok(); i++) await new Promise((r) => setTimeout(r, 50)); return ok() }`
+
+describe('<mdlib-markdown>', () => {
+  test('renders the source attribute and re-renders when it changes', async () => {
+    const page = await setup()
+    const html = await page.evaluate(() => {
+      const el = document.createElement('mdlib-markdown')
+      el.setAttribute('source', '# Hi *there*')
+      document.body.append(el)
+      const first = el.innerHTML
+      el.setAttribute('source', '~~old~~')
+      const plain = el.innerHTML
+      el.setAttribute('plugins', 'gfm')
+      return [first, plain, el.innerHTML]
+    })
+    assert.deepEqual(html, ['<h1>Hi <em>there</em></h1>', '<p>~~old~~</p>', '<p><del>old</del></p>'])
+  })
+
+  test('functions come from named configs; raw HTML cannot be enabled from attributes', async () => {
+    const page = await setup()
+    const r = await page.evaluate(() => {
+      const el = document.createElement('mdlib-markdown')
+      el.setAttribute('config', 'shout')
+      el.setAttribute('html', 'true')
+      el.setAttribute('source', '```js\nlet x\n```\n\n<img src=x onerror=alert(1)> [a](javascript:x)')
+      document.body.append(el)
+      return { code: el.querySelector('code')!.textContent, img: el.querySelectorAll('img').length, href: el.querySelector('a')!.getAttribute('href') }
+    })
+    assert.deepEqual(r, { code: 'LET X\n', img: 0, href: '' })
+  })
+
+  test('plugins="all": math typeset by KaTeX, diagrams drawn by Mermaid, loaded on demand', async () => {
+    const page = await setup()
+    const r = await page.evaluate(async (untilSrc) => {
+      const wait = eval(untilSrc)
+      const el = document.createElement('mdlib-markdown')
+      el.className = 'md'
+      el.setAttribute('plugins', 'all')
+      el.setAttribute('source', '# T\n\n$x^2$ and ==mark==\n\n```mermaid\ngraph TD\n  A-->B\n```')
+      document.body.append(el)
+      await wait(() => el.querySelector('.katex') && el.querySelector('pre.mermaid svg'))
+      return { katex: el.querySelectorAll('.katex').length, svg: el.querySelectorAll('svg').length, mark: el.querySelectorAll('mark').length, id: el.querySelector('h1')!.id }
+    }, until)
+    assert.deepEqual(r, { katex: 1, svg: 1, mark: 1, id: 't' })
+  })
+})
+
+describe('<mdlib-editor>', () => {
+  test('typing updates the preview at once; input is debounced, change on blur', async () => {
+    const page = await setup()
+    await page.evaluate(() => {
+      const ed = document.createElement('mdlib-editor')
+      ed.setAttribute('value', '# Start')
+      ed.setAttribute('plugins', 'gfm')
+      ed.setAttribute('delay', '150')
+      ;(window as any).events = []
+      for (const t of ['input', 'change']) ed.addEventListener(t, (e) => (window as any).events.push([t, (e.target as any).value]))
+      document.body.append(ed)
+    })
+    await page.locator('mdlib-editor textarea').click()
+    await page.keyboard.press('End')
+    await page.keyboard.type(' and *more*')
+    const preview = await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r(document.querySelector('.mdlib-editor-preview')!.innerHTML))))
+    const before = await page.evaluate(() => (window as any).events.length)
+    await page.waitForTimeout(400)
+    const afterDelay = await page.evaluate(() => (window as any).events)
+    await page.locator('body').click({ position: { x: 1, y: 1 } })
+    const afterBlur = await page.evaluate(() => (window as any).events)
+    assert.equal(preview, '<h1>Start and <em>more</em></h1>')
+    assert.equal(before, 0, 'no input event while typing fast')
+    assert.deepEqual(afterDelay, [['input', '# Start and *more*']])
+    assert.deepEqual(afterBlur.at(-1), ['change', '# Start and *more*'])
+  })
+
+  test('a stale echo while typing is ignored; a deliberate set is applied', async () => {
+    const page = await setup()
+    await page.evaluate(() => {
+      const ed = document.createElement('mdlib-editor')
+      ed.setAttribute('delay', '0')
+      document.body.append(ed)
+    })
+    const ta = page.locator('mdlib-editor textarea')
+    await ta.click()
+    await page.keyboard.type('ab')
+    await page.waitForTimeout(50) // 'ab' is sent to listeners
+    await page.keyboard.type('c')
+    // A server re-rendering late sends back the older value while the user types.
+    await page.evaluate(() => document.querySelector('mdlib-editor')!.setAttribute('value', 'ab'))
+    const kept = await ta.inputValue()
+    // A Reset button: focus leaves the textarea, then the value is set.
+    await page.locator('body').click({ position: { x: 1, y: 1 } })
+    await page.evaluate(() => document.querySelector('mdlib-editor')!.setAttribute('value', ''))
+    assert.equal(kept, 'abc')
+    assert.equal(await ta.inputValue(), '')
+    assert.equal(await page.locator('.mdlib-editor-preview').innerHTML(), '')
+  })
+
+  test('toolbar and shortcuts, views, form value', async () => {
+    const page = await setup()
+    await page.evaluate(() => {
+      const form = document.createElement('form')
+      const ed = document.createElement('mdlib-editor')
+      ed.setAttribute('name', 'body')
+      ed.setAttribute('value', 'word')
+      form.append(ed)
+      document.body.append(form)
+    })
+    const ta = page.locator('mdlib-editor textarea')
+    await ta.click()
+    await page.keyboard.press('Control+A')
+    await page.keyboard.press('Control+B')
+    await page.getByRole('button', { name: 'Italic (Ctrl+I)' }).click()
+    await page.getByRole('button', { name: 'Preview view' }).click()
+    const r = await page.evaluate(() => ({
+      value: (document.querySelector('mdlib-editor') as any).value,
+      preview: document.querySelector('.mdlib-editor-preview')!.innerHTML,
+      view: document.querySelector('mdlib-editor')!.getAttribute('view'),
+      inputHidden: getComputedStyle(document.querySelector('mdlib-editor textarea')!).display === 'none',
+      pressed: document.querySelector('[data-view="preview"]')!.getAttribute('aria-pressed'),
+      form: new FormData(document.querySelector('form')!).get('body'),
+    }))
+    assert.deepEqual(r, { value: '**_word_**', preview: '<p><strong><em>word</em></strong></p>', view: 'preview', inputHidden: true, pressed: 'true', form: '**_word_**' })
+  })
+
+  test('diagrams already drawn do not flicker while typing elsewhere', async () => {
+    const page = await setup()
+    await page.evaluate(() => {
+      const ed = document.createElement('mdlib-editor')
+      ed.setAttribute('plugins', 'all')
+      ed.setAttribute('value', '```mermaid\ngraph TD\n  A-->B\n```\n\nText')
+      document.body.append(ed)
+    })
+    await page.waitForFunction(() => document.querySelector('.mdlib-editor-preview svg'))
+    await page.locator('mdlib-editor textarea').click()
+    await page.keyboard.press('Control+End')
+    await page.keyboard.type('!')
+    const svgNextFrame = await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(!!document.querySelector('.mdlib-editor-preview svg'))))))
+    assert.equal(svgNextFrame, true)
+  })
+})

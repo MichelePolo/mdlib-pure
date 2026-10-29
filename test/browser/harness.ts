@@ -17,6 +17,7 @@ function bundle(): Promise<string> {
         export { container } from './src/plugins/container.ts'
         export { math } from './src/plugins/math.ts'
         export { mermaid, renderMermaid } from './src/plugins/mermaid.ts'
+        export { defineElements, getMarkdown } from './src/element.ts'
       `,
       resolveDir: root,
       loader: 'ts',

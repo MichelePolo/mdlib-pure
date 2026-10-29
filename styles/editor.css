@@ -1,0 +1,120 @@
+/*
+ * mdlib-pure — styles for <mdlib-markdown> and <mdlib-editor>.
+ * Use with theme.css (the preview is a `.md` container). Same rules as the
+ * theme: @layer mdlib, :where() (zero specificity), --md-* tokens only.
+ * Give the editor a height (e.g. `mdlib-editor { block-size: 30rem }`): the
+ * panes fill it and scroll.
+ */
+@layer mdlib {
+  :where(mdlib-markdown) {
+    display: block;
+  }
+
+  :where(mdlib-editor) {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-block-size: 16rem;
+    border: var(--md-border-width) solid var(--md-color-border);
+    border-radius: var(--md-radius);
+    overflow: hidden;
+  }
+
+  :where(mdlib-editor:focus-within) {
+    outline: 2px solid var(--md-color-accent);
+    outline-offset: -1px;
+  }
+
+  :where(mdlib-editor) :where(.mdlib-editor-toolbar) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.375rem 0.5rem;
+    border-block-end: var(--md-border-width) solid var(--md-color-border);
+    background: var(--md-color-surface);
+  }
+
+  :where(mdlib-editor) :where(.mdlib-editor-toolbar button) {
+    min-inline-size: 2rem;
+    padding: 0.25rem 0.5rem;
+    border: var(--md-border-width) solid transparent;
+    border-radius: calc(var(--md-radius) * 0.75);
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+
+  :where(mdlib-editor) :where(.mdlib-editor-toolbar button:hover, .mdlib-editor-toolbar button[aria-pressed='true']) {
+    border-color: var(--md-color-border);
+    background: var(--md-color-code-bg);
+  }
+
+  :where(mdlib-editor) :where(.mdlib-editor-toolbar button:focus-visible) {
+    outline: 2px solid var(--md-color-accent);
+    outline-offset: 1px;
+  }
+
+  :where(mdlib-editor) :where(.mdlib-editor-views) {
+    display: flex;
+    gap: 0.25rem;
+    margin-inline-start: auto;
+  }
+
+  :where(mdlib-editor) :where(.mdlib-editor-panes) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-block-size: 0;
+  }
+
+  :where(mdlib-editor) :where(.mdlib-editor-input) {
+    box-sizing: border-box;
+    block-size: 100%;
+    min-block-size: 0;
+    margin: 0;
+    padding: 1rem;
+    border: 0;
+    border-inline-end: var(--md-border-width) solid var(--md-color-border);
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font-family: var(--md-font-mono);
+    font-size: var(--md-size-code);
+    line-height: 1.6;
+    resize: none;
+    tab-size: 4;
+  }
+
+  :where(mdlib-editor) :where(.mdlib-editor-preview) {
+    min-block-size: 0;
+    padding: 1rem 1.25rem;
+    overflow: auto;
+  }
+
+  :where(mdlib-editor[view='write']) :where(.mdlib-editor-panes),
+  :where(mdlib-editor[view='preview']) :where(.mdlib-editor-panes) {
+    grid-template-columns: 1fr;
+  }
+
+  :where(mdlib-editor[view='write']) :where(.mdlib-editor-preview),
+  :where(mdlib-editor[view='preview']) :where(.mdlib-editor-input) {
+    display: none;
+  }
+
+  :where(mdlib-editor[view='write']) :where(.mdlib-editor-input) {
+    border-inline-end: 0;
+  }
+
+  /* Narrow screens: one pane above the other. */
+  @media (width < 40rem) {
+    :where(mdlib-editor) :where(.mdlib-editor-panes) {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    :where(mdlib-editor) :where(.mdlib-editor-input) {
+      border-inline-end: 0;
+      border-block-end: var(--md-border-width) solid var(--md-color-border);
+    }
+  }
+}

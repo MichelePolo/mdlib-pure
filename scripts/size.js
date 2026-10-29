@@ -18,6 +18,8 @@ const budgets = [
   { name: 'mdlib-pure/frontmatter', entry: 'src/plugins/frontmatter.ts', limit: 1 * 1024, external: true },
   { name: 'mdlib-pure/deflist', entry: 'src/plugins/deflist.ts', limit: 1.5 * 1024, external: true },
   { name: 'mdlib-pure/mermaid', entry: 'src/plugins/mermaid.ts', limit: 1.5 * 1024, external: true },
+  // Batteries included: core + every plugin + the two elements, measured whole.
+  { name: 'mdlib-pure/element', entry: 'src/element.ts', limit: 26 * 1024 },
 ]
 
 let failed = false

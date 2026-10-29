@@ -61,7 +61,12 @@
       "types": "./dist/types/plugins/mermaid.d.ts",
       "default": "./dist/mermaid.js"
     },
+    "./element": {
+      "types": "./dist/types/element.d.ts",
+      "default": "./dist/element.js"
+    },
     "./theme.css": "./styles/theme.css",
+    "./editor.css": "./styles/editor.css",
     "./tailwind.css": "./styles/tailwind.css",
     "./package.json": "./package.json"
   },
