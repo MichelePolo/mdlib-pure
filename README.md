@@ -17,8 +17,19 @@ Lightweight Markdown renderer for the browser.
 ## Install
 
 **Not on the npm registry yet**: `npm install mdlib-pure` does not work. Until
-the first release, build the package from a clone (Node 22.18 or later) and
-install the tarball:
+the first release there, install the tarball attached to the
+[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.0):
+
+```sh
+npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz
+```
+
+npm records the URL in your `package.json` and the tarball's checksum in
+`package-lock.json`, so `npm ci` works on CI and for your colleagues. Imports
+are the same as they will be from the registry (`from 'mdlib-pure'`,
+`from 'mdlib-pure/gfm'`…).
+
+To build the tarball yourself instead (Node 22.18 or later):
 
 ```sh
 git clone https://github.com/MichelePolo/mdlib-pure.git
@@ -30,12 +41,10 @@ cd ../my-app
 npm install ../mdlib-pure/mdlib-pure-0.1.0.tgz
 ```
 
-npm records it as `file:…tgz` in your `package.json`: keep the tarball in your
-repository (a `vendor/` folder) so that `npm ci` works on CI and for your
-colleagues. The framework wrappers are not on a registry either:
-[Blazor](bindings/blazor/README.md) is not on nuget.org (the `.nupkg` is on
-the GitHub release), [Angular](bindings/angular/README.md) is not on npm
-(tarballs from `npm run angular:pack`). See [Framework wrappers](#framework-wrappers).
+The framework wrappers are not on a registry either, and have GitHub
+releases too: [Blazor](bindings/blazor/README.md) (the `.nupkg`, not on
+nuget.org) and [Angular](bindings/angular/README.md) (a tarball, not on npm).
+See [Framework wrappers](#framework-wrappers).
 
 ## Usage
 
@@ -240,8 +249,9 @@ standalone components: `<mdlib-editor [(value)]>` (also a form control for
 `ngModel` and reactive forms), `<mdlib-markdown [source]>`,
 `provideMdlibPure()` and a `MarkdownService` for the AST, the table of
 contents and HTML. Server-side rendering and hydration work. **Not on npm**,
-like mdlib-pure itself: `npm run angular:pack` builds both tarballs, which
-your app installs from a `vendor/` folder.
+like mdlib-pure itself: install both tarballs from the GitHub releases
+([`angular-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.0),
+[`mdlib-pure-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.0)).
 
 ## Performance
 

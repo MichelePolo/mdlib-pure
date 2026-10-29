@@ -8,7 +8,9 @@ break the API).
 ## [0.1.0] — unreleased
 
 First release. Not on a registry yet: mdlib-pure and ngx-mdlib-pure are not
-on npm, MdlibPure.Blazor is not on nuget.org (see README.md, "Install").
+on npm, MdlibPure.Blazor is not on nuget.org. Each is attached to a GitHub
+release instead (`mdlib-pure-v0.1.0`, `angular-v0.1.0`, `blazor-v0.1.0`; see
+README.md, "Install").
 
 ### Core (`mdlib-pure`, ~11 KB gzip, zero dependencies)
 

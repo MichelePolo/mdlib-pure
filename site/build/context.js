@@ -21,6 +21,9 @@ export const read = (path) => readFileSync(join(ROOT, path), 'utf8')
 
 /** The Blazor wrapper's release: the .nupkg is attached there (not on nuget.org). */
 export const BLAZOR_RELEASE = `${REPO}/releases/tag/blazor-v0.1.0`
+/** mdlib-pure is not on the npm registry yet: its tarball is attached to this release. */
+export const MDLIB_RELEASE = `${REPO}/releases/tag/mdlib-pure-v0.1.0`
+export const MDLIB_TARBALL = `${REPO}/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz`
 
 /**
  * Docs pages, rendered from the repository's own Markdown (`source`). Only
@@ -53,7 +56,7 @@ export const DOCS = [
     source: 'bindings/angular/README.md',
     summary: '`ngx-mdlib-pure` 0.1.0 for Angular 21 and 22: `<mdlib-editor [(value)]>` (a form control too), `<mdlib-markdown>`, `provideMdlibPure()`, `MarkdownService`, SSR with hydration',
     description: 'ngx-mdlib-pure: a Markdown editor with live preview and a viewer for Angular 21 and 22, standalone components with signals and forms, SSR with hydration, built on the mdlib-pure Web Components.',
-    note: 'Neither `ngx-mdlib-pure` nor `mdlib-pure` is on the npm registry yet: build both tarballs and install them from a local folder, as described under [Install](#install).',
+    note: `Neither \`ngx-mdlib-pure\` nor \`mdlib-pure\` is on the npm registry yet: install both tarballs from the [GitHub releases](${REPO}/releases/tag/angular-v0.1.0), as described under [Install](#install).`,
   },
   { slug: 'tokens', title: 'Design tokens', source: 'docs/tokens.md', summary: 'the `--md-*` tokens of `theme.css`, light and dark, Tailwind CSS v4' },
   { slug: 'security', title: 'Security', source: 'docs/security.md', summary: 'what is guaranteed by default, raw HTML, URL policy, DOM clobbering' },

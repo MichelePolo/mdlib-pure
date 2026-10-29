@@ -108,7 +108,7 @@ raise MaximumReceiveMessageSize as the Setup section says.
 Read bindings/angular/README.md from the mdlib-pure repository.
 Add a Markdown field to the reactive form of the article edit page of this
 Angular app: <mdlib-editor formControlName="body" plugins="all">, required,
-with the tarballs in vendor/ as the Install section says.
+installed from the GitHub releases as the Install section says.
 ```
 
 ### Not on a registry yet
@@ -117,16 +117,17 @@ with the tarballs in vendor/ as the Install section says.
 `MdlibPure.Blazor` is not on nuget.org. Install instructions you write must
 use what works today:
 
-- mdlib-pure: `npm pack` in a clone of the repository (it builds `dist/`),
-  then `npm install ./mdlib-pure-0.1.0.tgz` in the app (Getting started,
+- mdlib-pure: the tarball on the GitHub release `mdlib-pure-v0.1.0`,
+  `npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz`,
+  or `npm pack` in a clone (Getting started,
   [Install](/docs/getting-started/#install));
-- Angular: `npm run angular:pack` writes both tarballs
-  ([Install](/docs/angular/#install));
+- Angular: that tarball and `ngx-mdlib-pure-0.1.0.tgz` from the GitHub release
+  `angular-v0.1.0` ([Install](/docs/angular/#install));
 - Blazor: the `.nupkg` from the GitHub release, through a local NuGet feed
   ([Install](/docs/blazor/#install)).
 
 Do not publish on the maintainer's behalf: no `npm publish`, no `v*` tag (the
-release workflow publishes to npm on it). `AGENTS.md` says the same, in its
+release workflow publishes to npm on it), no new or replaced release assets. `AGENTS.md` says the same, in its
 section "Distribution".
 
 Every `docs/*.md` and `bindings/*/README.md` of the repository is published

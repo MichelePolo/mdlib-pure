@@ -58,10 +58,24 @@ This package adds Angular on top, without a second renderer:
 ## Install
 
 **Not on the npm registry yet**: neither `ngx-mdlib-pure` nor `mdlib-pure`
-is published, so `npm install ngx-mdlib-pure` fails. Until the first release,
-install both from local tarballs.
+is published, so `npm install ngx-mdlib-pure` fails. Until the first release
+there, install both tarballs from the GitHub releases
+([`angular-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.0),
+[`mdlib-pure-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.0)):
 
-1. Build the tarballs from a clone of the repository (the Angular CLI 22
+```sh
+npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz \
+  https://github.com/MichelePolo/mdlib-pure/releases/download/angular-v0.1.0/ngx-mdlib-pure-0.1.0.tgz
+npm install katex mermaid   # optional: math and diagrams
+```
+
+npm records the URLs in your `package.json` and the checksums in
+`package-lock.json`, so `npm ci` works on CI and for your colleagues. Once
+published: `npm install mdlib-pure ngx-mdlib-pure`.
+
+To build the tarballs yourself instead:
+
+1. Build them from a clone of the repository (the Angular CLI 22
    needs Node `^22.22.3`, `^24.15` or `>=26`):
 
    ```sh
@@ -72,18 +86,13 @@ install both from local tarballs.
                                        #   bindings/angular/dist/ngx-mdlib-pure-0.1.0.tgz
    ```
 
-   Or get the two `.tgz` files from the maintainer.
-
 2. Copy them into your app (for example a `vendor/` folder, committed) and install both:
 
    ```sh
    npm install ./vendor/mdlib-pure-0.1.0.tgz ./vendor/ngx-mdlib-pure-0.1.0.tgz
-   npm install katex mermaid   # optional: math and diagrams
    ```
 
-   npm records them as `file:vendor/…tgz` in your `package.json`, so
-   `npm ci` works on CI and for your colleagues. Once published:
-   `npm install mdlib-pure ngx-mdlib-pure`.
+   npm records them as `file:vendor/…tgz` in your `package.json`.
 
 | Peer dependency | Version |
 |---|---|

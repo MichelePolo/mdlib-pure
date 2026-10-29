@@ -135,7 +135,8 @@ covered by a test or a check:
   Angular workspace now drops that cache before testing.
 
 Nothing is on a package registry yet. The README, the guides, `AGENTS.md`
-and this site say so, and each explains how to install from a tarball today.
+and this site say so, and each gives the tarball to install today, attached
+to a GitHub release.
 
 ## The maintainer decides
 
@@ -161,7 +162,9 @@ Agents propose; Michele decides. Some of the decisions in the history:
   ([ba0b3a4]).
 - Publishing on npm put on hold, and the Blazor package released only on
   GitHub. The Angular wrapper followed, built on the same elements, and the
-  docs say plainly that nothing is on a registry yet ([5a551cd]).
+  docs say plainly that nothing is on a registry yet ([5a551cd]); the npm
+  tarballs of mdlib-pure and the Angular wrapper are attached to GitHub
+  releases as well.
 
 ## Checked on every change
 

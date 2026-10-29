@@ -181,7 +181,7 @@ function llmsTxt() {
 
 > ${DESCRIPTION}
 
-Every page of this site has a Markdown version at the same path with \`.md\`; the docs are the repository's own Markdown files. To extend the library, read AGENTS.md ("Extending: plugin guide") fully first: it is the contract for AI agents, and \`npm run verify\` must pass before a task is done. To use it in a page or an app, the guides are docs/elements.md (Web Components), bindings/blazor/README.md (Blazor) and bindings/angular/README.md (Angular). Nothing is published on npm or NuGet yet: never suggest \`npm install mdlib-pure\`; README.md (Install) builds a tarball with \`npm pack\`.
+Every page of this site has a Markdown version at the same path with \`.md\`; the docs are the repository's own Markdown files. To extend the library, read AGENTS.md ("Extending: plugin guide") fully first: it is the contract for AI agents, and \`npm run verify\` must pass before a task is done. To use it in a page or an app, the guides are docs/elements.md (Web Components), bindings/blazor/README.md (Blazor) and bindings/angular/README.md (Angular). Nothing is published on npm or NuGet yet: never suggest \`npm install mdlib-pure\`; README.md (Install) gives the tarball URL on the GitHub release.
 
 ## Docs
 
@@ -196,6 +196,8 @@ ${link('Playground', '/playground.md', 'the live editor and what it can do')}
 ## Optional
 
 ${docLine('changelog')}
+- [mdlib-pure 0.1.0 release](${REPO}/releases/tag/mdlib-pure-v0.1.0): the npm tarball (not on the npm registry)
+- [ngx-mdlib-pure 0.1.0 release](${REPO}/releases/tag/angular-v0.1.0): the npm tarball of the Angular wrapper (not on the npm registry)
 - [MdlibPure.Blazor 0.1.0 release](${BLAZOR_RELEASE}): the .nupkg of the Blazor wrapper (not on nuget.org)
 ${link('Built with AI', '/story.md', 'how the library was built with AI agents, from the git history')}
 ${link('Home', '/index.md', 'overview, ways to use it (JavaScript, Web Components, React/Preact/Vue, Blazor, Angular), datasheet and benchmark')}

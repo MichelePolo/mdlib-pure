@@ -232,7 +232,8 @@ h3.title { font-size: 1.5rem; }
   display: inline-flex; align-items: stretch; max-inline-size: 100%;
   margin-block-start: 1.75rem;
   border: 1px solid var(--md-color-border); border-radius: 4px; background: var(--raised);
-  & code { padding: 0.55rem 0.9rem; font-size: 0.9375rem; overflow-x: auto; white-space: nowrap; }
+  /* Long commands (a tarball URL) wrap at the <wbr> after each slash. */
+  & code { padding: 0.55rem 0.9rem; font-size: 0.9375rem; overflow-wrap: anywhere; }
   & code::before { content: '$ ' / ''; color: var(--md-color-muted); }
   & button { border: 0; border-inline-start: 1px solid var(--md-color-border); background: transparent; padding-inline: 0.85rem; cursor: pointer; font-size: 0.875rem; }
   & button:hover { background: var(--md-color-surface); }

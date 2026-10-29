@@ -1,6 +1,6 @@
 // Home: hero with a live example, datasheet, ways to use it, plugins,
 // benchmark, agents.
-import { abs, BLAZOR_RELEASE, escapeHtml, fenceFor, kb, makeMarkdown, num, PKG, read, REPO, rel, siteLinks } from '../context.js'
+import { abs, BLAZOR_RELEASE, MDLIB_RELEASE, MDLIB_TARBALL, escapeHtml, fenceFor, kb, makeMarkdown, num, PKG, read, REPO, rel, siteLinks } from '../context.js'
 import { asset, page } from '../layout.js'
 import { PLUGIN_CARDS } from './plugins.js'
 
@@ -82,7 +82,7 @@ export const Markdown = ({ source }) => (
   {
     id: 'use-angular',
     title: 'Angular (21, 22)',
-    text: '`ngx-mdlib-pure` 0.1.0: standalone components whose tag is the Web Component, `[(value)]` with signals, a form control for `ngModel` and reactive forms, SSR with hydration, and a service for the AST. Not on npm yet, like mdlib-pure: install both from tarballs.',
+    text: '`ngx-mdlib-pure` 0.1.0: standalone components whose tag is the Web Component, `[(value)]` with signals, a form control for `ngModel` and reactive forms, SSR with hydration, and a service for the AST. Not on npm yet, like mdlib-pure: both tarballs are attached to GitHub releases.',
     lang: 'ts',
     code: `// app.config.ts
 providers: [provideMdlibPure({ loaders: { mermaid: () => import('mermaid') } })]
@@ -91,12 +91,13 @@ providers: [provideMdlibPure({ loaders: { mermaid: () => import('mermaid') } })]
 template: \`
   <mdlib-editor [(value)]="body" plugins="all" />
   <mdlib-markdown [source]="body()" plugins="all" />\``,
-    links: '[Angular guide](/docs/angular/) · [Install from tarballs](/docs/angular/#install)',
+    links: '[Angular guide](/docs/angular/) · [Install from the GitHub releases](/docs/angular/#install)',
   },
 ]
 
 /** The hero's install line: the package is not on the npm registry yet. */
-const INSTALL_NOTE = 'Not on the npm registry yet: build the tarball with `npm pack` in a clone of the repository. [How to install](/docs/getting-started/#install).'
+const INSTALL = `npm install ${MDLIB_TARBALL}`
+const INSTALL_NOTE = `Not on the npm registry yet: this installs the tarball attached to the [GitHub release](${MDLIB_RELEASE}). [Other ways to install](/docs/getting-started/#install).`
 
 const USES_INTRO = 'One parser and one renderer behind five entry points: pick the one your stack speaks. None is on a package registry yet: each guide says how to install it today.'
 
@@ -175,7 +176,7 @@ Output
       <div>
         <h1 id="title" class="title"><span class="mk" aria-hidden="true">#</span>Markdown, to the letter.</h1>
         <p class="lede">${escapeHtml(lede)}</p>
-        <div class="install"><code>npm install ./mdlib-pure-0.1.0.tgz</code><button type="button" class="js-only" data-copy="npm install ./mdlib-pure-0.1.0.tgz" aria-label="Copy the install command">Copy</button></div>
+        <div class="install"><code>${escapeHtml(INSTALL).replaceAll('/', '/<wbr>')}</code><button type="button" class="js-only" data-copy="${escapeHtml(INSTALL)}" aria-label="Copy the install command">Copy</button></div>
         <p class="install-note muted">${inline(INSTALL_NOTE)}</p>
         <p class="actions">
           <a class="btn btn-primary" href="${rel(PATH, '/docs/getting-started/')}">Read the docs</a>
@@ -291,7 +292,7 @@ ${lede}
 ${INSTALL_NOTE}
 
 \`\`\`sh
-npm install ./mdlib-pure-0.1.0.tgz
+${INSTALL}
 \`\`\`
 
 - [Read the docs](/docs/getting-started/)

@@ -38,15 +38,18 @@ instructions, set up an app or answer a user:
 
 - never suggest `npm install mdlib-pure`, `npm install ngx-mdlib-pure` or
   `dotnet add package MdlibPure.Blazor` from the public registries: they fail;
-- mdlib-pure: `npm pack` in a clone (`prepack` builds `dist/`), then
-  `npm install ./mdlib-pure-0.1.0.tgz` in the app (README.md, "Install");
-- Angular: `npm run angular:pack` writes both tarballs to `bindings/angular/dist/`
+- mdlib-pure: the tarball on the GitHub release `mdlib-pure-v0.1.0`
+  (`npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz`),
+  or `npm pack` in a clone (`prepack` builds `dist/`) (README.md, "Install");
+- Angular: that tarball plus `ngx-mdlib-pure-0.1.0.tgz` from the GitHub
+  release `angular-v0.1.0`, or `npm run angular:pack`
   (bindings/angular/README.md, "Install");
 - Blazor: the `.nupkg` attached to the GitHub release `blazor-v0.1.0`, from a
   local NuGet feed (bindings/blazor/README.md, "Install");
 - never publish: no `npm publish`, no `v*` tags (`.github/workflows/release.yml`
-  publishes to npm on them), no `dotnet nuget push`. Publishing is the
-  maintainer's decision.
+  publishes to npm on them), no `dotnet nuget push`, no new GitHub releases
+  or replaced release assets (lockfiles pin their checksums). Publishing is
+  the maintainer's decision.
 
 When a package is published, update this section, `README.md`, the
 `bindings/*/README.md` and the site in the same commit.
