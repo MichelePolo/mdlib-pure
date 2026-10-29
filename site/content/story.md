@@ -106,6 +106,37 @@ half: its build fails when one of those guides is not published as a docs
 page. That is how the [Web Components guide](/docs/elements/) and the
 [Blazor README](/docs/blazor/) became pages here.
 
+## Then Angular
+
+A second agent built `ngx-mdlib-pure` on the same elements, in a git worktree
+of its own so that it could not collide with the agent updating this site
+([5a551cd]). The package has standalone components whose tag *is* the Web
+Component (`<mdlib-editor [(value)]>`, also a form control for `ngModel` and
+reactive forms, and `<mdlib-markdown>`), a provider, and a service for the
+AST that also runs on the server. It is checked by 29 unit tests in Chromium
+and 11 end-to-end tests against a server-rendered, hydrated demo. Its
+[README](/docs/angular/) became a docs page here in the same commit, since
+the site build requires it.
+
+Building and reviewing it found four problems outside the wrapper, each now
+covered by a test or a check:
+
+- **No disabled state.** Inside `<fieldset disabled>`, the editor still took
+  typing. It now disables its text area and formatting buttons, like a
+  disabled `<textarea>`.
+- **A loader type that rejected KaTeX.** The documented
+  `katex: () => import('katex/contrib/auto-render').then((m) => m.default)`
+  did not compile under strict TypeScript. `npm run typecheck` now compiles
+  it against KaTeX's own types.
+- **Warnings in every build.** Bare `import "./chunk-*.js"` lines in `dist/`
+  made each consumer's bundler warn ten times. The build removes them.
+- **A stale copy in the cache.** Vite kept serving the mdlib-pure it had
+  pre-bundled before a rebuild, so the unit tests ran against old code. The
+  Angular workspace now drops that cache before testing.
+
+Nothing is on a package registry yet. The README, the guides, `AGENTS.md`
+and this site say so, and each explains how to install from a tarball today.
+
 ## The maintainer decides
 
 Agents propose; Michele decides. Some of the decisions in the history:
@@ -128,6 +159,9 @@ Agents propose; Michele decides. Some of the decisions in the history:
   no server-side rendering of the Markdown for SEO ([13c87c3]).
 - The repository made public and this site published on GitHub Pages
   ([ba0b3a4]).
+- Publishing on npm put on hold, and the Blazor package released only on
+  GitHub. The Angular wrapper followed, built on the same elements, and the
+  docs say plainly that nothing is on a registry yet ([5a551cd]).
 
 ## Checked on every change
 
@@ -174,3 +208,4 @@ with this site's own copies of KaTeX and Mermaid as loaders.
 [60c7298]: https://github.com/MichelePolo/mdlib-pure/commit/60c7298
 [13c87c3]: https://github.com/MichelePolo/mdlib-pure/commit/13c87c3
 [8dcf108]: https://github.com/MichelePolo/mdlib-pure/commit/8dcf108
+[5a551cd]: https://github.com/MichelePolo/mdlib-pure/commit/5a551cd
