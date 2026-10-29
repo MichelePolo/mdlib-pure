@@ -40,6 +40,9 @@ First release.
 - `mdlib-pure/mermaid`: Mermaid diagrams without depending on Mermaid;
   lazy loading, strict security level, theme from the tokens.
 - `mdlib-pure/adapter`: React, Preact and Vue elements.
+- `mdlib-pure/element`: `<mdlib-markdown>` and `<mdlib-editor>` Web
+  Components (editor with live preview, debounced events, echo-safe value
+  binding, form-associated) and `editor.css`.
 - `mdlib-pure/entities`: full entity table for non-browser environments.
 - `theme.css` with semantic `--md-*` tokens (light/dark via `color-scheme`);
   `tailwind.css` for Tailwind CSS v4.

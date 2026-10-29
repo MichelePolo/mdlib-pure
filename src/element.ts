@@ -96,16 +96,33 @@ const KATEX_OPTIONS = {
 function typesetMath(el: Element): void {
   if (!el.querySelector('.math') || !loaders.katex) return
   if (typeset) return typeset(el, KATEX_OPTIONS)
-  katexLoading ??= loaders.katex().then((fn) => {
+  katexLoading ??= loaders.katex().then(async (fn) => {
     typeset = fn
-    if (loaders.katexStylesheet && !document.querySelector(`link[data-mdlib-katex]`)) {
-      const link = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: loaders.katexStylesheet })
-      link.dataset.mdlibKatex = ''
-      document.head.append(link)
-    }
+    if (loaders.katexStylesheet) await adoptStylesheet(loaders.katexStylesheet)
   })
   katexLoading.then(() => el.isConnected && typeset?.(el, KATEX_OPTIONS))
 }
+
+/**
+ * Add a stylesheet through document.adoptedStyleSheets: it is not a DOM node,
+ * so frameworks that morph the document (Blazor enhanced navigation, Turbo,
+ * htmx) cannot remove it. Relative url()s (fonts) are made absolute, since a
+ * constructed sheet resolves them against the document. Falls back to <link>.
+ */
+async function adoptStylesheet(href: string): Promise<void> {
+  const url = new URL(href, document.baseURI)
+  try {
+    const css = await (await fetch(url)).text()
+    const sheet = new CSSStyleSheet()
+    sheet.replaceSync(css.replace(/url\((['"]?)(?![a-z]+:|\/)([^'")]+)\1\)/gi, (_, q: string, path: string) => `url(${q}${new URL(path, url)}${q})`))
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]
+  } catch {
+    document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: url.href }))
+  }
+}
+
+/** Connected elements, refreshed when loaders or configs are added later. */
+const live = new Set<{ refresh(): void }>()
 
 /** Per-element Mermaid state: rendered SVGs by source, so unchanged diagrams never flicker. */
 interface Diagrams {
@@ -198,21 +215,31 @@ function defineClasses(): void {
   class MdlibMarkdown extends HTMLElement {
     static observedAttributes = ['source', 'plugins', 'config']
     #diagrams = newDiagrams()
+    // A framework morphing the page may empty the element: render again.
+    #observer = new MutationObserver(() => {
+      if (!this.firstChild && this.getAttribute('source')) this.refresh()
+    })
 
     connectedCallback(): void {
-      this.render()
+      live.add(this)
+      this.#observer.observe(this, { childList: true })
+      this.refresh()
     }
 
     attributeChangedCallback(): void {
-      if (this.isConnected) this.render()
+      if (this.isConnected) this.refresh()
     }
 
     disconnectedCallback(): void {
+      live.delete(this)
+      this.#observer.disconnect()
       this.#diagrams.stop()
     }
 
-    render(): void {
+    /** Render again (e.g. after loaders or configs were added). */
+    refresh(): void {
       getMarkdown(this.getAttribute('plugins') ?? '', this.getAttribute('config') ?? '').renderTo(this, this.getAttribute('source') ?? '')
+      this.#observer.takeRecords() // our own changes are not external ones
       typesetMath(this)
       void drawDiagrams(this, this.#diagrams)
     }
@@ -225,7 +252,13 @@ function defineClasses(): void {
     #input = document.createElement('textarea')
     #preview = document.createElement('div')
     #toolbar = document.createElement('div')
+    #panes = document.createElement('div')
     #diagrams = newDiagrams()
+    // A framework morphing the page may remove our parts: put them back
+    // (the text area keeps the user's text).
+    #observer = new MutationObserver(() => {
+      if (this.#toolbar.parentNode !== this || this.#panes.parentNode !== this) this.#mount()
+    })
     /** Values already sent to listeners: if one comes back as an attribute, it is an echo. */
     #sent: string[] = []
     #timer = 0
@@ -297,21 +330,35 @@ function defineClasses(): void {
     }
 
     connectedCallback(): void {
-      if (!this.#input.isConnected) {
-        const panes = document.createElement('div')
-        panes.className = 'mdlib-editor-panes'
-        panes.append(this.#input, this.#preview)
-        this.replaceChildren(this.#toolbar, panes)
+      if (!this.#panes.firstChild) {
+        this.#panes.className = 'mdlib-editor-panes'
+        this.#panes.append(this.#input, this.#preview)
         this.#input.value = this.getAttribute('value') ?? ''
         this.#internals.setFormValue(this.#input.value)
         this.#syncView()
         this.#input.setAttribute('aria-label', this.getAttribute('label') ?? 'Markdown')
       }
+      this.#mount()
+      live.add(this)
+      this.#observer.observe(this, { childList: true })
       this.#render()
     }
 
     disconnectedCallback(): void {
+      live.delete(this)
+      this.#observer.disconnect()
       this.#diagrams.stop()
+    }
+
+    #mount(): void {
+      if (this.#toolbar.parentNode === this && this.#panes.parentNode === this && this.childNodes.length === 2) return
+      this.replaceChildren(this.#toolbar, this.#panes)
+      this.#observer.takeRecords()
+    }
+
+    /** Render the preview again (e.g. after loaders or configs were added). */
+    refresh(): void {
+      this.#render()
     }
 
     attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
@@ -393,4 +440,6 @@ export function defineElements(options: ElementsOptions = {}): void {
     for (const key of [...instances.keys()]) if (key.endsWith(`|${name}`)) instances.delete(key)
   }
   if (typeof customElements !== 'undefined') defineClasses()
+  // Elements defined before these loaders/configs existed render again now.
+  for (const el of live) el.refresh()
 }

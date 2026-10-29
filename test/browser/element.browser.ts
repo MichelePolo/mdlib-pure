@@ -168,3 +168,66 @@ describe('<mdlib-editor>', () => {
     assert.equal(svgNextFrame, true)
   })
 })
+
+describe('robust against frameworks that morph the page', () => {
+  test('emptied from outside: the viewer renders again, the editor restores its parts and keeps the text', async () => {
+    const page = await setup()
+    await page.evaluate(() => {
+      const v = document.createElement('mdlib-markdown')
+      v.id = 'v'
+      v.setAttribute('source', '# Kept')
+      const ed = document.createElement('mdlib-editor')
+      ed.setAttribute('value', 'typed text')
+      document.body.append(v, ed)
+    })
+    const r = await page.evaluate(async () => {
+      document.querySelector('#v')!.replaceChildren() // what an enhanced update does
+      document.querySelector('mdlib-editor')!.replaceChildren()
+      await new Promise((res) => setTimeout(res, 50))
+      return {
+        viewer: document.querySelector('#v')!.innerHTML,
+        toolbar: !!document.querySelector('mdlib-editor > .mdlib-editor-toolbar'),
+        text: (document.querySelector('mdlib-editor textarea') as HTMLTextAreaElement).value,
+      }
+    })
+    assert.deepEqual(r, { viewer: '<h1>Kept</h1>', toolbar: true, text: 'typed text' })
+  })
+
+  test('the KaTeX stylesheet is adopted, so removing <link>s from the document cannot drop it', async () => {
+    const page = await setup()
+    const r = await page.evaluate(async (untilSrc) => {
+      const wait = eval(untilSrc)
+      ;(window as any).mdlib.defineElements({ loaders: { katexStylesheet: 'data:text/css,.katex-probe{color:rgb(1,2,3)}' } })
+      const el = document.createElement('mdlib-markdown')
+      el.setAttribute('plugins', 'math')
+      el.setAttribute('source', '$x$')
+      document.body.append(el)
+      await wait(() => document.adoptedStyleSheets.length > 0)
+      for (const link of document.querySelectorAll('link')) link.remove()
+      const probe = document.createElement('span')
+      probe.className = 'katex-probe'
+      document.body.append(probe)
+      return { adopted: document.adoptedStyleSheets.length, color: getComputedStyle(probe).color }
+    }, until)
+    assert.deepEqual(r, { adopted: 1, color: 'rgb(1, 2, 3)' })
+  })
+
+  test('loaders registered after the elements: existing elements render again', async () => {
+    const page = await openPage(browser, { css })
+    await page.addScriptTag({ content: await mermaidBundle() })
+    const r = await page.evaluate(async (untilSrc) => {
+      const wait = eval(untilSrc)
+      const w = window as any
+      w.mdlib.defineElements({ configs: { early: {} } }) // an app registering configs first
+      const el = document.createElement('mdlib-markdown')
+      el.setAttribute('plugins', 'mermaid')
+      el.setAttribute('source', '```mermaid\ngraph TD\n  A-->B\n```')
+      document.body.append(el)
+      const before = el.querySelectorAll('svg').length
+      w.mdlib.defineElements({ loaders: { mermaid: async () => w.__mermaid } })
+      await wait(() => el.querySelector('svg'))
+      return { before, after: el.querySelectorAll('svg').length }
+    }, until)
+    assert.deepEqual(r, { before: 0, after: 1 })
+  })
+})

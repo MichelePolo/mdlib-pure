@@ -184,6 +184,9 @@ First-party plugins:
 - `mdlib-pure/mermaid`: ` ```mermaid ` diagrams, with no dependency on
   Mermaid: `renderMermaid(el, { load: () => import('mermaid') })` loads it
   only when a page has diagrams, themed from the tokens (light and dark).
+- `mdlib-pure/element`: `<mdlib-markdown>` and `<mdlib-editor>` Web
+  Components (an editor with live preview), every plugin included; the
+  base of the Blazor wrapper in `bindings/blazor/`.
 - `mdlib-pure/deflist`: definition lists (`Term` / `: Definition`, Pandoc and
   PHP Markdown Extra style) → `<dl>`.
 - `mdlib-pure/frontmatter`: YAML (`---`) / TOML (`+++`) front matter, kept
