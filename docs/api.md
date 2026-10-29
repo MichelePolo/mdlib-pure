@@ -280,60 +280,12 @@ dependencies).
 
 ## mdlib-pure/element
 
-Two Web Components, for plain HTML pages and any framework (they are the base
-of the Blazor wrapper in `bindings/blazor/`). Core and every plugin are
-included: ~20 KB gzip.
-
-```js
-import { defineElements } from 'mdlib-pure/element'
-
-defineElements({
-  loaders: {
-    mermaid: () => import('mermaid'),
-    katex: () => import('katex/contrib/auto-render').then((m) => m.default),
-    katexStylesheet: '/css/katex.min.css',
-  },
-  configs: { docs: { highlight: (code, lang) => myHighlighter(code, lang) } },
-})
-```
-
-```html
-<link rel="stylesheet" href="mdlib-pure/theme.css" />
-<link rel="stylesheet" href="mdlib-pure/editor.css" />
-
-<mdlib-markdown class="md" source="# Hello" plugins="gfm math"></mdlib-markdown>
-<mdlib-editor value="# Hello" plugins="all" style="block-size: 30rem"></mdlib-editor>
-```
-
-**Attributes**
-
-| Element | Attribute | |
-|---|---|---|
-| both | `plugins` | space-separated names or `all`: `gfm headings math mermaid container deflist mark frontmatter` |
-| both | `config` | name of options registered with `defineElements({ configs })` |
-| `<mdlib-markdown>` | `source` | the Markdown |
-| `<mdlib-editor>` | `value` | initial (or externally set) Markdown |
-| `<mdlib-editor>` | `view` | `split` (default), `write`, `preview` |
-| `<mdlib-editor>` | `delay` | ms before `input` is dispatched (default 200) |
-| `<mdlib-editor>` | `label`, `name` | accessible name of the text area; form field name |
-
-Options that are functions (`highlight`, `allowUrl`, `sanitize`) and `html`
-can only be set through named configs, never from attributes: content cannot
-switch raw HTML on.
-
-**Editor behavior.** The preview renders on every keystroke, in the browser.
-Listeners get a debounced `input` event and `change` on blur, with the text
-in `event.target.value` (the text area's own events do not escape). While the
-user types, an attribute set to a value the editor already sent is treated as
-a late echo and ignored, so a slow server never overwrites typing; a value
-set while the editor is not focused (a Reset button) is applied. The element
-is form-associated: with `name`, its value is submitted with the form.
-Toolbar: bold, italic, heading, link, lists, quote, code (Ctrl+B, Ctrl+I,
-Ctrl+K). Math and diagrams load KaTeX and Mermaid only when a document uses
-them; diagrams already drawn are reused while typing.
-
-`getMarkdown(plugins, config)` returns the shared `Markdown` instance behind
-an attribute combination (e.g. to `parse()` the editor's text).
+`defineElements(options)` defines two Web Components, `<mdlib-markdown>`
+(viewer) and `<mdlib-editor>` (editor with live preview), with every plugin
+included (~20 KB gzip); `getMarkdown(plugins, config)` returns the shared
+instance behind an attribute combination. Styles: `mdlib-pure/editor.css`.
+Attributes, events, loaders, named configs and the editor's behavior:
+**[elements.md](elements.md)**. For Blazor: [the Blazor wrapper](../bindings/blazor/README.md).
 
 ## mdlib-pure/adapter
 

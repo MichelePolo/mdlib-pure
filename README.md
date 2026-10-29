@@ -185,8 +185,15 @@ First-party plugins:
   Mermaid: `renderMermaid(el, { load: () => import('mermaid') })` loads it
   only when a page has diagrams, themed from the tokens (light and dark).
 - `mdlib-pure/element`: `<mdlib-markdown>` and `<mdlib-editor>` Web
-  Components (an editor with live preview), every plugin included; the
-  base of the Blazor wrapper in `bindings/blazor/`.
+  Components (an editor with live preview, styled by `mdlib-pure/editor.css`),
+  every plugin included: [docs/elements.md](docs/elements.md).
+
+### Blazor (.NET 10)
+
+[`MdlibPure.Blazor`](bindings/blazor/README.md) wraps the Web Components for
+every render mode: `<MarkdownEditor @bind-Value>`, `<Markdown>` and an AST
+service. Download the `.nupkg` from the
+[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0).
 - `mdlib-pure/deflist`: definition lists (`Term` / `: Definition`, Pandoc and
   PHP Markdown Extra style) → `<dl>`.
 - `mdlib-pure/frontmatter`: YAML (`---`) / TOML (`+++`) front matter, kept

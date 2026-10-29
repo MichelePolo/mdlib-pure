@@ -23,6 +23,7 @@ declare any task done; it runs all of them.
 | 7 | **CSS tokens are semantic** (`--md-color-link`), never primitive (`--md-blue-500`). | review |
 | 8 | **Regexes must be linear** on any input: no alternatives that can match the same text inside a quantifier (`(?:\\.|\\[^x])*`), no unanchored `x+$`/`x*$` (scan by hand instead), always `y`/`g` + `lastIndex` instead of `slice(pos)`. | `test/pathological.test.ts` |
 | 9 | **Lookups keyed by input use `Map` or `Object.hasOwn`**, never a plain object (`&constructor;` must not reach `Object.prototype`). | review + tests |
+| 10 | **Docs stay complete for humans and agents.** Every public entry point (`exports` in package.json) is documented in `docs/api.md` and mentioned in `README.md`; every `docs/*.md` and `bindings/*/README.md` is linked from `README.md`. The website, `llms.txt` and `llms-full.txt` are generated from these files: never edit generated copies. | `npm run check` |
 
 **Browser support:** Baseline 2024. Features Baseline-available in 2024 or
 earlier (`light-dark()`, `color-mix()`, `:has()`, `text-wrap: balance`, CSS
@@ -71,7 +72,7 @@ src/
                       headings, math, mermaid, deflist, mark, frontmatter
   adapter.ts          VNodes → React/Preact/Vue elements (`mdlib-pure/adapter`)
 styles/               theme.css (tokens), tailwind.css (Tailwind v4 bridge)
-docs/                 api.md, tokens.md, security.md, screenshots/
+docs/                 api.md, elements.md (Web Components), tokens.md, security.md, screenshots/
 templates/plugin/     a complete tested plugin to copy (runs in `npm test`)
 demo/                 the first live editor (needs `npm run build`)
 site/                 the website: `npm run site:build` → site/out/ (pages, samples, playground)
@@ -307,6 +308,9 @@ become dependencies. The pattern of `mdlib-pure/mermaid` and
 - [ ] new tokens documented in `docs/tokens.md`
 - [ ] new plugin: docs and site updated, `npm run site:build` passes (it fails
       on broken internal links)
+- [ ] any change to behavior or API: the human docs (`README.md`, `docs/*.md`,
+      `bindings/*/README.md`) and this file say the same thing, in the same
+      commit
 - [ ] no behavior change to core output unless the task requires it
 
 ## CSS (styles/)
