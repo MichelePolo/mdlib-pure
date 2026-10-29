@@ -13,7 +13,7 @@ import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync,
 import { createServer } from 'node:http'
 import { dirname, extname, join, normalize, posix, relative, sep } from 'node:path'
 import { build } from 'esbuild'
-import { abs, DOCS, fileOf, OUT, PKG, read, REPO, rewriteTwin, ROOT, SITE, SITE_URL, takeWarnings, twinOf } from '../site/build/context.js'
+import { abs, BLAZOR_RELEASE, DOCS, fileOf, OUT, PKG, read, REPO, rewriteTwin, ROOT, SITE, SITE_URL, takeWarnings, twinOf } from '../site/build/context.js'
 import { assets, page } from '../site/build/layout.js'
 import { docs } from '../site/build/pages/docs.js'
 import { home } from '../site/build/pages/home.js'
@@ -34,6 +34,7 @@ async function buildSite() {
 
   // --- Static assets -----------------------------------------------------------
   copyFileSync(join(ROOT, 'styles/theme.css'), join(OUT, 'assets/theme.css'))
+  copyFileSync(join(ROOT, 'styles/editor.css'), join(OUT, 'assets/editor.css'))
   copyFileSync(join(SITE, 'assets/site.css'), join(OUT, 'assets/site.css'))
   copyFileSync(join(SITE, 'assets/favicon.svg'), join(OUT, 'favicon.svg'))
   const katex = join(ROOT, 'node_modules/katex/dist')
@@ -74,6 +75,9 @@ async function buildSite() {
     plugins: [samplesModule],
   })
   await build({ entryPoints: ['site/client/katex-init.js'], absWorkingDir: ROOT, outfile: join(OUT, 'assets/js/katex-init.js'), bundle: true, format: 'iife', minify: true, target: 'es2022' })
+  // The Web Components sample: src/element.ts (core and every plugin) in one
+  // file of its own, so the other bundles and their chunks stay as they are.
+  await build({ entryPoints: ['site/client/elements.js'], absWorkingDir: ROOT, outfile: join(OUT, 'assets/js/elements.js'), bundle: true, format: 'esm', platform: 'browser', minify: true, legalComments: 'none', target: 'es2022' })
 
   // --- Mermaid (dev dependency), split per diagram type, loaded on demand ------
   await build({ entryPoints: ['site/client/mermaid-init.js'], absWorkingDir: ROOT, outfile: join(OUT, 'assets/js/mermaid-init.js'), bundle: true, format: 'esm', minify: true, target: 'es2022' })
@@ -107,7 +111,7 @@ async function buildSite() {
 
   // Asset version for cache busting: a hash of the CSS and the entry scripts.
   const hash = createHash('sha256')
-  for (const f of ['assets/theme.css', 'assets/site.css', 'assets/tailwind-sample.css', 'assets/js/site.js', 'assets/js/home.js', 'assets/js/playground.js', 'assets/js/katex-init.js']) {
+  for (const f of ['assets/theme.css', 'assets/editor.css', 'assets/site.css', 'assets/tailwind-sample.css', 'assets/js/site.js', 'assets/js/home.js', 'assets/js/playground.js', 'assets/js/katex-init.js', 'assets/js/elements.js']) {
     hash.update(readFileSync(join(OUT, f)))
   }
   assets.version = hash.digest('hex').slice(0, 10)
@@ -145,7 +149,7 @@ async function buildSite() {
   write('playground/sw.js', serviceWorker(bundle.metafile, katexFonts))
   write('.nojekyll', '')
 
-  const problems = [...takeWarnings(), ...checkLinks()]
+  const problems = [...takeWarnings(), ...checkDocsCoverage(), ...checkLinks()]
   const files = walk(OUT)
   const kb = (n) => `${(n / 1024).toFixed(0)} KB`
   console.log(`built ${relative(ROOT, OUT)}/: ${pages.length} pages, ${files.length} files, ${kb(files.reduce((n, f) => n + statSync(f).size, 0))} in ${((performance.now() - t0) / 1000).toFixed(1)} s`)
@@ -167,7 +171,7 @@ const walk = (dir) => readdirSync(dir).flatMap((f) => (statSync(join(dir, f)).is
 // --- llms.txt (https://llmstxt.org) --------------------------------------------------
 
 const DESCRIPTION =
-  'Lightweight, zero-dependency Markdown renderer for the browser: 100% CommonMark 0.31.2 (652/652 spec examples), GitHub Flavored Markdown as an opt-in plugin (54/54 extension examples), an ~11 KB gzipped core, safe by default, linear time on any input. Extensible through plugins, styled with semantic CSS tokens, output as HTML, DOM or React/Preact/Vue elements.'
+  'Lightweight, zero-dependency Markdown renderer for the browser: 100% CommonMark 0.31.2 (652/652 spec examples), GitHub Flavored Markdown as an opt-in plugin (54/54 extension examples), an ~11 KB gzipped core, safe by default, linear time on any input. Extensible through plugins, styled with semantic CSS tokens, output as HTML, DOM, React/Preact/Vue elements, or the <mdlib-markdown> and <mdlib-editor> Web Components, which the MdlibPure.Blazor wrapper (.NET 10) builds on.'
 
 function llmsTxt() {
   const doc = (slug) => DOCS.find((d) => d.slug === slug)
@@ -177,25 +181,26 @@ function llmsTxt() {
 
 > ${DESCRIPTION}
 
-Every page of this site has a Markdown version at the same path with \`.md\`; the docs are the repository's own Markdown files. To extend the library, read AGENTS.md ("Extending: plugin guide") fully first: it is the contract for AI agents, and \`npm run verify\` must pass before a task is done.
+Every page of this site has a Markdown version at the same path with \`.md\`; the docs are the repository's own Markdown files. To extend the library, read AGENTS.md ("Extending: plugin guide") fully first: it is the contract for AI agents, and \`npm run verify\` must pass before a task is done. To use it in a page or an app, the guides are docs/elements.md (Web Components) and bindings/blazor/README.md (Blazor).
 
 ## Docs
 
-${['getting-started', 'api', 'tokens', 'security', 'extending', 'agents'].map(docLine).join('\n')}
+${DOCS.filter((d) => d.slug !== 'changelog').map((d) => docLine(d.slug)).join('\n')}
 
 ## Examples
 
-${link('Samples', '/samples.md', 'Markdown source and rendered output for CommonMark, GFM, math, definition lists, containers, mark, front matter, syntax highlighting, Tailwind classes and React')}
-${link('Plugins', '/plugins.md', 'import path, gzip size, syntax and AST nodes of every first-party plugin')}
+${link('Samples', '/samples.md', 'Markdown source and rendered output for CommonMark, GFM, math, Mermaid, definition lists, containers, mark, front matter, syntax highlighting, Tailwind classes and React, and a live <mdlib-editor> and <mdlib-markdown>')}
+${link('Plugins', '/plugins.md', 'import path, gzip size, syntax and AST nodes of every first-party plugin, and the size of mdlib-pure/element')}
 ${link('Playground', '/playground.md', 'the live editor and what it can do')}
 
 ## Optional
 
 ${docLine('changelog')}
+- [MdlibPure.Blazor 0.1.0 release](${BLAZOR_RELEASE}): the .nupkg of the Blazor wrapper (not on nuget.org)
 ${link('Built with AI', '/story.md', 'how the library was built with AI agents, from the git history')}
-${link('Home', '/index.md', 'overview, datasheet and benchmark')}
+${link('Home', '/index.md', 'overview, ways to use it (JavaScript, Web Components, React/Preact/Vue, Blazor), datasheet and benchmark')}
 ${link('All docs in one file', '/llms-full.txt')}
-- [Source repository](${REPO}): README.md, AGENTS.md, docs/, src/, templates/plugin
+- [Source repository](${REPO}): README.md, AGENTS.md, docs/, src/, templates/plugin, bindings/blazor
 `
 }
 
@@ -208,10 +213,12 @@ function llmsFull(docPages) {
 
 > ${DESCRIPTION}
 
-This file concatenates the documentation pages of ${abs('/')}: the repository's README.md, docs/api.md, docs/tokens.md, docs/security.md, AGENTS.md and CHANGELOG.md, plus the site's page for AI agents. Version ${PKG.version}.
+This file concatenates the documentation pages of ${abs('/')}: the repository's ${list(DOCS.filter((d) => !d.site).map((d) => d.source))}, plus the site's page for AI agents. Version ${PKG.version}.
 
 ${parts.join('\n---\n\n')}`
 }
+
+const list = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`)
 
 function sitemap(pages) {
   const today = new Date().toISOString().slice(0, 10)
@@ -306,6 +313,33 @@ self.addEventListener('fetch', (event) => {
   )
 })
 `
+}
+
+// --- Docs coverage: every guide of the repository is a docs page ------------------
+//
+// AGENTS.md rule 10: the site, llms.txt and llms-full.txt are generated from
+// docs/*.md and bindings/*/README.md, so a guide added there without a DOCS
+// entry (site/build/context.js) would silently be missing from the site.
+// docs/ is scanned recursively, so a guide in a subfolder is caught too.
+
+/** Markdown files under docs/ that are not guides, with the reason. */
+const NOT_GUIDES = new Map([
+  // The index of docs/screenshots/: one caption per PNG. It is published in
+  // another form: its table is the gallery of the story page (pages/story.js).
+  ['docs/screenshots/README.md', 'screenshot captions, published as the gallery of /story/'],
+])
+
+function checkDocsCoverage() {
+  const published = new Set(DOCS.map((d) => d.source))
+  const repoPath = (f) => relative(ROOT, f).split(sep).join('/')
+  const bindings = join(ROOT, 'bindings')
+  const guides = [
+    ...walk(join(ROOT, 'docs')).filter((f) => f.endsWith('.md')).map(repoPath),
+    ...(existsSync(bindings) ? readdirSync(bindings).map((d) => `bindings/${d}/README.md`).filter((f) => existsSync(join(ROOT, f))) : []),
+  ]
+  return guides
+    .filter((f) => !published.has(f) && !NOT_GUIDES.has(f))
+    .map((f) => `${f} is not published on the site: add it to DOCS in site/build/context.js (if it is not a guide, to NOT_GUIDES in scripts/build-site.js, with the reason)`)
 }
 
 // --- Internal link check ---------------------------------------------------------

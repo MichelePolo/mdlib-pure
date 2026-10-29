@@ -15,6 +15,8 @@ pass loaders, and they are fetched only when a document uses them.
 
 ```js
 import { defineElements } from 'mdlib-pure/element'
+import 'mdlib-pure/theme.css' // with a bundler that handles CSS imports;
+import 'mdlib-pure/editor.css' // otherwise <link> them (see below)
 
 defineElements({
   loaders: {
@@ -27,9 +29,6 @@ defineElements({
 ```
 
 ```html
-<link rel="stylesheet" href="mdlib-pure/theme.css" />
-<link rel="stylesheet" href="mdlib-pure/editor.css" />
-
 <mdlib-markdown class="md" source="# Hello" plugins="gfm math"></mdlib-markdown>
 <mdlib-editor value="# Hello" plugins="all" style="block-size: 30rem"></mdlib-editor>
 ```
@@ -112,4 +111,5 @@ refreshes the elements already in the page (e.g. loaders registered late).
 Raw HTML and functions cannot be enabled from attributes: `html`,
 `highlight`, `allowUrl` and `sanitize` only come from named configs written
 in JavaScript. URLs follow the [default allowlist](security.md#url-policy);
-Mermaid runs with `securityLevel: 'strict'`.
+Mermaid runs with `securityLevel: 'strict'`. More in
+[Security: Web Components](security.md#web-components).

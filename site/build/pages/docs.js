@@ -19,7 +19,7 @@ function sideNav(path) {
   return { docs: `<ul>${link(INDEX, 'Overview')}${docs}</ul>`, agents: `<ul>${agents}</ul>` }
 }
 
-function frame(path, { article, entries = [], foot = '' }) {
+function frame(path, { article, entries = [], foot = '', note = '' }) {
   const math = article.includes('class="math')
   const nav = sideNav(path)
   const tocList = entries.length
@@ -36,6 +36,7 @@ function frame(path, { article, entries = [], foot = '' }) {
       <div class="doc-body">
         <details class="disclosure mobile-only"><summary>Documentation pages</summary>${nav.docs}${nav.agents}</details>
         ${tocList ? `<details class="disclosure toc-mobile"><summary>On this page</summary>${tocList}</details>` : ''}
+        ${note ? `<aside class="md doc-note" aria-label="Note from this site">${note}</aside>` : ''}
         <article class="md"${math ? ' data-katex' : ''}>
 ${article}
         </article>
@@ -68,12 +69,13 @@ export function docs() {
           ${next ? `<a class="next" href="${rel(doc.path, next.path)}" rel="next"><small>Next</small>${escapeHtml(next.title)}</a>` : ''}
         </nav>
         <p class="muted source-note">${origin} <a href="${rel(doc.path, twin)}" type="text/markdown">Markdown version</a>.</p>`
+    const note = doc.note ? makeMarkdown(['gfm'], { extra: [siteLinks({ from: doc.path })] }).render(`> [!NOTE]\n> ${doc.note}\n`) : ''
     const html = page({
       path: doc.path,
       section: doc.slug === 'agents' ? 'agents' : 'docs',
       title: doc.title,
-      description: `mdlib-pure ${doc.title.toLowerCase()}: ${doc.summary.replace(/`/g, '')}.`,
-      body: frame(doc.path, { article, entries, foot }),
+      description: doc.description ?? `mdlib-pure ${doc.title.toLowerCase()}: ${doc.summary.replace(/`/g, '')}.`,
+      body: frame(doc.path, { article, entries, foot, note }),
       head: article.includes('class="math') ? katexHead(doc.path) : '',
     })
     pages.push({ path: doc.path, html, md: rewriteTwin(src, { from: twin, repo: doc.repo }), title: doc.title, source: doc.source })
@@ -89,7 +91,9 @@ These pages are the repository's own Markdown files, rendered at build time by
 mdlib-pure itself with \`gfm()\`, \`headings({ permalink: true })\` (ids,
 permalinks and the table of contents from \`toc()\`), \`math()\`,
 \`container()\`, \`deflist()\` and \`mark()\`. Links between the files point to
-these pages; other repository paths link to GitHub.
+these pages; other repository paths link to GitHub. Every guide of the
+repository (\`docs/*.md\`, \`bindings/*/README.md\`) has a page here: the site
+build fails if one is missing.
 
 | Page | Source | Covers |
 |:--|:--|:--|
@@ -109,7 +113,7 @@ More in [For AI agents](/docs/agents/).
       path: INDEX,
       section: 'docs',
       title: 'Documentation',
-      description: 'mdlib-pure documentation: getting started, API reference, design tokens, security, the plugin guide (AGENTS.md) and the changelog.',
+      description: 'mdlib-pure documentation: getting started, API reference, Web Components, the Blazor wrapper, design tokens, security, the plugin guide (AGENTS.md) and the changelog.',
       body: frame(INDEX, { article: md.render(overview) }),
     }),
     md: rewriteTwin(overview, { from: twinOf(INDEX) }),

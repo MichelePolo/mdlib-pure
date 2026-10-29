@@ -1,5 +1,6 @@
-// Home: hero with a live example, datasheet, plugins, benchmark, agents.
-import { abs, escapeHtml, fenceFor, kb, makeMarkdown, num, PKG, read, REPO, rel, siteLinks } from '../context.js'
+// Home: hero with a live example, datasheet, ways to use it, plugins,
+// benchmark, agents.
+import { abs, BLAZOR_RELEASE, escapeHtml, fenceFor, kb, makeMarkdown, num, PKG, read, REPO, rel, siteLinks } from '../context.js'
 import { asset, page } from '../layout.js'
 import { PLUGIN_CARDS } from './plugins.js'
 
@@ -17,6 +18,70 @@ with \`gfm()\` and ==mark==.
 > [!TIP]
 > The DOM is built without parsing HTML.
 `
+
+/** The entry points, each with a short snippet. `text` and `links` are Markdown. */
+const uses = (sizes) => [
+  {
+    id: 'use-js',
+    title: 'JavaScript',
+    text: 'The core API: `render()` returns an HTML string, `renderTo()` builds DOM nodes without parsing HTML. Each plugin is one more import.',
+    lang: 'js',
+    code: `import { createMarkdown } from 'mdlib-pure'
+import { gfm } from 'mdlib-pure/gfm'
+
+const md = createMarkdown({ plugins: gfm() })
+md.render('# Hello')        // an HTML string
+md.renderTo(el, '# Hello')  // DOM nodes, no HTML parsing`,
+    links: '[Getting started](/docs/getting-started/) · [API reference](/docs/api/)',
+  },
+  {
+    id: 'use-html',
+    title: 'HTML: Web Components',
+    text: `\`mdlib-pure/element\` defines \`<mdlib-markdown>\`, a viewer, and \`<mdlib-editor>\`, an editor with toolbar and live preview, for plain pages and any framework. Core and every plugin included: ${kb(sizes.element.gzip)} gzip.`,
+    lang: 'html',
+    code: `<script type="module">
+  // with a bundler or an import map
+  import { defineElements } from 'mdlib-pure/element'
+  defineElements()
+</script>
+
+<mdlib-markdown class="md" plugins="gfm"
+  source="# Hello"></mdlib-markdown>
+<mdlib-editor name="body" plugins="all"
+  value="# Draft"></mdlib-editor>`,
+    links: '[Web Components guide](/docs/elements/) · [Live sample](/samples/#elements)',
+  },
+  {
+    id: 'use-frameworks',
+    title: 'React, Preact, Vue',
+    text: '`mdlib-pure/adapter` turns the output into elements with the framework’s own `createElement` or `h`, following its conventions: `className`, `defaultChecked`, keys.',
+    lang: 'jsx',
+    code: `import { createElement } from 'react'
+import { toElements } from 'mdlib-pure/adapter'
+
+export const Markdown = ({ source }) => (
+  <article className="md">
+    {toElements(md.toVNodes(source), createElement, 'react')}
+  </article>
+)
+// Vue: toElements(vnodes, h, 'vue')
+// Preact: toElements(vnodes, h, 'preact')`,
+    links: '[The adapter](/plugins/#adapter) · [React sample](/samples/#react)',
+  },
+  {
+    id: 'use-blazor',
+    title: 'Blazor (.NET 10)',
+    text: '`MdlibPure.Blazor` 0.1.0 wraps the Web Components for every render mode (Static SSR, Server, WebAssembly, Auto): `@bind-Value`, `EditForm` validation, and a C# service for the AST. Not on nuget.org yet: the `.nupkg` is attached to the GitHub release.',
+    lang: 'razor',
+    code: `@using MdlibPure.Blazor
+
+<MarkdownEditor @bind-Value="Body" Plugins="MarkdownPlugins.All" />
+<Markdown Value="@Body" Plugins="MarkdownPlugins.Gfm" />`,
+    links: `[Blazor guide](/docs/blazor/) · [Download 0.1.0 from the GitHub release](${BLAZOR_RELEASE})`,
+  },
+]
+
+const USES_INTRO = 'One parser and one renderer behind four entry points: pick the one your stack speaks.'
 
 function benchmark() {
   const r = JSON.parse(read('bench/results.json'))
@@ -67,19 +132,22 @@ Linear time
 : on adversarial input too: 30+ hostile inputs with time limits in \`test/pathological.test.ts\`
 
 Output
-: an HTML string, DOM nodes, or React, Preact and Vue elements through the adapter
+: an HTML string, DOM nodes, React, Preact and Vue elements through the adapter, or the \`<mdlib-markdown>\` and \`<mdlib-editor>\` Web Components, which the [Blazor wrapper](/docs/blazor/) builds on
 `
 
-  const pluginRows = PLUGIN_CARDS.map((p) => `| [\`${p.name}\`](/plugins/#${p.id}) | ${p.adds} | ${kb(sizes[p.id].gzip)} |`).join('\n')
+  const pluginRows = PLUGIN_CARDS.map((p) => `| [\`${p.name}\`](/plugins/#${p.id}) | ${p.adds}${p.whole ? ' (core and every plugin included)' : ''} | ${kb(sizes[p.id].gzip)} |`).join('\n')
   const plugins = `| Plugin | Adds | gzip |\n|:--|:--|--:|\n${pluginRows}`
 
   const bench = benchmark()
+  const useCards = uses(sizes)
+  const inline = (text) => md.render(text).replace(/^<p>|<\/p>\n$/g, '')
 
   const agents = `This site reads fine without a browser. Every page has a Markdown version at the same address with \`.md\`, and [\`/llms.txt\`](/llms.txt) lists them all.
 
 - Start at [\`/llms.txt\`](/llms.txt), or take everything in one file with [\`/llms-full.txt\`](/llms-full.txt).
 - [\`AGENTS.md\`](/docs/extending/) is the extension contract: rules checked by commands, recipes for each extension point, a definition of done.
 - To get a plugin from an agent: “Read AGENTS.md and write a plugin that…”, then let it run \`npm run verify\`. Example prompts are in the [guide for agents](/docs/agents/).
+- To use it in an app rather than extend it, the guides are [\`docs/elements.md\`](/docs/elements/) for the Web Components and [\`bindings/blazor/README.md\`](/docs/blazor/) for the Blazor wrapper; both are in \`llms-full.txt\`.
 `
 
   const lede = `mdlib-pure renders Markdown to HTML in the browser and follows CommonMark to the letter: all 652 spec examples, in ${core} gzipped, with zero dependencies.`
@@ -114,6 +182,25 @@ Output
       <div class="wrap">
         <h2 class="title" id="datasheet"><span class="mk" aria-hidden="true">##</span>Datasheet</h2>
         <div class="md datasheet">${md.render(datasheet)}</div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="use">
+      <div class="wrap">
+        <h2 class="title" id="use"><span class="mk" aria-hidden="true">##</span>Ways to use it</h2>
+        <div class="prose"><p>${escapeHtml(USES_INTRO)}</p></div>
+        <div class="uses">
+          ${useCards
+            .map(
+              (u) => `<section class="use" aria-labelledby="${u.id}">
+            <h3 class="title" id="${u.id}">${escapeHtml(u.title)}</h3>
+            <div class="md use-text">${md.render(u.text)}</div>
+            <div class="md use-code">${md.render(`\`\`\`${u.lang}\n${u.code}\n\`\`\`\n`)}</div>
+            <p class="use-links">${inline(u.links)}</p>
+          </section>`,
+            )
+            .join('\n          ')}
+        </div>
       </div>
     </section>
 
@@ -197,6 +284,11 @@ ${HERO_SOURCE}${fenceFor(HERO_SOURCE)}
 ## Datasheet
 
 ${datasheet}
+## Ways to use it
+
+${USES_INTRO}
+
+${useCards.map((u) => `### ${u.title}\n\n${u.text}\n\n\`\`\`${u.lang}\n${u.code}\n\`\`\`\n\n${u.links}\n`).join('\n')}
 ## Plugins
 
 The core does CommonMark and nothing else. Everything else is one import away: each plugin is a separate module, measured on its own. [All plugins](/plugins/).

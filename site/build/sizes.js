@@ -1,6 +1,7 @@
 // Minified + gzipped size of every entry point, measured exactly like
 // scripts/size.js (esbuild, es2022, gzip level 9; plugins measured with the
-// core marked external). GFM parts are measured as single named exports.
+// core marked external, mdlib-pure/element whole since it bundles the core and
+// every plugin). GFM parts are measured as single named exports.
 import { gzipSync } from 'node:zlib'
 import { build } from 'esbuild'
 import { ROOT } from './context.js'
@@ -39,6 +40,8 @@ export const ENTRIES = [
   { id: 'frontmatter', name: 'mdlib-pure/frontmatter', entry: 'src/plugins/frontmatter.ts', external: true },
   { id: 'deflist', name: 'mdlib-pure/deflist', entry: 'src/plugins/deflist.ts', external: true },
   { id: 'mermaid', name: 'mdlib-pure/mermaid', entry: 'src/plugins/mermaid.ts', external: true },
+  // Batteries included: core + every plugin + the two elements, measured whole.
+  { id: 'element', name: 'mdlib-pure/element', entry: 'src/element.ts' },
 ]
 
 export const GFM_PARTS = ['table', 'strikethrough', 'autolink', 'tasklist', 'footnotes', 'tagfilter', 'alerts']

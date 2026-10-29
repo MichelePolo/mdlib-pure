@@ -7,13 +7,17 @@ import { toElements } from '../../../src/adapter.ts'
 import { decodeEntity } from '../../../src/entities/index.ts'
 import { toc } from '../../../src/plugins/headings.ts'
 import { getFrontmatter } from '../../../src/plugins/frontmatter.ts'
+import { getMarkdown } from '../../../src/element.ts'
 import { escapeHtml, fenceFor, kb, makeMarkdown, rel, siteLinks } from '../context.js'
 import { asset, page } from '../layout.js'
 import { codeBlock, katexHead, pair } from './parts.js'
 
 const PATH = '/plugins/'
 
-/** `docs`: heading text in docs/api.md (or [doc slug, heading text]). */
+/**
+ * `docs`: heading text in docs/api.md (or [doc slug, heading text]).
+ * `whole`: the entry bundles the core and every plugin, and is measured so.
+ */
 export const PLUGIN_CARDS = [
   {
     id: 'gfm',
@@ -127,6 +131,21 @@ export const PLUGIN_CARDS = [
     extra: 'react',
   },
   {
+    id: 'element',
+    name: 'mdlib-pure/element',
+    adds: 'the `<mdlib-markdown>` viewer and the `<mdlib-editor>` editor with live preview, as Web Components',
+    import: "import { defineElements } from 'mdlib-pure/element'",
+    use: 'defineElements({ loaders }) · <mdlib-editor plugins="all" value="# Draft">',
+    syntax: 'every plugin on this page, chosen per element with `plugins="gfm math"` or `plugins="all"`; KaTeX and Mermaid through loaders, fetched only when a document uses them; raw HTML and functions only through named configs, never from attributes; styles in `mdlib-pure/editor.css`',
+    ast: 'no node of its own: `getMarkdown(plugins, config)` returns the instance behind an element, to `parse()` its text',
+    plugins: [],
+    example: '<mdlib-markdown class="md" plugins="gfm" source="\n| Element | For |\n|:--|:--|\n| `mdlib-markdown` | reading |\n| `mdlib-editor` | writing, with a live preview |"></mdlib-markdown>\n',
+    docs: ['elements', 'Quick start'],
+    docsLabel: 'Guide: Web Components',
+    extra: 'element',
+    whole: true,
+  },
+  {
     id: 'entities',
     name: 'mdlib-pure/entities',
     adds: 'the full HTML entity table, for Node, SSR and workers',
@@ -137,6 +156,7 @@ export const PLUGIN_CARDS = [
     plugins: [],
     example: 'Half: &frac12;, love: &hearts;, copyright: &copy;\n',
     docs: ['getting-started', 'Node, SSR, workers'],
+    docsLabel: 'Getting started: Node, SSR, workers',
     extra: 'entities',
   },
 ]
@@ -168,6 +188,12 @@ export function plugins({ sizes, tocs }) {
     } else if (card.extra === 'react') {
       const vnodes = createMarkdown({ decodeEntity }).toVNodes(card.example)
       output = renderToStaticMarkup(createElement('div', null, ...toElements(vnodes, createElement, 'react'))).replace(/^<div>|<\/div>$/g, '')
+    } else if (card.extra === 'element') {
+      // What the element renders into itself: the same shared instance.
+      const source = /source="([^"]*)"/.exec(card.example)[1]
+      output = getMarkdown('gfm').render(source)
+      extra = `<p class="item-links"><a href="${rel(PATH, '/samples/#elements')}">Try the live editor and viewer</a><a href="${rel(PATH, '/docs/blazor/')}">The Blazor wrapper, built on these elements</a></p>`
+      extraMd = 'A live editor and viewer: [Samples, Web Components](/samples/#elements). Blazor: [the wrapper built on these elements](/docs/blazor/).\n'
     } else if (card.extra === 'entities') {
       const without = createMarkdown().render(card.example).trim()
       const withTable = createMarkdown({ decodeEntity }).render(card.example).trim()
@@ -186,13 +212,13 @@ export function plugins({ sizes, tocs }) {
       <dl class="specs">
         <dt>Import</dt><dd><code>${escapeHtml(card.import)}</code></dd>
         <dt>Use</dt><dd><code>${escapeHtml(card.use)}</code></dd>
-        <dt>Size</dt><dd>${kb(sizes[card.id].gzip)} min + gzip</dd>
+        <dt>Size</dt><dd>${kb(sizes[card.id].gzip)} min + gzip${card.whole ? ', core and every plugin included' : ''}</dd>
         <dt>Syntax</dt><dd>${inline(card.syntax)}</dd>
         <dt>AST</dt><dd>${inline(card.ast)}</dd>
-        <dt>Reference</dt><dd><a href="${rel(PATH, docs)}">${card.id === 'entities' ? 'Getting started: Node, SSR, workers' : `API reference: ${card.name}`}</a></dd>
+        <dt>Reference</dt><dd><a href="${rel(PATH, docs)}">${card.docsLabel ?? `API reference: ${card.name}`}</a></dd>
       </dl>
       ${card.id === 'gfm' ? gfmParts(sizes) : ''}
-      ${pair(card.example, output, { math, label: card.extra === 'react' ? 'Result (React SSR)' : 'Result', outAttrs: diagrams ? ' data-mermaid' : '' })}
+      ${pair(card.example, output, { math, ...LABELS[card.extra], outAttrs: diagrams ? ' data-mermaid' : '' })}
       ${extra}
     </section>`
     const fence = fenceFor(card.example)
@@ -202,19 +228,19 @@ Adds ${card.adds}.
 
 - Import: \`${card.import}\`
 - Use: \`${card.use}\`
-- Size: ${kb(sizes[card.id].gzip)} min + gzip
+- Size: ${kb(sizes[card.id].gzip)} min + gzip${card.whole ? ', core and every plugin included' : ''}
 - Syntax: ${card.syntax}
 - AST: ${card.ast}
-- Reference: [${card.name}](${docs})
+- Reference: [${card.docsLabel ?? card.name}](${docs})
 ${card.id === 'gfm' ? `\n${gfmPartsMd(sizes)}\n` : ''}
-${fence}markdown
+${fence}${card.extra === 'element' ? 'html' : 'markdown'}
 ${card.example}${fence}
 
 ${extraMd}`
     return { html, twin }
   })
 
-  const intro = 'Each plugin is its own entry point: import only what you use. Sizes are measured at build time like `npm run size`: minified, gzipped, with the core counted once (plugins are measured without it).'
+  const intro = 'Each plugin is its own entry point: import only what you use. Sizes are measured at build time like `npm run size`: minified, gzipped, with the core counted once (plugins are measured without it). `mdlib-pure/element` is the exception: it bundles the core and every plugin, and is measured whole.'
   const body = `
     <header class="page-head wrap">
       <h1 class="title"><span class="mk" aria-hidden="true">#</span>Plugins</h1>
@@ -231,7 +257,7 @@ ${extraMd}`
     path: PATH,
     section: 'plugins',
     title: 'Plugins',
-    description: 'The first-party plugins of mdlib-pure: GFM, headings, containers, math, Mermaid diagrams, definition lists, mark, front matter, the framework adapter and the entity table.',
+    description: 'The first-party plugins of mdlib-pure: GFM, headings, containers, math, Mermaid diagrams, definition lists, mark, front matter, the framework adapter, the Web Components and the entity table.',
     body,
     head: `${usesMath ? katexHead(PATH) : ''}${usesMermaid ? `\n  <script type="module" src="${asset(PATH, 'js/mermaid-init.js')}"></script>` : ''}`,
   })
@@ -246,6 +272,12 @@ ${sections.map((s) => s.twin).join('\n')}
 A plugin is a plain object with \`block\`, \`inline\`, \`delimiters\`, \`transform\` and \`render\` fields. [\`AGENTS.md\`](/docs/extending/) explains how to choose the extension point and has a recipe for each. See also [For AI agents](/docs/agents/).
 `
   return { path: PATH, html, md: twin }
+}
+
+/** Pane labels per card kind. */
+const LABELS = {
+  react: { label: 'Result (React SSR)' },
+  element: { label: 'Result (what the element renders, here at build time)', srcLabel: 'HTML', srcLang: 'html' },
 }
 
 const GFM_PARTS = [

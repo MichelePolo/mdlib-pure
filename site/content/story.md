@@ -67,6 +67,45 @@ from the commits that fixed it:
   caught it and it was reverted. The input shrank to 1 MB and every timing
   limit became `budget(ms)`, tripled on CI ([a593dd7]).
 
+## Web Components, then Blazor
+
+`mdlib-pure/element` added two custom elements that work in plain HTML and in
+any framework: `<mdlib-markdown>`, a viewer, and `<mdlib-editor>`, an editor
+with toolbar and live preview ([7f25396]). They were written as the base of a
+Blazor wrapper. Core, every plugin and both elements came to 19.8 KB gzip at the time,
+within a 26 KB budget; KaTeX and Mermaid come through loaders, fetched only
+when a document needs them. The commit shipped with 7 Chromium tests.
+
+An agent then built `MdlibPure.Blazor` on the elements, and the work was
+reviewed ([13c87c3]): a Razor class library for .NET 10 with a viewer, an
+editor bound with `@bind-Value`, and a C# service for the AST. It has 48 bUnit
+tests and 20 Playwright end-to-end tests across Static SSR, Interactive
+Server, WebAssembly and Auto. Version 0.1.0 is attached to a
+[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0);
+the guide is [its README](/docs/blazor/).
+
+Building the wrapper found three problems in the elements, each reproduced
+in a test before the fix ([60c7298]):
+
+- **DOM morphing.** Blazor enhanced navigation (like Turbo and htmx) empties
+  elements it did not create, and the elements never recovered. A
+  `MutationObserver` now renders the viewer again and puts back the editor's
+  toolbar and panes, keeping the typed text.
+- **A stylesheet that disappeared.** The KaTeX stylesheet was a `<link>`
+  added once, which a morph removed for good. It is now adopted through
+  `document.adoptedStyleSheets`, with absolute font URLs.
+- **Late loaders.** Elements defined before their loaders never drew math or
+  diagrams. Every `defineElements()` call now refreshes the elements already
+  in the page.
+
+Then a rule for the docs ([8dcf108]): rule 10 of `AGENTS.md`, checked by
+`npm run check`, requires every public entry point to be documented in
+`docs/api.md` and the README, and every `docs/*.md` and
+`bindings/*/README.md` to be linked from the README. This site adds the other
+half: its build fails when one of those guides is not published as a docs
+page. That is how the [Web Components guide](/docs/elements/) and the
+[Blazor README](/docs/blazor/) became pages here.
+
 ## The maintainer decides
 
 Agents propose; Michele decides. Some of the decisions in the history:
@@ -84,6 +123,9 @@ Agents propose; Michele decides. Some of the decisions in the history:
   (Mermaid 12 measured at 215 KB gzip on first load). Chosen: no dependency
   on Mermaid, lazy loading, theme from the tokens with redraw on light/dark,
   pre-rendered output only through a `render` option ([287334c]).
+- The Blazor wrapper: built on the Web Components, in this repository, for
+  .NET 10, in every render mode, with every plugin and access to the AST, and
+  no server-side rendering of the Markdown for SEO ([13c87c3]).
 - The repository made public and this site published on GitHub Pages
   ([ba0b3a4]).
 
@@ -94,7 +136,8 @@ dependencies, no HTML sinks) and the size budgets. GitHub Actions runs it on
 Node 22 and 24, plus a Chromium suite with Playwright: CommonMark through the
 DOM, `renderTo()` never assigning `innerHTML` without raw HTML, hostile
 Markdown unable to run script, the theme, and a real Tailwind build
-([297d6af]).
+([297d6af]). A `blazor` job builds, tests and packs the wrapper and runs its
+end-to-end tests ([13c87c3]).
 
 ## This site
 
@@ -105,7 +148,9 @@ Playwright. Checking the Mermaid sample in a real browser found two problems
 that unit tests had not: this site switches themes through
 `<meta name="color-scheme">`, which the redraw did not watch, and Mermaid's
 black default edge-label background in dark mode. Both were fixed in the
-library ([287334c]).
+library ([287334c]). The [samples](/samples/#elements) include a live
+`<mdlib-editor>` and `<mdlib-markdown>`, defined from the library's sources
+with this site's own copies of KaTeX and Mermaid as loaders.
 
 [5a482ba]: https://github.com/MichelePolo/mdlib-pure/commit/5a482ba
 [1c4dd87]: https://github.com/MichelePolo/mdlib-pure/commit/1c4dd87
@@ -125,3 +170,7 @@ library ([287334c]).
 [a593dd7]: https://github.com/MichelePolo/mdlib-pure/commit/a593dd7
 [287334c]: https://github.com/MichelePolo/mdlib-pure/commit/287334c
 [ba0b3a4]: https://github.com/MichelePolo/mdlib-pure/commit/ba0b3a4
+[7f25396]: https://github.com/MichelePolo/mdlib-pure/commit/7f25396
+[60c7298]: https://github.com/MichelePolo/mdlib-pure/commit/60c7298
+[13c87c3]: https://github.com/MichelePolo/mdlib-pure/commit/13c87c3
+[8dcf108]: https://github.com/MichelePolo/mdlib-pure/commit/8dcf108

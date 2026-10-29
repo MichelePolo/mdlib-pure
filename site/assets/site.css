@@ -274,6 +274,12 @@ h3.title { font-size: 1.5rem; }
   .pane-src { border-inline-end: 0; border-block-end: 1px solid var(--guide); }
 }
 
+/* Source above the output, at every width (the Web Components sample) */
+.pair-stack {
+  grid-template-columns: minmax(0, 1fr);
+  & > .pane-src { border-inline-end: 0; border-block-end: 1px solid var(--guide); }
+}
+
 /* --- Home ------------------------------------------------------------------- */
 
 .hero {
@@ -328,6 +334,22 @@ h3.title { font-size: 1.5rem; }
   .datasheet dl dd { padding-block-start: 0; border-block-start: 0; }
 }
 
+/* Ways to use it: title, text, code and links aligned across columns (subgrid) */
+.uses {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(1.5rem, 4vw, 3.5rem);
+  margin-block-start: 1.75rem;
+}
+.use {
+  display: grid; grid-row: span 4; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); gap: 0; align-content: start;
+  min-inline-size: 0;
+  padding-block: 1rem 2.5rem; border-block-start: 1px solid var(--md-color-border);
+  & > .title { margin-block-end: 0.6rem; }
+  & pre { margin-block-end: 0.75rem; font-size: 0.8125rem; }
+}
+.use-links { margin: 0; font-size: 0.9375rem; }
+
+@media (width < 56rem) { .uses { grid-template-columns: minmax(0, 1fr); } }
+
 .split {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem);
   align-items: start;
@@ -338,6 +360,7 @@ h3.title { font-size: 1.5rem; }
 .table-wrap { overflow-x: auto; }
 .md table { min-inline-size: 100%; }
 .num-table td:not(:first-child), .num-table th:not(:first-child) { text-align: end; }
+.num-last :is(td, th):last-child { white-space: nowrap; }
 
 /* --- Rendered Markdown, site additions ------------------------------------- */
 
@@ -491,6 +514,12 @@ details.disclosure {
 
 .tw-preview { display: block; }
 
+/* The live Web Components sample (styles/editor.css styles the elements) */
+.elements-out { display: grid; gap: 1.25rem; }
+.elements-out > mdlib-editor { background: var(--raised); }
+.elements-events { margin: 0; font-size: 0.875rem; }
+.elements-events code { padding: 0.1em 0.35em; border-radius: 3px; background: var(--md-color-code-bg); color: var(--ink); }
+
 /* --- Story ------------------------------------------------------------------ */
 
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
@@ -520,6 +549,7 @@ details.disclosure {
 
 .code-caption { padding-inline: 0 !important; border: 0 !important; }
 .source-note { margin-block-start: 1rem; font-size: 0.875rem; }
+.doc-note { margin-block-end: 1.5rem; & > .markdown-alert { margin: 0; } }
 .gfm-parts { margin-block-end: 1.5rem; }
 .tw-host { padding: 1.25rem 1.5rem; }
 .story { padding-block: clamp(2rem, 5vw, 3.5rem) 4rem; }

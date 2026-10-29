@@ -7,7 +7,7 @@ import { decodeEntity } from '../../../src/entities/index.ts'
 import { getFrontmatter } from '../../../src/plugins/frontmatter.ts'
 import { configFor, pluginsFor } from '../../lib/plugins.js'
 import { SAMPLES } from '../../lib/samples.js'
-import { escapeHtml, fenceFor, makeMarkdown, read, rel } from '../context.js'
+import { abs, escapeHtml, fenceFor, githubUrl, makeMarkdown, read, rel } from '../context.js'
 import { asset, page } from '../layout.js'
 import { codeBlock, katexHead, pair } from './parts.js'
 
@@ -54,15 +54,52 @@ export function Markdown({ source }) {
   return <article className="md">{toElements(md.toVNodes(source), createElement, 'react')}</article>
 }`
 
+const ELEMENTS_CONFIG = `import { defineElements } from 'mdlib-pure/element'
+
+// This site's own KaTeX and Mermaid, fetched only on first use
+// (simplified from site/client/elements.js)
+defineElements({
+  loaders: {
+    katex: () => loadKatexAutoRender(), // resolves to renderMathInElement
+    katexStylesheet: '/assets/katex/katex.min.css',
+    mermaid: () => import('/assets/mermaid/mermaid.js'),
+  },
+})
+
+// Debounced: 200 ms after the last keystroke (the delay attribute)
+document.querySelector('mdlib-editor').addEventListener('input', (e) => save(e.target.value))`
+
+// Continuation lines of a paragraph may be indented: the viewer strips it.
+const VIEWER_SOURCE = `**Rendered in your browser** from the \`source\` attribute,
+  with GFM and math: ~~strikethrough~~, www.commonmark.org
+  and $a^2 + b^2 = c^2$.`
+
+/** Attribute value: only `&` and `"` need escaping inside double quotes. */
+const attr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+
+/** The markup of the live sample: shown as source and used as is in the page. */
+const elementsHtml = (text) => `<mdlib-markdown class="md" plugins="gfm math"
+  source="${attr(VIEWER_SOURCE)}"></mdlib-markdown>
+
+<mdlib-editor plugins="all" label="Sample document" style="block-size: 34rem"
+  value="${attr(text)}"></mdlib-editor>
+`
+
 export function samples() {
   const prose = makeMarkdown([])
   const inline = (s) => prose.render(s).replace(/^<p>|<\/p>\n$/g, '')
   let usesMath = false
   let usesMermaid = false
+  let usesElements = false
   const twinParts = []
 
   const sections = SAMPLES.map((s) => {
-    const source = read(`site/content/samples/${s.id}.md`)
+    let source = read(`site/content/samples/${s.id}.md`)
+    let srcLabel = 'Markdown'
+    let srcLang = 'markdown'
+    let stack = false
+    let cls
+    let links = ''
     let output
     let config = configFor(s.plugins)
     let configLang = 'js'
@@ -76,6 +113,21 @@ export function samples() {
       config = twConfig
       label = 'Result (Tailwind CSS v4 utilities, no theme)'
       outAttrs = ' data-tailwind'
+    } else if (s.special === 'elements') {
+      // Live: the browser defines the elements (site/client/elements.js).
+      usesElements = true
+      source = elementsHtml(source)
+      output = `${source}
+        <p class="muted elements-events"><code>input</code> events from the editor: <span id="elements-events">none yet</span></p>
+        <noscript><p>This sample needs JavaScript: the elements render in the browser.</p></noscript>`
+      config = ELEMENTS_CONFIG
+      label = 'Result (live Web Components)'
+      srcLabel = 'HTML'
+      srcLang = 'html'
+      stack = true
+      cls = 'pane-out elements-out'
+      afterMd = `On [the HTML page](${abs('/samples/#elements')}) this markup runs as is, defined by [\`site/client/elements.js\`](${githubUrl('site/client/elements.js')}). Guides: [Web Components](/docs/elements/), [Blazor](/docs/blazor/).\n`
+      links = `<a href="${rel(PATH, '/docs/elements/')}">Web Components guide</a><a href="${rel(PATH, '/docs/blazor/')}">The Blazor wrapper, built on them</a><a href="${githubUrl('site/client/elements.js')}">Source of this sample</a>`
     } else if (s.special === 'react') {
       const md = createMarkdown({ decodeEntity, plugins: pluginsFor(s.plugins) })
       output = renderToStaticMarkup(createElement('div', null, ...toElements(md.toVNodes(source), createElement, 'react'))).replace(/^<div>|<\/div>$/g, '')
@@ -108,7 +160,7 @@ ${s.description}
 ${config}
 \`\`\`
 
-${fence}markdown
+${fence}${srcLang}
 ${source}${fence}
 ${afterMd ? `\n${afterMd}` : ''}`)
     return `
@@ -116,13 +168,13 @@ ${afterMd ? `\n${afterMd}` : ''}`)
       <h2 class="title" id="${s.id}-title"><span class="mk" aria-hidden="true">##</span>${escapeHtml(s.title)}</h2>
       <div class="md prose"><p>${inline(s.description)}</p></div>
       ${config.includes('\n') ? codeBlock(configLang, config, 'Configuration') : `<p class="config">Configuration: <code>${escapeHtml(config)}</code></p>`}
-      ${pair(source, output, { math, label, cls: s.special === 'tailwind' ? 'tw-host pane-out' : undefined, outAttrs })}
+      ${pair(source, output, { math, label, cls: s.special === 'tailwind' ? 'tw-host pane-out' : cls, outAttrs, srcLabel, srcLang, stack })}
       ${after}
-      ${playground ? `<p class="item-links">${playground}</p>` : ''}
+      ${playground || links ? `<p class="item-links">${playground}${links}</p>` : ''}
     </section>`
   })
 
-  const intro = 'Each sample shows its Markdown next to the output, rendered when this site was built by the same library you would install. Math is typeset in your browser by KaTeX; everything else is static HTML.'
+  const intro = 'Each sample shows its Markdown next to the output, rendered when this site was built by the same library you would install. In your browser, KaTeX typesets the math and Mermaid draws the diagrams, and the last sample is a live editor; everything else is static HTML.'
   const body = `
     <header class="page-head wrap">
       <h1 class="title"><span class="mk" aria-hidden="true">#</span>Samples</h1>
@@ -135,11 +187,12 @@ ${afterMd ? `\n${afterMd}` : ''}`)
     path: PATH,
     section: 'samples',
     title: 'Samples',
-    description: 'mdlib-pure samples, source next to output: CommonMark, GFM, math with KaTeX, definition lists, containers, mark, front matter, syntax highlighting, Tailwind classes and React.',
+    description: 'mdlib-pure samples, source next to output: CommonMark, GFM, math with KaTeX, Mermaid diagrams, definition lists, containers, mark, front matter, syntax highlighting, Tailwind classes, React and a live <mdlib-editor>.',
     body,
     // The document also loads the Tailwind build: @property rules only register
     // at document level, and the shadow root's utilities rely on them.
-    head: `${usesMath ? katexHead(PATH) : ''}${usesMermaid ? `\n  <script type="module" src="${asset(PATH, 'js/mermaid-init.js')}"></script>` : ''}\n  <link rel="stylesheet" href="${asset(PATH, 'tailwind-sample.css')}">`,
+    head: `${usesMath ? katexHead(PATH) : ''}${usesMermaid ? `\n  <script type="module" src="${asset(PATH, 'js/mermaid-init.js')}"></script>` : ''}\n  <link rel="stylesheet" href="${asset(PATH, 'tailwind-sample.css')}">${usesElements ? `\n  <link rel="stylesheet" href="${asset(PATH, 'editor.css')}">` : ''}`,
+    scripts: usesElements ? [asset(PATH, 'js/elements.js')] : [],
   })
   const twin = `# Samples\n\n${intro}\n\n${twinParts.join('\n')}`
   return { path: PATH, html, md: twin }

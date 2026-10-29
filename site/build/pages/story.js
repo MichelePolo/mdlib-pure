@@ -112,7 +112,7 @@ ${article}
     path: PATH,
     section: 'story',
     title: 'Built with AI',
-    description: 'How mdlib-pure was built with AI: AGENTS.md dogfooded by agents, bugs found by adversarial tests and reviews, maintainer decisions and CI, from the git history.',
+    description: 'How mdlib-pure was built with AI: AGENTS.md dogfooded by agents, bugs found by adversarial tests and reviews, the Web Components and the Blazor wrapper, maintainer decisions and CI, from the git history.',
     body,
   })
 

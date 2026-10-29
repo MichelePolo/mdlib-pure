@@ -6,6 +6,9 @@
 // current position; the first match wins. Every regex is linear on any input
 // (AGENTS.md rule 8): alternatives inside quantifiers never overlap, and
 // unclosed comments or strings consume to the end instead of backtracking.
+// A name scanned before a lookahead is bounded ({0,63}): on failure only one
+// word is consumed, so an unbounded run (`a-a-a…`) would be rescanned from
+// every position inside it.
 import { h } from '../../src/render/vnode.ts'
 
 const word = (list) => new RegExp(`\\b(?:${list})\\b`, 'y')
@@ -23,9 +26,9 @@ const CSS = [
   ['comment', /\/\*(?:[^*]|\*(?!\/))*(?:\*\/)?/y],
   ['string', /'(?:[^'\\\n]|\\.)*'?|"(?:[^"\\\n]|\\.)*"?/y],
   ['keyword', /@[\w-]+/y],
-  ['prop', /--?[A-Za-z][\w-]*(?=\s*:)/y],
+  ['prop', /--?[A-Za-z][\w-]{0,63}(?=\s*:)/y],
   ['atom', /#[\da-fA-F]{3,8}\b|-?\b\d+(?:\.\d+)?(?:%|[a-z]+)?/y],
-  ['fn', /[A-Za-z][\w-]*(?=\()/y],
+  ['fn', /[A-Za-z][\w-]{0,63}(?=\()/y],
 ]
 
 const SH = [
@@ -39,7 +42,24 @@ const HTML = [
   ['comment', /<!--(?:[^-]|-(?!->))*(?:-->)?/y],
   ['tag', /<\/?[A-Za-z][\w-]*|\/?>/y],
   ['string', /"[^"]*"?|'[^']*'?/y],
-  ['prop', /[A-Za-z_:][\w:.-]*(?==)/y],
+  ['prop', /[A-Za-z_:][\w:.-]{0,63}(?==)/y],
+]
+
+const CS = [
+  ['comment', /\/\/[^\n]*|\/\*(?:[^*]|\*(?!\/))*(?:\*\/)?/y],
+  ['string', /\$?"(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?/y],
+  ['keyword', word('abstract|as|async|await|bool|break|case|catch|class|const|continue|default|do|double|else|enum|finally|for|foreach|get|if|in|init|int|interface|internal|is|namespace|new|object|out|override|private|protected|public|readonly|record|required|return|sealed|set|static|string|struct|switch|this|throw|try|typeof|using|var|void|where|while|yield')],
+  ['atom', /\b(?:true|false|null)\b|\b\d[\d_]*(?:\.\d+)?[fdmlu]?\b/y],
+  ['fn', /[A-Za-z_][\w]*(?=\()/y],
+]
+
+// Razor: markup, @directives and @bind-… attributes, C# in @code blocks.
+const RAZOR = [
+  ['comment', /@\*(?:[^*]|\*(?!@))*(?:\*@)?|<!--(?:[^-]|-(?!->))*(?:-->)?/y],
+  ['prop', /[A-Za-z_:@][\w:.-]{0,63}(?==)/y],
+  ['keyword', /@[A-Za-z_][\w]*/y],
+  ['tag', /<\/?[A-Za-z][\w.-]*|\/?>/y],
+  ...CS.slice(1),
 ]
 
 const JSON_ = [
@@ -51,6 +71,7 @@ const JSON_ = [
 const LANGS = new Map([
   ['js', JS], ['javascript', JS], ['mjs', JS], ['ts', JS], ['typescript', JS], ['jsx', JSX], ['tsx', JSX],
   ['css', CSS], ['sh', SH], ['bash', SH], ['shell', SH], ['html', HTML], ['xml', HTML], ['json', JSON_],
+  ['csharp', CS], ['cs', CS], ['razor', RAZOR], ['cshtml', RAZOR],
 ])
 
 // Plain text that no rule matched: whole words and runs, to keep tokens few.

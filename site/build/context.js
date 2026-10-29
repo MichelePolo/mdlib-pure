@@ -19,18 +19,39 @@ export const PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
 
 export const read = (path) => readFileSync(join(ROOT, path), 'utf8')
 
+/** The Blazor wrapper's release: the .nupkg is attached there (not on nuget.org). */
+export const BLAZOR_RELEASE = `${REPO}/releases/tag/blazor-v0.1.0`
+
 /**
  * Docs pages, rendered from the repository's own Markdown (`source`). Only
- * the agents page is written for the site.
+ * the agents page is written for the site. Every `docs/*.md` and
+ * `bindings/*\/README.md` must be here: the build fails otherwise (see
+ * checkDocsCoverage() in scripts/build-site.js). `note` (Markdown) is shown
+ * above the page, for what the site knows and the file does not say.
  */
 export const DOCS = [
   { slug: 'getting-started', title: 'Getting started', source: 'README.md', summary: 'install, usage, options, highlighting, frameworks, styling, plugins, performance' },
   { slug: 'api', title: 'API reference', source: 'docs/api.md', summary: '`createMarkdown()`, options, methods, AST shape, rendering helpers, every plugin' },
+  {
+    slug: 'elements',
+    title: 'Web Components',
+    source: 'docs/elements.md',
+    summary: '`<mdlib-markdown>` and `<mdlib-editor>` (`mdlib-pure/element`): attributes, loaders, named configs, events, form value, frameworks that rewrite the page',
+    description: 'The mdlib-pure Web Components: the <mdlib-markdown> viewer and the <mdlib-editor> editor with live preview, for plain HTML and any framework.',
+  },
+  {
+    slug: 'blazor',
+    title: 'Blazor',
+    source: 'bindings/blazor/README.md',
+    summary: '`MdlibPure.Blazor` 0.1.0 for .NET 10: `<MarkdownEditor>`, `<Markdown>`, every render mode, the AST service; the `.nupkg` is on the GitHub release',
+    description: 'MdlibPure.Blazor: a Markdown editor with live preview and a viewer for Blazor (.NET 10) in every render mode, built on the mdlib-pure Web Components, with a C# AST service.',
+    note: `The package is not on nuget.org yet: download \`MdlibPure.Blazor.0.1.0.nupkg\` from the [GitHub release](${BLAZOR_RELEASE}) and use it from a local feed as described under [Install](#install).`,
+  },
   { slug: 'tokens', title: 'Design tokens', source: 'docs/tokens.md', summary: 'the `--md-*` tokens of `theme.css`, light and dark, Tailwind CSS v4' },
   { slug: 'security', title: 'Security', source: 'docs/security.md', summary: 'what is guaranteed by default, raw HTML, URL policy, DOM clobbering' },
   { slug: 'extending', title: 'Extending: plugin guide', source: 'AGENTS.md', summary: 'AGENTS.md: rules, how parsing works, recipes for every extension point' },
   { slug: 'changelog', title: 'Changelog', source: 'CHANGELOG.md', summary: 'notable changes in each version' },
-  { slug: 'agents', title: 'For AI agents', source: 'site/content/agents.md', site: true, summary: 'llms.txt, Markdown twins, AGENTS.md as the contract, how to ask for a plugin' },
+  { slug: 'agents', title: 'For AI agents', source: 'site/content/agents.md', site: true, summary: 'llms.txt, Markdown twins, AGENTS.md as the contract, how to ask for a plugin, the guides for using it in an app' },
 ].map((d) => ({ ...d, path: `/docs/${d.slug}/`, repo: d.site ? null : d.source }))
 
 const DOC_BY_REPO = new Map(DOCS.filter((d) => d.repo).map((d) => [d.repo, d]))

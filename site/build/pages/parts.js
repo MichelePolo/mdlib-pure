@@ -4,10 +4,10 @@ import { asset } from '../layout.js'
 
 const code = makeMarkdown([])
 
-/** Markdown source next to its rendered output. */
-export function pair(source, output, { math = false, label = 'Result', outAttrs = '', cls = 'md pane-out' } = {}) {
-  return `<div class="pair">
-        <div class="pane pane-src"><p class="pane-label">Markdown</p><pre><code class="language-markdown">${escapeHtml(source)}</code></pre></div>
+/** Markdown source next to its rendered output (`stack`: source above it). */
+export function pair(source, output, { math = false, label = 'Result', outAttrs = '', cls = 'md pane-out', srcLabel = 'Markdown', srcLang = 'markdown', stack = false } = {}) {
+  return `<div class="pair${stack ? ' pair-stack' : ''}">
+        <div class="pane pane-src"><p class="pane-label">${srcLabel}</p><pre><code class="language-${srcLang}">${escapeHtml(source)}</code></pre></div>
         <div class="pane"><p class="pane-label">${label}</p><div class="${cls}"${math ? ' data-katex' : ''}${outAttrs}>${output}</div></div>
       </div>`
 }

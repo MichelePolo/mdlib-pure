@@ -1,6 +1,7 @@
 // Samples shown on /samples/ and offered by the playground. Sources live in
 // site/content/samples/<id>.md. `plugins` are ids from plugins.js; `special`
 // marks samples whose page shows extra configuration (see pages/samples.js).
+// `elements`: the source is the editor's initial text, shown inside the HTML.
 export const SAMPLES = [
   {
     id: 'commonmark',
@@ -73,6 +74,14 @@ export const SAMPLES = [
     plugins: ['gfm'],
     description: '`mdlib-pure/adapter` turns VNodes into React, Preact or Vue elements. This preview was produced by `react-dom/server` when the site was built.',
     special: 'react',
+    playground: false,
+  },
+  {
+    id: 'elements',
+    title: 'Web Components, live',
+    plugins: [],
+    description: '`mdlib-pure/element` defines `<mdlib-markdown>` and `<mdlib-editor>`. Both are live below, defined in your browser from the HTML above: the viewer renders its `source` attribute, the editor renders its preview on every keystroke and sends a debounced `input` event. KaTeX and Mermaid come from this site, loaded only when the text needs them.',
+    special: 'elements',
     playground: false,
   },
 ]

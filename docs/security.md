@@ -74,6 +74,24 @@ is Mermaid's: `renderMermaid` uses `securityLevel: 'strict'` by default
 (labels sanitized, no click callbacks); for untrusted input consider
 `'sandbox'` and keep Mermaid up to date.
 
+## Web Components
+
+`<mdlib-markdown>` and `<mdlib-editor>` (`mdlib-pure/element`) render through
+`renderTo()` with the defaults above, the editor's live preview included.
+
+- Attributes only choose plugins and a named config. `html`, `sanitize`,
+  `allowUrl` and `highlight` come only from `defineElements({ configs })`,
+  written in JavaScript: markup or content that sets attributes cannot turn
+  raw HTML on or loosen the URL policy.
+- Math is typeset by KaTeX with its defaults (`trust: false`: no `\href`, no
+  `\includegraphics`); diagrams by Mermaid with `securityLevel: 'strict'`.
+  Both write into the element, outside mdlib-pure's DOM-safe path.
+- The loaders are yours: `mermaid` and `katex` import what you give them, and
+  `katexStylesheet` is fetched and added to `document.adoptedStyleSheets`.
+  Point them at files you serve (no CDN is hard-coded).
+- Framework wrappers built on the elements (the
+  [Blazor wrapper](../bindings/blazor/README.md#security)) add their own notes.
+
 ## DOM clobbering
 
 Element ids become globals (`window.config`), so ids derived from content

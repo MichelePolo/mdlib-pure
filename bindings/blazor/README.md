@@ -51,9 +51,10 @@ and ignores it.
 
 Until the package is published on nuget.org, use a local package feed.
 
-1. Get `MdlibPure.Blazor.0.1.0.nupkg` (from the maintainer, or build it, see
-   [Building from source](#building-from-source)) and put it in a folder, for
-   example `packages/` next to your solution.
+1. Download `MdlibPure.Blazor.0.1.0.nupkg` from the
+   [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0)
+   (or build it, see [Building from source](#building-from-source)) and put it
+   in a folder, for example `packages/` next to your solution.
 2. Add a `nuget.config` next to your solution:
 
    ```xml

@@ -16,6 +16,10 @@ samples.
    example [`/docs/api.md`](/docs/api.md). Each HTML page announces it in its
    head with `<link rel="alternate" type="text/markdown">`. The docs twins are
    the repository's Markdown files, with links pointing to the other twins.
+4. To use the library in an app rather than extend it, read the guide for
+   the way in: [`docs/elements.md`](/docs/elements/) for the Web Components,
+   [`bindings/blazor/README.md`](/docs/blazor/) for Blazor (see
+   [below](#using-it-in-an-app)).
 
 ## AGENTS.md is the extension contract
 
@@ -25,7 +29,9 @@ working on mdlib-pure. It has:
 - **Non-negotiable rules**, each with the command that verifies it: zero
   runtime dependencies, CommonMark 652/652, size budgets, no HTML sinks,
   erasable TypeScript, tests with adversarial input, semantic CSS tokens,
-  linear regexes, `Map` lookups for input-keyed data.
+  linear regexes, `Map` lookups for input-keyed data, and docs kept complete
+  for humans and agents (every entry point in `docs/api.md` and the README,
+  every guide linked from the README).
 - **How parsing works**: the block phase, the inline phase, transforms,
   rendering, and per-parse state in `env`.
 - **A decision tree** for choosing the extension point (block rule,
@@ -63,12 +69,44 @@ browser helper loads the library only when a page needs it, and a `render`
 option accepts pre-rendered output. `mdlib-pure/mermaid` and
 `mdlib-pure/math` follow it.
 
+## Using it in an app
+
+Two guides cover embedding the library; both are docs pages here, so they are
+in [`/llms-full.txt`](/llms-full.txt) and have `.md` twins:
+
+- [`docs/elements.md`](/docs/elements/): `mdlib-pure/element`, the
+  `<mdlib-markdown>` viewer and the `<mdlib-editor>` editor with live
+  preview, for plain HTML and any framework. Attributes, loaders for KaTeX
+  and Mermaid, named configs (the only way to set functions or `html`),
+  events and form value, frameworks that rewrite the page.
+- [`bindings/blazor/README.md`](/docs/blazor/): `MdlibPure.Blazor` 0.1.0,
+  the Blazor wrapper (.NET 10) built on those elements: `<MarkdownEditor>`
+  and `<Markdown>` in every render mode, `IMarkdownService` for the AST. It is
+  not on nuget.org: the `.nupkg` is attached to the
+  [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0).
+
+For example:
+
+```text
+Read bindings/blazor/README.md from the mdlib-pure repository.
+Add a Markdown editor to the article edit page of this Blazor Web App
+(Interactive Server): bind it to Article.Body with @bind-Value inside the
+existing EditForm, enable MarkdownPlugins.Gfm | MarkdownPlugins.Math, and
+raise MaximumReceiveMessageSize as the Setup section says.
+```
+
+Every `docs/*.md` and `bindings/*/README.md` of the repository is published
+on this site: the site build fails if one is missing, so a new guide cannot
+be forgotten.
+
 ## It has been done
 
 The `container`, `math`, `mark`, `frontmatter` and `deflist` plugins were
 written by agents from `AGENTS.md`, and the friction the first agent ran
-into was folded back into the guide. The [story of the
-library](/story/) has the details, from the git history.
+into was folded back into the guide. The Blazor wrapper was built by an agent
+on the Web Components; doing so found three robustness problems in the
+elements, fixed with a test each. The [story of the library](/story/) has the
+details, from the git history.
 
 ## Machine-friendly by design
 
