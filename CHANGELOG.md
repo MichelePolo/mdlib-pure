@@ -47,6 +47,13 @@ First release.
 - `theme.css` with semantic `--md-*` tokens (light/dark via `color-scheme`);
   `tailwind.css` for Tailwind CSS v4.
 
+### Bindings
+
+- `MdlibPure.Blazor` 0.1.0 (NuGet, in `bindings/blazor/`, not published
+  yet): `<Markdown>` and `<MarkdownEditor @bind-Value>` for every Blazor
+  render mode, `IMarkdownService` for the AST, KaTeX and Mermaid bundled and
+  loaded on demand.
+
 ### Tooling
 
 - `AGENTS.md` guide for AI agents, tested by having an agent build a plugin

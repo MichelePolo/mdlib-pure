@@ -1,0 +1,12 @@
+@page "/auto"
+@rendermode InteractiveAuto
+
+<PageTitle>Interactive Auto</PageTitle>
+
+<h1>Interactive Auto</h1>
+
+<Playground Mode="Interactive Auto" Delay="Delay" />
+
+@code {
+    [SupplyParameterFromQuery] public int? Delay { get; set; }
+}

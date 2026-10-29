@@ -1,0 +1,133 @@
+@namespace MdlibPure.Blazor
+@using System.Diagnostics.CodeAnalysis
+@using System.Linq.Expressions
+@inherits InputBase<string?>
+@*
+    Markdown editor with live preview: <mdlib-editor>.
+
+    The element renders the preview in the browser on every keystroke and
+    dispatches a debounced `input` event (and `change` on blur) with the value
+    in event.target.value: that event drives @bind-Value, so a server round trip
+    (Interactive Server) never delays typing. Values coming back as the `value`
+    attribute while the user types are echoes, and the element ignores them.
+
+    Static SSR: no events reach .NET. The element is form-associated, so with a
+    `name` (given, or generated from @bind-Value inside an EditForm, like
+    InputText) its value is posted with the form.
+*@
+<mdlib-editor @attributes="AdditionalAttributes"
+              class="@ClassAttribute"
+              style="@Style"
+              value="@CurrentValueAsString"
+              plugins="@PluginsAttribute"
+              config="@Config"
+              view="@ViewAttribute"
+              delay="@Delay"
+              label="@Label"
+              name="@NameAttribute"
+              inert="@Inert"
+              data-permanent
+              @oninput="OnInput"
+              @ref="Element"></mdlib-editor>
+
+@code {
+    private bool _unbound;
+
+    /// <summary>Plugins to enable in the preview. Default <see cref="MarkdownPlugins.None"/> (CommonMark only).</summary>
+    [Parameter] public MarkdownPlugins Plugins { get; set; }
+
+    /// <summary>Name of options registered in JavaScript with <c>defineElements({ configs })</c>.</summary>
+    [Parameter] public string? Config { get; set; }
+
+    /// <summary>Panes shown at first. The toolbar's view buttons change it in the browser.</summary>
+    [Parameter] public MarkdownEditorView View { get; set; }
+
+    /// <summary>Milliseconds of typing pause before <c>ValueChanged</c> fires. Default 200 (the element's default).</summary>
+    [Parameter] public int? Delay { get; set; }
+
+    /// <summary>Accessible name of the text area. Default "Markdown".</summary>
+    [Parameter] public string? Label { get; set; }
+
+    /// <summary>
+    /// Form field name: the value is submitted with the form under this name (Static SSR forms).
+    /// Inside an <c>EditForm</c> with <c>@bind-Value</c> it defaults to the bound expression, like <c>InputText</c>.
+    /// </summary>
+    [Parameter] public string? Name { get; set; }
+
+    /// <summary>Extra CSS classes (validation classes such as <c>modified</c>/<c>invalid</c> are added inside an <c>EditForm</c>).</summary>
+    [Parameter] public string? Class { get; set; }
+
+    /// <summary>Inline style, e.g. <c>block-size: 30rem</c>: the panes fill the editor and scroll.</summary>
+    [Parameter] public string? Style { get; set; }
+
+    /// <summary>
+    /// While an interactive component is prerendered and not yet interactive, render the editor
+    /// <c>inert</c> (visible, but it cannot be focused or typed into): Blazor replaces prerendered
+    /// markup when it becomes interactive, which would discard what was typed. Default <c>true</c>.
+    /// </summary>
+    [Parameter] public bool InertUntilInteractive { get; set; } = true;
+
+    /// <summary>The <c>&lt;mdlib-editor&gt;</c> element, once rendered.</summary>
+    [DisallowNull] public ElementReference? Element { get; protected set; }
+
+    /// <inheritdoc />
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        // InputBase requires an expression (@bind-Value provides one). Accept
+        // Value="…" alone too, e.g. a plain SSR form with Name.
+        if (ValueExpression is null && !parameters.TryGetValue<Expression<Func<string?>>>(nameof(ValueExpression), out _))
+        {
+            _unbound = true;
+            ValueExpression = () => Value;
+        }
+
+        return base.SetParametersAsync(parameters);
+    }
+
+    /// <inheritdoc />
+    protected override bool TryParseValueFromString(string? value, out string? result, [NotNullWhen(false)] out string? validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = null;
+        return true;
+    }
+
+    private void OnInput(ChangeEventArgs e) => CurrentValueAsString = e.Value as string ?? e.Value?.ToString() ?? string.Empty;
+
+    private string? ClassAttribute
+    {
+        get
+        {
+            var validation = EditContext is null ? null : EditContext.FieldCssClass(FieldIdentifier);
+            var css = string.Join(' ', new[] { Class, validation }.Where(c => !string.IsNullOrWhiteSpace(c)));
+            return css.Length == 0 ? null : css;
+        }
+    }
+
+    private string? PluginsAttribute => Plugins == MarkdownPlugins.None ? null : Plugins.ToAttributeValue();
+
+    private string ViewAttribute => View switch
+    {
+        MarkdownEditorView.Write => "write",
+        MarkdownEditorView.Preview => "preview",
+        _ => "split",
+    };
+
+    private string? NameAttribute
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Name))
+            {
+                return Name;
+            }
+
+            var generated = _unbound ? null : NameAttributeValue;
+            return string.IsNullOrEmpty(generated) ? null : generated;
+        }
+    }
+
+    // AssignedRenderMode first: RendererInfo is only read for components that have a render mode
+    // (bUnit throws when a test reads RendererInfo without setting it).
+    private bool Inert => InertUntilInteractive && AssignedRenderMode is not null && !RendererInfo.IsInteractive;
+}

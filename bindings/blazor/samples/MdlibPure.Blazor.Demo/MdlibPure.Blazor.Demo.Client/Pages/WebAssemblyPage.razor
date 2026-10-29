@@ -1,0 +1,12 @@
+@page "/wasm"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Interactive WebAssembly</PageTitle>
+
+<h1>Interactive WebAssembly</h1>
+
+<Playground Mode="Interactive WebAssembly" Delay="Delay" />
+
+@code {
+    [SupplyParameterFromQuery] public int? Delay { get; set; }
+}

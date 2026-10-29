@@ -1,0 +1,17 @@
+@* A parent using @bind-Value, as an app would. *@
+<MarkdownEditor @bind-Value="Text" Plugins="MarkdownPlugins.Gfm" />
+<span id="echo">@Text</span>
+
+@code {
+    [Parameter] public string? Text { get; set; } = "# Start";
+
+    public int Changes { get; private set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            Changes++;
+        }
+    }
+}

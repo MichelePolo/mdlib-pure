@@ -1,0 +1,21 @@
+@page "/"
+
+<PageTitle>mdlib-pure for Blazor</PageTitle>
+
+<h1>mdlib-pure for Blazor</h1>
+
+<p class="lead">
+    The same <code>&lt;MarkdownEditor&gt;</code> and <code>&lt;Markdown&gt;</code> components in every render mode.
+    The preview is rendered in the browser on every keystroke; the C# value follows after a short pause.
+</p>
+
+<ul class="modes">
+    <li><a href="ssr"><strong>Static SSR</strong></a>: no interactivity. The editor works in the browser and posts its value with a form.</li>
+    <li><a href="server"><strong>Interactive Server</strong></a>: <code>@@bind-Value</code> over the SignalR circuit.</li>
+    <li><a href="wasm"><strong>Interactive WebAssembly</strong></a>: .NET in the browser.</li>
+    <li><a href="auto"><strong>Interactive Auto</strong></a>: Server first, WebAssembly once downloaded.</li>
+</ul>
+
+<h2>Read-only viewer</h2>
+
+<Markdown Value="@Samples.Short" Plugins="MarkdownPlugins.All" id="home-viewer" />

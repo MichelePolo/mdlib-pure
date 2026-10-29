@@ -1,0 +1,91 @@
+@inject IMarkdownService MarkdownService
+@*
+    The body of the interactive demo pages: the editor bound to a C# string,
+    that string as C# sees it, a viewer of the same text, and the AST service.
+    Config="demo" selects options registered in JavaScript by the app's own
+    initializer (wwwroot/MdlibPure.Blazor.Demo.lib.module.js): external links
+    open in a new tab.
+*@
+<p id="status" class="status" data-interactive="@(RendererInfo.IsInteractive ? "true" : "false")" data-renderer="@RendererInfo.Name">
+    @Mode ·
+    @if (RendererInfo.IsInteractive)
+    {
+        <span>interactive (@RendererInfo.Name)</span>
+    }
+    else
+    {
+        <span>prerendered, waiting for interactivity…</span>
+    }
+</p>
+
+<MarkdownEditor @bind-Value="Text" Plugins="MarkdownPlugins.All" Config="demo" Delay="Delay" Label="Release notes (Markdown)" Style="block-size: 30rem" />
+
+<div class="panels">
+    <section>
+        <h2>C# value <small id="value-length">@Text.Length characters</small></h2>
+        <pre id="value">@Text</pre>
+    </section>
+    <section>
+        <h2>Viewer</h2>
+        <Markdown id="viewer" class="viewer" Value="@Text" Plugins="MarkdownPlugins.All" Config="demo" />
+    </section>
+</div>
+
+<section class="ast">
+    <h2>AST service</h2>
+    <p>
+        <button type="button" id="ast" @onclick="ShowAstAsync" disabled="@(!RendererInfo.IsInteractive)">AST</button>
+        <code>IMarkdownService.ParseAsync</code>, <code>GetTocAsync</code> and <code>RenderHtmlAsync</code>, from C#.
+    </p>
+    @if (_error is not null)
+    {
+        <p id="ast-error" class="error">@_error</p>
+    }
+    @if (_ast is not null)
+    {
+        <p id="ast-count"><strong>@_ast.Nodes</strong> nodes: @_ast.Types</p>
+        <p id="ast-html">HTML: @_ast.HtmlLength characters</p>
+        <ol id="toc">
+            @foreach (var entry in _ast.Toc)
+            {
+                <li data-depth="@entry.Depth"><a href="@($"{NavigationPath}#{entry.Id}")">@entry.Text</a> <code>#@entry.Id</code></li>
+            }
+        </ol>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public string Mode { get; set; } = "";
+
+    /// <summary>Debounce of the editor (?delay=0 sends every keystroke: the hardest case for echoes).</summary>
+    [Parameter] public int? Delay { get; set; }
+
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private string Text { get; set; } = Samples.Welcome;
+
+    private AstSummary? _ast;
+    private string? _error;
+
+    private string NavigationPath => new Uri(Navigation.Uri).AbsolutePath;
+
+    private async Task ShowAstAsync()
+    {
+        try
+        {
+            var root = await MarkdownService.ParseAsync(Text, MarkdownPlugins.All, "demo");
+            var toc = await MarkdownService.GetTocAsync(Text, MarkdownPlugins.All, "demo");
+            var html = await MarkdownService.RenderHtmlAsync(Text, MarkdownPlugins.All, "demo");
+            var nodes = root.DescendantsAndSelf().ToList();
+            var types = string.Join(", ", nodes.GroupBy(n => n.Type).OrderByDescending(g => g.Count()).Take(6).Select(g => $"{g.Key} × {g.Count()}"));
+            _ast = new AstSummary(nodes.Count, types, html.Length, toc);
+            _error = null;
+        }
+        catch (Exception e)
+        {
+            _error = e.Message;
+        }
+    }
+
+    private sealed record AstSummary(int Nodes, string Types, int HtmlLength, IReadOnlyList<TocEntry> Toc);
+}

@@ -1,0 +1,22 @@
+@inherits LayoutComponentBase
+
+<header class="site">
+    <a class="brand" href="">mdlib-pure <span>for Blazor</span></a>
+    @* Plain links: Blazor's enhanced navigation fetches each page and patches the DOM. *@
+    <nav aria-label="Render modes">
+        <NavLink href="ssr">Static SSR</NavLink>
+        <NavLink href="server">Interactive Server</NavLink>
+        <NavLink href="wasm">WebAssembly</NavLink>
+        <NavLink href="auto">Auto</NavLink>
+    </nav>
+</header>
+
+<main>
+    @Body
+</main>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

@@ -1,0 +1,20 @@
+@using System.ComponentModel.DataAnnotations
+@* The editor inside an EditForm with validation. *@
+<EditForm EditContext="Context">
+    <DataAnnotationsValidator />
+    <MarkdownEditor @bind-Value="Model.Body" />
+</EditForm>
+
+@code {
+    public DocumentModel Model { get; } = new();
+
+    public EditContext Context { get; private set; } = default!;
+
+    protected override void OnInitialized() => Context = new EditContext(Model);
+
+    public sealed class DocumentModel
+    {
+        [Required]
+        public string? Body { get; set; } = "Initial";
+    }
+}

@@ -1,0 +1,12 @@
+@page "/server"
+@rendermode InteractiveServer
+
+<PageTitle>Interactive Server</PageTitle>
+
+<h1>Interactive Server</h1>
+
+<Playground Mode="Interactive Server" Delay="Delay" />
+
+@code {
+    [SupplyParameterFromQuery] public int? Delay { get; set; }
+}

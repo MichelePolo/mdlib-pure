@@ -1,0 +1,72 @@
+@page "/ssr"
+@inject IMarkdownService MarkdownService
+
+<PageTitle>Static SSR</PageTitle>
+
+<h1>Static SSR</h1>
+
+<p id="status" class="status" data-interactive="false" data-renderer="@RendererInfo.Name">
+    Static SSR · no interactivity: the editor works in the browser and posts its value with the form.
+</p>
+
+@* An enhanced form (Enhance): the response patches the page, the editor keeps its state. *@
+<EditForm Model="Input" FormName="ssr-editor" OnValidSubmit="Save" Enhance>
+    <DataAnnotationsValidator />
+    @* @bind-Value inside an EditForm: the field name ("Input.Body") is generated, like InputText. *@
+    <MarkdownEditor @bind-Value="Input!.Body" Plugins="MarkdownPlugins.All" Config="demo" Label="Release notes (Markdown)" Style="block-size: 30rem" />
+    <ValidationMessage For="() => Input!.Body" />
+    <p class="actions">
+        <button type="submit" id="save">Save (form POST)</button>
+        @if (_savedAt is not null)
+        {
+            <span id="saved">Received @Input!.Body.Length characters at @_savedAt.</span>
+        }
+    </p>
+</EditForm>
+
+<div class="panels">
+    <section>
+        <h2>C# value <small id="value-length">@Input!.Body.Length characters, as of the last request</small></h2>
+        <pre id="value">@Input!.Body</pre>
+    </section>
+    <section>
+        <h2>Viewer</h2>
+        <Markdown id="viewer" class="viewer" Value="@Input!.Body" Plugins="MarkdownPlugins.All" Config="demo" />
+    </section>
+</div>
+
+<section class="ast">
+    <h2>AST service</h2>
+    <p id="ast-error" class="error">@_serviceError</p>
+</section>
+
+@code {
+    [SupplyParameterFromForm(FormName = "ssr-editor")]
+    private DocumentInput? Input { get; set; }
+
+    private string? _savedAt;
+    private string? _serviceError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Input ??= new DocumentInput { Body = Samples.Welcome };
+
+        // The service needs JavaScript interop: here it explains why it cannot work.
+        try
+        {
+            await MarkdownService.GetTocAsync(Input.Body);
+        }
+        catch (InvalidOperationException e)
+        {
+            _serviceError = e.Message;
+        }
+    }
+
+    private void Save() => _savedAt = DateTime.Now.ToString("HH:mm:ss");
+
+    public sealed class DocumentInput
+    {
+        [Required, MinLength(1)]
+        public string Body { get; set; } = "";
+    }
+}

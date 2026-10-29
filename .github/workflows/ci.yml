@@ -44,3 +44,30 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+
+  blazor:
+    name: blazor (.NET 10)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # wwwroot/dist of the Razor class library (gitignored): elements, service
+      # module, styles, KaTeX, Mermaid. The .NET build fails without it.
+      - run: npm run blazor:assets
+      - run: dotnet build bindings/blazor/MdlibPure.Blazor.slnx
+      - name: bUnit tests
+        # global.json there selects Microsoft.Testing.Platform (xunit v3)
+        working-directory: bindings/blazor
+        run: dotnet test --no-build
+      # The package must pack; it is not published from CI.
+      - run: dotnet pack bindings/blazor/src/MdlibPure.Blazor -c Release -o ${{ runner.temp }}/nupkg
+      # Builds and starts the demo, drives every render mode in Chromium.
+      - run: npm run test:blazor

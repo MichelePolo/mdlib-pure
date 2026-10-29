@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MdlibPure.Blazor/MdlibPure.Blazor.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/MdlibPure.Blazor.Demo/MdlibPure.Blazor.Demo/MdlibPure.Blazor.Demo.csproj" />
+    <Project Path="samples/MdlibPure.Blazor.Demo/MdlibPure.Blazor.Demo.Client/MdlibPure.Blazor.Demo.Client.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MdlibPure.Blazor.Tests/MdlibPure.Blazor.Tests.csproj" />
+  </Folder>
+</Solution>

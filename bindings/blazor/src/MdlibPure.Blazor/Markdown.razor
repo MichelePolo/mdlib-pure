@@ -1,0 +1,39 @@
+@namespace MdlibPure.Blazor
+@*
+    Markdown viewer: <mdlib-markdown>, rendered in the browser by mdlib-pure.
+
+    Blazor renders the element empty and only ever updates its attributes; the
+    element renders the Markdown into itself (DOM nodes, never HTML parsing), in
+    every render mode. `data-permanent` keeps enhanced navigation from deleting
+    that content: it still syncs the attributes, so a new `source` re-renders.
+*@
+<mdlib-markdown @attributes="AdditionalAttributes"
+                class="@ClassAttribute"
+                source="@Value"
+                plugins="@PluginsAttribute"
+                config="@Config"
+                data-permanent></mdlib-markdown>
+
+@code {
+    /// <summary>The Markdown source.</summary>
+    [Parameter] public string? Value { get; set; }
+
+    /// <summary>Plugins to enable. Default <see cref="MarkdownPlugins.None"/> (CommonMark only).</summary>
+    [Parameter] public MarkdownPlugins Plugins { get; set; }
+
+    /// <summary>
+    /// Name of options registered in JavaScript with <c>defineElements({ configs })</c>
+    /// (syntax highlighting, URL policy…). See the README, "Named configs".
+    /// </summary>
+    [Parameter] public string? Config { get; set; }
+
+    /// <summary>Extra CSS classes. The element always has <c>md</c>, the class of the theme.</summary>
+    [Parameter] public string? Class { get; set; }
+
+    /// <summary>Any other attribute (<c>id</c>, <c>style</c>, <c>aria-*</c>…), passed to the element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ClassAttribute => string.IsNullOrWhiteSpace(Class) ? "md" : $"md {Class}";
+
+    private string? PluginsAttribute => Plugins == MarkdownPlugins.None ? null : Plugins.ToAttributeValue();
+}
