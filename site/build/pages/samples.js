@@ -126,8 +126,8 @@ export function samples() {
       srcLang = 'html'
       stack = true
       cls = 'pane-out elements-out'
-      afterMd = `On [the HTML page](${abs('/samples/#elements')}) this markup runs as is, defined by [\`site/client/elements.js\`](${githubUrl('site/client/elements.js')}). Guides: [Web Components](/docs/elements/), [Blazor](/docs/blazor/).\n`
-      links = `<a href="${rel(PATH, '/docs/elements/')}">Web Components guide</a><a href="${rel(PATH, '/docs/blazor/')}">The Blazor wrapper, built on them</a><a href="${githubUrl('site/client/elements.js')}">Source of this sample</a>`
+      afterMd = `On [the HTML page](${abs('/samples/#elements')}) this markup runs as is, defined by [\`site/client/elements.js\`](${githubUrl('site/client/elements.js')}). Guides: [Web Components](/docs/elements/), [Blazor](/docs/blazor/), [Angular](/docs/angular/).\n`
+      links = `<a href="${rel(PATH, '/docs/elements/')}">Web Components guide</a><a href="${rel(PATH, '/docs/blazor/')}">The Blazor wrapper</a><a href="${rel(PATH, '/docs/angular/')}">The Angular wrapper</a><a href="${githubUrl('site/client/elements.js')}">Source of this sample</a>`
     } else if (s.special === 'react') {
       const md = createMarkdown({ decodeEntity, plugins: pluginsFor(s.plugins) })
       output = renderToStaticMarkup(createElement('div', null, ...toElements(md.toVNodes(source), createElement, 'react'))).replace(/^<div>|<\/div>$/g, '')

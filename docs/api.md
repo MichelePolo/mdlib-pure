@@ -285,7 +285,8 @@ dependencies).
 included (~20 KB gzip); `getMarkdown(plugins, config)` returns the shared
 instance behind an attribute combination. Styles: `mdlib-pure/editor.css`.
 Attributes, events, loaders, named configs and the editor's behavior:
-**[elements.md](elements.md)**. For Blazor: [the Blazor wrapper](../bindings/blazor/README.md).
+**[elements.md](elements.md)**. Framework wrappers: [Blazor](../bindings/blazor/README.md),
+[Angular](../bindings/angular/README.md).
 
 ## mdlib-pure/adapter
 

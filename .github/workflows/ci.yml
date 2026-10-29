@@ -71,3 +71,31 @@ jobs:
       - run: dotnet pack bindings/blazor/src/MdlibPure.Blazor -c Release -o ${{ runner.temp }}/nupkg
       # Builds and starts the demo, drives every render mode in Chromium.
       - run: npm run test:blazor
+
+  angular:
+    name: angular (Angular 22)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # The Angular CLI 22 needs Node ^22.22.3 || ^24.15 || >=26.
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            bindings/angular/package-lock.json
+      - run: npm ci
+      # Same Playwright version in both workspaces: one Chromium for both.
+      - run: npx playwright install --with-deps chromium
+      # The Angular workspace links the repository's dist/ ("mdlib-pure": "file:../..").
+      - run: npm run build
+      - run: npm ci --prefix bindings/angular
+      # The library (ng-packagr, partial compilation), then the SSR demo against it.
+      - run: npm run build --prefix bindings/angular
+      # Unit tests: Vitest in Chromium, through Angular's unit-test builder.
+      - run: npm run angular:unit
+      # Both packages must pack; nothing is published from CI.
+      - run: npm run angular:pack
+      # Builds again, serves the SSR demo, checks the server HTML and hydration, drives it in Chromium.
+      - run: npm run test:angular

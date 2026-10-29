@@ -14,6 +14,29 @@ Lightweight Markdown renderer for the browser.
 - **Linear time** on adversarial input
 - MIT licensed
 
+## Install
+
+**Not on the npm registry yet**: `npm install mdlib-pure` does not work. Until
+the first release, build the package from a clone (Node 22.18 or later) and
+install the tarball:
+
+```sh
+git clone https://github.com/MichelePolo/mdlib-pure.git
+cd mdlib-pure
+npm ci      # dev tools only: the package itself has no dependencies
+npm pack    # builds dist/, writes mdlib-pure-0.1.0.tgz
+
+cd ../my-app
+npm install ../mdlib-pure/mdlib-pure-0.1.0.tgz
+```
+
+npm records it as `file:…tgz` in your `package.json`: keep the tarball in your
+repository (a `vendor/` folder) so that `npm ci` works on CI and for your
+colleagues. The framework wrappers are not on a registry either:
+[Blazor](bindings/blazor/README.md) is not on nuget.org (the `.nupkg` is on
+the GitHub release), [Angular](bindings/angular/README.md) is not on npm
+(tarballs from `npm run angular:pack`). See [Framework wrappers](#framework-wrappers).
+
 ## Usage
 
 ```js
@@ -187,13 +210,6 @@ First-party plugins:
 - `mdlib-pure/element`: `<mdlib-markdown>` and `<mdlib-editor>` Web
   Components (an editor with live preview, styled by `mdlib-pure/editor.css`),
   every plugin included: [docs/elements.md](docs/elements.md).
-
-### Blazor (.NET 10)
-
-[`MdlibPure.Blazor`](bindings/blazor/README.md) wraps the Web Components for
-every render mode: `<MarkdownEditor @bind-Value>`, `<Markdown>` and an AST
-service. Download the `.nupkg` from the
-[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0).
 - `mdlib-pure/deflist`: definition lists (`Term` / `: Definition`, Pandoc and
   PHP Markdown Extra style) → `<dl>`.
 - `mdlib-pure/frontmatter`: YAML (`---`) / TOML (`+++`) front matter, kept
@@ -202,6 +218,30 @@ service. Download the `.nupkg` from the
 The full guide, written for both humans and AI agents, is
 [`AGENTS.md`](AGENTS.md). [`templates/plugin`](templates/plugin) is a
 complete, tested plugin to copy.
+
+## Framework wrappers
+
+Both wrap the Web Components of `mdlib-pure/element`: the Blazor package
+bundles them, the Angular package depends on `mdlib-pure`. Neither is on a
+public registry yet.
+
+### Blazor (.NET 10)
+
+[`MdlibPure.Blazor`](bindings/blazor/README.md) wraps the Web Components for
+every render mode: `<MarkdownEditor @bind-Value>`, `<Markdown>` and an AST
+service. **Not on nuget.org**: download the `.nupkg` from the
+[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0)
+and add it from a local package feed.
+
+### Angular (21, 22)
+
+[`ngx-mdlib-pure`](bindings/angular/README.md) wraps the Web Components as
+standalone components: `<mdlib-editor [(value)]>` (also a form control for
+`ngModel` and reactive forms), `<mdlib-markdown [source]>`,
+`provideMdlibPure()` and a `MarkdownService` for the AST, the table of
+contents and HTML. Server-side rendering and hydration work. **Not on npm**,
+like mdlib-pure itself: `npm run angular:pack` builds both tarballs, which
+your app installs from a `vendor/` folder.
 
 ## Performance
 

@@ -192,8 +192,8 @@ export function plugins({ sizes, tocs }) {
       // What the element renders into itself: the same shared instance.
       const source = /source="([^"]*)"/.exec(card.example)[1]
       output = getMarkdown('gfm').render(source)
-      extra = `<p class="item-links"><a href="${rel(PATH, '/samples/#elements')}">Try the live editor and viewer</a><a href="${rel(PATH, '/docs/blazor/')}">The Blazor wrapper, built on these elements</a></p>`
-      extraMd = 'A live editor and viewer: [Samples, Web Components](/samples/#elements). Blazor: [the wrapper built on these elements](/docs/blazor/).\n'
+      extra = `<p class="item-links"><a href="${rel(PATH, '/samples/#elements')}">Try the live editor and viewer</a><a href="${rel(PATH, '/docs/blazor/')}">The Blazor wrapper</a><a href="${rel(PATH, '/docs/angular/')}">The Angular wrapper</a></p>`
+      extraMd = 'A live editor and viewer: [Samples, Web Components](/samples/#elements). Built on these elements: [the Blazor wrapper](/docs/blazor/), [the Angular wrapper](/docs/angular/).\n'
     } else if (card.extra === 'entities') {
       const without = createMarkdown().render(card.example).trim()
       const withTable = createMarkdown({ decodeEntity }).render(card.example).trim()

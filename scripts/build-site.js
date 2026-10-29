@@ -171,7 +171,7 @@ const walk = (dir) => readdirSync(dir).flatMap((f) => (statSync(join(dir, f)).is
 // --- llms.txt (https://llmstxt.org) --------------------------------------------------
 
 const DESCRIPTION =
-  'Lightweight, zero-dependency Markdown renderer for the browser: 100% CommonMark 0.31.2 (652/652 spec examples), GitHub Flavored Markdown as an opt-in plugin (54/54 extension examples), an ~11 KB gzipped core, safe by default, linear time on any input. Extensible through plugins, styled with semantic CSS tokens, output as HTML, DOM, React/Preact/Vue elements, or the <mdlib-markdown> and <mdlib-editor> Web Components, which the MdlibPure.Blazor wrapper (.NET 10) builds on.'
+  'Lightweight, zero-dependency Markdown renderer for the browser: 100% CommonMark 0.31.2 (652/652 spec examples), GitHub Flavored Markdown as an opt-in plugin (54/54 extension examples), an ~11 KB gzipped core, safe by default, linear time on any input. Extensible through plugins, styled with semantic CSS tokens, output as HTML, DOM, React/Preact/Vue elements, or the <mdlib-markdown> and <mdlib-editor> Web Components, which the MdlibPure.Blazor (.NET 10) and ngx-mdlib-pure (Angular) wrappers build on. Not on a package registry yet (no npm, no NuGet): the Install section of each guide says how to install it today.'
 
 function llmsTxt() {
   const doc = (slug) => DOCS.find((d) => d.slug === slug)
@@ -181,7 +181,7 @@ function llmsTxt() {
 
 > ${DESCRIPTION}
 
-Every page of this site has a Markdown version at the same path with \`.md\`; the docs are the repository's own Markdown files. To extend the library, read AGENTS.md ("Extending: plugin guide") fully first: it is the contract for AI agents, and \`npm run verify\` must pass before a task is done. To use it in a page or an app, the guides are docs/elements.md (Web Components) and bindings/blazor/README.md (Blazor).
+Every page of this site has a Markdown version at the same path with \`.md\`; the docs are the repository's own Markdown files. To extend the library, read AGENTS.md ("Extending: plugin guide") fully first: it is the contract for AI agents, and \`npm run verify\` must pass before a task is done. To use it in a page or an app, the guides are docs/elements.md (Web Components), bindings/blazor/README.md (Blazor) and bindings/angular/README.md (Angular). Nothing is published on npm or NuGet yet: never suggest \`npm install mdlib-pure\`; README.md (Install) builds a tarball with \`npm pack\`.
 
 ## Docs
 
@@ -198,9 +198,9 @@ ${link('Playground', '/playground.md', 'the live editor and what it can do')}
 ${docLine('changelog')}
 - [MdlibPure.Blazor 0.1.0 release](${BLAZOR_RELEASE}): the .nupkg of the Blazor wrapper (not on nuget.org)
 ${link('Built with AI', '/story.md', 'how the library was built with AI agents, from the git history')}
-${link('Home', '/index.md', 'overview, ways to use it (JavaScript, Web Components, React/Preact/Vue, Blazor), datasheet and benchmark')}
+${link('Home', '/index.md', 'overview, ways to use it (JavaScript, Web Components, React/Preact/Vue, Blazor, Angular), datasheet and benchmark')}
 ${link('All docs in one file', '/llms-full.txt')}
-- [Source repository](${REPO}): README.md, AGENTS.md, docs/, src/, templates/plugin, bindings/blazor
+- [Source repository](${REPO}): README.md, AGENTS.md, docs/, src/, templates/plugin, bindings/blazor, bindings/angular
 `
 }
 

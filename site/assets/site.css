@@ -224,6 +224,8 @@ h3.title { font-size: 1.5rem; }
   &:hover { background: var(--md-color-link-hover); border-color: var(--md-color-link-hover); color: var(--paper); }
 }
 
+.install-note { margin: 0.6rem 0 0; font-size: 0.875rem; }
+
 .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1.5rem 0 0; padding: 0; }
 
 .install {

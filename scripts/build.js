@@ -31,6 +31,16 @@ await build({
   legalComments: 'none',
 })
 
+// esbuild adds bare `import "./chunk-X.js"` lines to keep evaluation order.
+// No module has side effects (package.json: "sideEffects": false), so they do
+// nothing, and every consumer's bundler warns about each one ("Ignoring this
+// import…"). Each becomes an empty line, so the source maps stay aligned.
+for (const f of readdirSync('dist').filter((f) => f.endsWith('.js'))) {
+  const src = readFileSync(join('dist', f), 'utf8')
+  const out = src.replace(/^import "\.\/chunk-[A-Z0-9]+\.js";$/gm, '')
+  if (out !== src) writeFileSync(join('dist', f), out)
+}
+
 execFileSync('npx', ['tsc', '-p', 'tsconfig.build.json'], { stdio: 'inherit' })
 
 // Declarations keep the source's `.ts` specifiers; consumers expect `.js`.

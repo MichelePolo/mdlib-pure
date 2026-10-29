@@ -45,7 +45,7 @@
     cursor: pointer;
   }
 
-  :where(mdlib-editor) :where(.mdlib-editor-toolbar button:hover, .mdlib-editor-toolbar button[aria-pressed='true']) {
+  :where(mdlib-editor) :where(.mdlib-editor-toolbar button:hover:enabled, .mdlib-editor-toolbar button[aria-pressed='true']) {
     border-color: var(--md-color-border);
     background: var(--md-color-code-bg);
   }
@@ -53,6 +53,12 @@
   :where(mdlib-editor) :where(.mdlib-editor-toolbar button:focus-visible) {
     outline: 2px solid var(--md-color-accent);
     outline-offset: 1px;
+  }
+
+  /* Disabled (the attribute, or an enclosing <fieldset disabled>). */
+  :where(mdlib-editor) :where(.mdlib-editor-toolbar button:disabled, .mdlib-editor-input:disabled) {
+    color: var(--md-color-muted);
+    cursor: not-allowed;
   }
 
   :where(mdlib-editor) :where(.mdlib-editor-views) {

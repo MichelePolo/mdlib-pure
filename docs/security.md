@@ -89,8 +89,9 @@ is Mermaid's: `renderMermaid` uses `securityLevel: 'strict'` by default
 - The loaders are yours: `mermaid` and `katex` import what you give them, and
   `katexStylesheet` is fetched and added to `document.adoptedStyleSheets`.
   Point them at files you serve (no CDN is hard-coded).
-- Framework wrappers built on the elements (the
-  [Blazor wrapper](../bindings/blazor/README.md#security)) add their own notes.
+- Framework wrappers built on the elements add their own notes:
+  [Blazor](../bindings/blazor/README.md#security),
+  [Angular](../bindings/angular/README.md#security).
 
 ## DOM clobbering
 

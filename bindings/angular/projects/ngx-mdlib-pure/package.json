@@ -1,0 +1,33 @@
+{
+  "name": "ngx-mdlib-pure",
+  "version": "0.1.0",
+  "description": "Angular Markdown editor with live preview, viewer, forms integration and SSR, built on mdlib-pure's Web Components.",
+  "license": "MIT",
+  "author": "Michele Polo <michele.polo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichelePolo/mdlib-pure.git",
+    "directory": "bindings/angular"
+  },
+  "homepage": "https://github.com/MichelePolo/mdlib-pure/tree/main/bindings/angular#readme",
+  "bugs": {
+    "url": "https://github.com/MichelePolo/mdlib-pure/issues"
+  },
+  "keywords": [
+    "angular",
+    "markdown",
+    "markdown-editor",
+    "commonmark",
+    "gfm",
+    "ssr",
+    "forms",
+    "mdlib-pure"
+  ],
+  "peerDependencies": {
+    "@angular/common": "^21.0.0 || ^22.0.0",
+    "@angular/core": "^21.0.0 || ^22.0.0",
+    "@angular/forms": "^21.0.0 || ^22.0.0",
+    "mdlib-pure": "^0.1.0"
+  },
+  "sideEffects": false
+}

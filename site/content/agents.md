@@ -18,8 +18,12 @@ samples.
    the repository's Markdown files, with links pointing to the other twins.
 4. To use the library in an app rather than extend it, read the guide for
    the way in: [`docs/elements.md`](/docs/elements/) for the Web Components,
-   [`bindings/blazor/README.md`](/docs/blazor/) for Blazor (see
+   [`bindings/blazor/README.md`](/docs/blazor/) for Blazor,
+   [`bindings/angular/README.md`](/docs/angular/) for Angular (see
    [below](#using-it-in-an-app)).
+5. Nothing is on a package registry yet: `npm install mdlib-pure` and
+   `dotnet add package MdlibPure.Blazor` fail. See
+   [Not on a registry yet](#not-on-a-registry-yet).
 
 ## AGENTS.md is the extension contract
 
@@ -71,8 +75,8 @@ option accepts pre-rendered output. `mdlib-pure/mermaid` and
 
 ## Using it in an app
 
-Two guides cover embedding the library; both are docs pages here, so they are
-in [`/llms-full.txt`](/llms-full.txt) and have `.md` twins:
+Three guides cover embedding the library; all are docs pages here, so they
+are in [`/llms-full.txt`](/llms-full.txt) and have `.md` twins:
 
 - [`docs/elements.md`](/docs/elements/): `mdlib-pure/element`, the
   `<mdlib-markdown>` viewer and the `<mdlib-editor>` editor with live
@@ -84,6 +88,11 @@ in [`/llms-full.txt`](/llms-full.txt) and have `.md` twins:
   and `<Markdown>` in every render mode, `IMarkdownService` for the AST. It is
   not on nuget.org: the `.nupkg` is attached to the
   [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0).
+- [`bindings/angular/README.md`](/docs/angular/): `ngx-mdlib-pure` 0.1.0, the
+  Angular wrapper (21, 22) built on the same elements: `MarkdownEditor` with
+  `[(value)]` and a `ControlValueAccessor`, `MarkdownViewer`,
+  `provideMdlibPure()`, `MarkdownService`, SSR with hydration. It is not on
+  npm: its Install section builds both tarballs.
 
 For example:
 
@@ -95,6 +104,31 @@ existing EditForm, enable MarkdownPlugins.Gfm | MarkdownPlugins.Math, and
 raise MaximumReceiveMessageSize as the Setup section says.
 ```
 
+```text
+Read bindings/angular/README.md from the mdlib-pure repository.
+Add a Markdown field to the reactive form of the article edit page of this
+Angular app: <mdlib-editor formControlName="body" plugins="all">, required,
+with the tarballs in vendor/ as the Install section says.
+```
+
+### Not on a registry yet
+
+`mdlib-pure` and `ngx-mdlib-pure` are not on the npm registry, and
+`MdlibPure.Blazor` is not on nuget.org. Install instructions you write must
+use what works today:
+
+- mdlib-pure: `npm pack` in a clone of the repository (it builds `dist/`),
+  then `npm install ./mdlib-pure-0.1.0.tgz` in the app (Getting started,
+  [Install](/docs/getting-started/#install));
+- Angular: `npm run angular:pack` writes both tarballs
+  ([Install](/docs/angular/#install));
+- Blazor: the `.nupkg` from the GitHub release, through a local NuGet feed
+  ([Install](/docs/blazor/#install)).
+
+Do not publish on the maintainer's behalf: no `npm publish`, no `v*` tag (the
+release workflow publishes to npm on it). `AGENTS.md` says the same, in its
+section "Distribution".
+
 Every `docs/*.md` and `bindings/*/README.md` of the repository is published
 on this site: the site build fails if one is missing, so a new guide cannot
 be forgotten.
@@ -105,7 +139,9 @@ The `container`, `math`, `mark`, `frontmatter` and `deflist` plugins were
 written by agents from `AGENTS.md`, and the friction the first agent ran
 into was folded back into the guide. The Blazor wrapper was built by an agent
 on the Web Components; doing so found three robustness problems in the
-elements, fixed with a test each. The [story of the library](/story/) has the
+elements, fixed with a test each. So was the Angular wrapper, which found
+two more: the editor had no disabled state, and the KaTeX loader's type
+rejected KaTeX's own function. The [story of the library](/story/) has the
 details, from the git history.
 
 ## Machine-friendly by design

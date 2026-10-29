@@ -79,9 +79,26 @@ export const Markdown = ({ source }) => (
 <Markdown Value="@Body" Plugins="MarkdownPlugins.Gfm" />`,
     links: `[Blazor guide](/docs/blazor/) · [Download 0.1.0 from the GitHub release](${BLAZOR_RELEASE})`,
   },
+  {
+    id: 'use-angular',
+    title: 'Angular (21, 22)',
+    text: '`ngx-mdlib-pure` 0.1.0: standalone components whose tag is the Web Component, `[(value)]` with signals, a form control for `ngModel` and reactive forms, SSR with hydration, and a service for the AST. Not on npm yet, like mdlib-pure: install both from tarballs.',
+    lang: 'ts',
+    code: `// app.config.ts
+providers: [provideMdlibPure({ loaders: { mermaid: () => import('mermaid') } })]
+
+// a component, imports: [MarkdownEditor, MarkdownViewer]
+template: \`
+  <mdlib-editor [(value)]="body" plugins="all" />
+  <mdlib-markdown [source]="body()" plugins="all" />\``,
+    links: '[Angular guide](/docs/angular/) · [Install from tarballs](/docs/angular/#install)',
+  },
 ]
 
-const USES_INTRO = 'One parser and one renderer behind four entry points: pick the one your stack speaks.'
+/** The hero's install line: the package is not on the npm registry yet. */
+const INSTALL_NOTE = 'Not on the npm registry yet: build the tarball with `npm pack` in a clone of the repository. [How to install](/docs/getting-started/#install).'
+
+const USES_INTRO = 'One parser and one renderer behind five entry points: pick the one your stack speaks. None is on a package registry yet: each guide says how to install it today.'
 
 function benchmark() {
   const r = JSON.parse(read('bench/results.json'))
@@ -132,7 +149,7 @@ Linear time
 : on adversarial input too: 30+ hostile inputs with time limits in \`test/pathological.test.ts\`
 
 Output
-: an HTML string, DOM nodes, React, Preact and Vue elements through the adapter, or the \`<mdlib-markdown>\` and \`<mdlib-editor>\` Web Components, which the [Blazor wrapper](/docs/blazor/) builds on
+: an HTML string, DOM nodes, React, Preact and Vue elements through the adapter, or the \`<mdlib-markdown>\` and \`<mdlib-editor>\` Web Components, which the [Blazor](/docs/blazor/) and [Angular](/docs/angular/) wrappers build on
 `
 
   const pluginRows = PLUGIN_CARDS.map((p) => `| [\`${p.name}\`](/plugins/#${p.id}) | ${p.adds}${p.whole ? ' (core and every plugin included)' : ''} | ${kb(sizes[p.id].gzip)} |`).join('\n')
@@ -147,7 +164,8 @@ Output
 - Start at [\`/llms.txt\`](/llms.txt), or take everything in one file with [\`/llms-full.txt\`](/llms-full.txt).
 - [\`AGENTS.md\`](/docs/extending/) is the extension contract: rules checked by commands, recipes for each extension point, a definition of done.
 - To get a plugin from an agent: “Read AGENTS.md and write a plugin that…”, then let it run \`npm run verify\`. Example prompts are in the [guide for agents](/docs/agents/).
-- To use it in an app rather than extend it, the guides are [\`docs/elements.md\`](/docs/elements/) for the Web Components and [\`bindings/blazor/README.md\`](/docs/blazor/) for the Blazor wrapper; both are in \`llms-full.txt\`.
+- To use it in an app rather than extend it, the guides are [\`docs/elements.md\`](/docs/elements/) for the Web Components, [\`bindings/blazor/README.md\`](/docs/blazor/) for Blazor and [\`bindings/angular/README.md\`](/docs/angular/) for Angular; all are in \`llms-full.txt\`.
+- Nothing is on a registry yet: no \`npm install mdlib-pure\`, no NuGet package. Each guide's Install section says what works today.
 `
 
   const lede = `mdlib-pure renders Markdown to HTML in the browser and follows CommonMark to the letter: all 652 spec examples, in ${core} gzipped, with zero dependencies.`
@@ -157,7 +175,8 @@ Output
       <div>
         <h1 id="title" class="title"><span class="mk" aria-hidden="true">#</span>Markdown, to the letter.</h1>
         <p class="lede">${escapeHtml(lede)}</p>
-        <div class="install"><code>npm install mdlib-pure</code><button type="button" class="js-only" data-copy="npm install mdlib-pure" aria-label="Copy the install command">Copy</button></div>
+        <div class="install"><code>npm install ./mdlib-pure-0.1.0.tgz</code><button type="button" class="js-only" data-copy="npm install ./mdlib-pure-0.1.0.tgz" aria-label="Copy the install command">Copy</button></div>
+        <p class="install-note muted">${inline(INSTALL_NOTE)}</p>
         <p class="actions">
           <a class="btn btn-primary" href="${rel(PATH, '/docs/getting-started/')}">Read the docs</a>
           <a class="btn" href="${rel(PATH, '/playground/')}">Open the playground</a>
@@ -269,8 +288,10 @@ Output
 
 ${lede}
 
+${INSTALL_NOTE}
+
 \`\`\`sh
-npm install mdlib-pure
+npm install ./mdlib-pure-0.1.0.tgz
 \`\`\`
 
 - [Read the docs](/docs/getting-started/)

@@ -7,7 +7,8 @@ break the API).
 
 ## [0.1.0] — unreleased
 
-First release.
+First release. Not on a registry yet: mdlib-pure and ngx-mdlib-pure are not
+on npm, MdlibPure.Blazor is not on nuget.org (see README.md, "Install").
 
 ### Core (`mdlib-pure`, ~11 KB gzip, zero dependencies)
 
@@ -42,19 +43,28 @@ First release.
 - `mdlib-pure/adapter`: React, Preact and Vue elements.
 - `mdlib-pure/element`: `<mdlib-markdown>` and `<mdlib-editor>` Web
   Components (editor with live preview, debounced events, echo-safe value
-  binding, form-associated) and `editor.css`.
+  binding, form-associated, disabled by `disabled` or a `<fieldset>`) and
+  `editor.css`. The `katex` loader takes KaTeX's own `renderMathInElement`.
 - `mdlib-pure/entities`: full entity table for non-browser environments.
 - `theme.css` with semantic `--md-*` tokens (light/dark via `color-scheme`);
   `tailwind.css` for Tailwind CSS v4.
 
 ### Bindings
 
-- `MdlibPure.Blazor` 0.1.0 (NuGet, in `bindings/blazor/`, not published
-  yet): `<Markdown>` and `<MarkdownEditor @bind-Value>` for every Blazor
-  render mode, `IMarkdownService` for the AST, KaTeX and Mermaid bundled and
-  loaded on demand.
+- `MdlibPure.Blazor` 0.1.0 (NuGet, in `bindings/blazor/`, not on nuget.org;
+  the `.nupkg` is on the GitHub release `blazor-v0.1.0`): `<Markdown>` and
+  `<MarkdownEditor @bind-Value>` for every Blazor render mode,
+  `IMarkdownService` for the AST, KaTeX and Mermaid bundled and loaded on
+  demand.
+- `ngx-mdlib-pure` 0.1.0 (npm, in `bindings/angular/`, not published yet):
+  `MarkdownEditor` (`<mdlib-editor [(value)]>`, a `ControlValueAccessor` for
+  `ngModel` and reactive forms) and `MarkdownViewer` (`<mdlib-markdown>`) as
+  standalone components for Angular 21 and 22, `provideMdlibPure()`,
+  `MarkdownService` (AST, TOC, HTML, also on the server); SSR with hydration.
 
 ### Tooling
 
 - `AGENTS.md` guide for AI agents, tested by having an agent build a plugin
   from it; plugin template; CI on Node 22/24 and Chromium.
+- `npm pack` builds `dist/` (`prepack`); `dist/` has no bare chunk imports,
+  so bundlers print no "Ignoring this import" warnings.

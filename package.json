@@ -85,13 +85,18 @@
     "test:browser": "node --test \"test/browser/**/*.browser.ts\"",
     "test:blazor": "node --test \"test/blazor/**/*.blazor.ts\"",
     "blazor:assets": "node scripts/build-blazor-assets.js",
+    "test:angular": "node --test \"test/angular/**/*.angular.ts\"",
+    "angular:build": "npm run build && npm run build --prefix bindings/angular",
+    "angular:unit": "npm test --prefix bindings/angular",
+    "angular:pack": "npm pack --pack-destination bindings/angular/dist && npm run pack --prefix bindings/angular",
     "spec": "node test/spec-report.ts",
     "typecheck": "tsc --noEmit",
     "size": "node scripts/size.js",
     "check": "node scripts/check.js",
     "verify": "npm run typecheck && npm test && npm run check && npm run size",
     "gen:entities": "node scripts/gen-entities.js",
-    "prepublishOnly": "npm run verify && npm run build"
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run verify"
   },
   "keywords": [
     "markdown",

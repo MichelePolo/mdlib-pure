@@ -1,0 +1,22 @@
+# Build output: the library package (dist/ngx-mdlib-pure, tarballs) and the demo (dist/demo)
+/dist
+/tmp
+/out-tsc
+
+# Node
+/node_modules
+npm-debug.log
+
+# IDEs and editors
+.idea/
+.vscode/
+
+# Angular CLI cache, Vitest browser-mode artifacts (failure screenshots)
+/.angular/cache
+/.vitest
+/coverage
+__screenshots__/
+
+# System files
+.DS_Store
+Thumbs.db

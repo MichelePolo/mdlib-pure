@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict'
 import { after, before, describe, test } from 'node:test'
 import type { Browser, Page } from 'playwright'
+import type { ElementsOptions } from '../../src/element.ts'
 import { launch, mermaidBundle, openPage, readRepoFile } from './harness.ts'
 
 let browser: Browser
@@ -26,6 +27,13 @@ async function setup(): Promise<Page> {
     })
   })
   return page
+}
+
+// The loaders of docs/elements.md type-check against the libraries' own
+// types (npm run typecheck); never called here.
+export const documentedLoaders: ElementsOptions['loaders'] = {
+  mermaid: () => import('mermaid'),
+  katex: () => import('katex/contrib/auto-render').then((m) => m.default),
 }
 
 const until = `async (ok) => { for (let i = 0; i < 80 && !ok(); i++) await new Promise((r) => setTimeout(r, 50)); return ok() }`
@@ -150,6 +158,36 @@ describe('<mdlib-editor>', () => {
       form: new FormData(document.querySelector('form')!).get('body'),
     }))
     assert.deepEqual(r, { value: '**_word_**', preview: '<p><strong><em>word</em></strong></p>', view: 'preview', inputHidden: true, pressed: 'true', form: '**_word_**' })
+  })
+
+  test('disabled by a <fieldset> or its own attribute: no typing, no formatting, no form value', async () => {
+    const page = await setup()
+    await page.evaluate(() => {
+      document.body.innerHTML = '<form><fieldset disabled><mdlib-editor name="body" value="kept"></mdlib-editor></fieldset></form>' // check:allow-innerHTML test fixture
+    })
+    const state = () =>
+      page.evaluate(() => {
+        const ed = document.querySelector('mdlib-editor')!
+        return {
+          matches: ed.matches(':disabled'),
+          input: ed.querySelector('textarea')!.disabled,
+          bold: ed.querySelector<HTMLButtonElement>('button:not([data-view])')!.disabled,
+          view: ed.querySelector<HTMLButtonElement>('[data-view]')!.disabled,
+          form: new FormData(document.querySelector('form')!).get('body'),
+          value: (ed as any).value,
+        }
+      })
+    assert.deepEqual(await state(), { matches: true, input: true, bold: true, view: false, form: null, value: 'kept' })
+    // Disabled text areas take no clicks or keys.
+    await page.locator('mdlib-editor textarea').click({ force: true })
+    await page.keyboard.type('typed')
+    assert.equal(await page.evaluate(() => (document.querySelector('mdlib-editor') as any).value), 'kept')
+
+    await page.evaluate(() => document.querySelector('fieldset')!.removeAttribute('disabled'))
+    assert.deepEqual(await state(), { matches: false, input: false, bold: false, view: false, form: 'kept', value: 'kept' })
+
+    await page.evaluate(() => document.querySelector('mdlib-editor')!.setAttribute('disabled', ''))
+    assert.deepEqual(await state(), { matches: true, input: true, bold: true, view: false, form: null, value: 'kept' })
   })
 
   test('diagrams already drawn do not flicker while typing elsewhere', async () => {

@@ -49,7 +49,9 @@ and ignores it.
 
 ## Install
 
-Until the package is published on nuget.org, use a local package feed.
+**Not on nuget.org yet**: `dotnet add package MdlibPure.Blazor` alone finds
+nothing. Until the first release there, use a local package feed. (The package
+bundles mdlib-pure, which is not on npm either; you need no npm.)
 
 1. Download `MdlibPure.Blazor.0.1.0.nupkg` from the
    [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0)

@@ -6,7 +6,8 @@ in any framework:
 - `<mdlib-markdown>`: renders Markdown from its `source` attribute;
 - `<mdlib-editor>`: a Markdown editor with toolbar and live preview.
 
-They are the base of the [Blazor wrapper](../bindings/blazor/README.md).
+They are the base of the [Blazor wrapper](../bindings/blazor/README.md) and of
+the [Angular wrapper](../bindings/angular/README.md).
 
 ## Quick start
 
@@ -44,6 +45,7 @@ defineElements({
 | `<mdlib-editor>` | `view` | `split` (default), `write`, `preview` |
 | `<mdlib-editor>` | `delay` | ms before `input` is dispatched (default 200) |
 | `<mdlib-editor>` | `label`, `name` | accessible name of the text area; form field name |
+| `<mdlib-editor>` | `disabled` | no typing or formatting, value left out of the form (as inside `<fieldset disabled>`) |
 
 Options that are functions (`highlight`, `allowUrl`, `sanitize`) and `html`
 can only be set through named configs, never from attributes: content cannot
@@ -55,7 +57,9 @@ in `event.target.value` (the text area's own events do not escape). While the
 user types, an attribute set to a value the editor already sent is treated as
 a late echo and ignored, so a slow server never overwrites typing; a value
 set while the editor is not focused (a Reset button) is applied. The element
-is form-associated: with `name`, its value is submitted with the form.
+is form-associated: with `name`, its value is submitted with the form;
+`disabled` (or an enclosing `<fieldset disabled>`) makes it behave like a
+disabled `<textarea>`, while the view buttons keep working.
 Toolbar: bold, italic, heading, link, lists, quote, code (Ctrl+B, Ctrl+I,
 Ctrl+K). Math and diagrams load KaTeX and Mermaid only when a document uses
 them; diagrams already drawn are reused while typing.
@@ -103,8 +107,11 @@ refreshes the elements already in the page (e.g. loaders registered late).
 
 - **Blazor**: use [MdlibPure.Blazor](../bindings/blazor/README.md), which wraps
   these elements for every render mode and adds a C# AST service.
-- **React 19, Vue, Svelte, Angular**: custom elements work as-is. Pass
-  `source`/`value` as attributes and listen to `input`/`change` events.
+- **Angular**: use [ngx-mdlib-pure](../bindings/angular/README.md): standalone
+  components with `[(value)]`, a form control for `ngModel` and reactive
+  forms, SSR with hydration, and a service for the AST.
+- **React 19, Vue, Svelte**: custom elements work as-is. Pass `source`/`value`
+  as attributes and listen to `input`/`change` events.
 
 ## Security
 

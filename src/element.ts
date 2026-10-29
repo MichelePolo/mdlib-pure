@@ -39,7 +39,7 @@ export interface ElementsOptions {
     /** Mermaid, e.g. `() => import('mermaid')`. */
     mermaid?: () => Promise<MermaidLike | { default: MermaidLike }>
     /** KaTeX auto-render's `renderMathInElement`, e.g. `() => import('katex/contrib/auto-render').then((m) => m.default)`. */
-    katex?: () => Promise<(el: Element, options: object) => void>
+    katex?: () => Promise<(el: HTMLElement, options: object) => void>
     /** KaTeX stylesheet URL, added to the document once math appears. */
     katexStylesheet?: string
   }
@@ -81,7 +81,7 @@ export function getMarkdown(plugins = '', config = ''): Markdown {
 
 // --- Math and diagrams after each render -------------------------------------------
 
-let typeset: ((el: Element, options: object) => void) | undefined
+let typeset: ((el: HTMLElement, options: object) => void) | undefined
 let katexLoading: Promise<void> | undefined
 
 const KATEX_OPTIONS = {
@@ -93,7 +93,7 @@ const KATEX_OPTIONS = {
 }
 
 /** Typeset math now if KaTeX is loaded, else load it (once) and typeset then. */
-function typesetMath(el: Element): void {
+function typesetMath(el: HTMLElement): void {
   if (!el.querySelector('.math') || !loaders.katex) return
   if (typeset) return typeset(el, KATEX_OPTIONS)
   katexLoading ??= loaders.katex().then(async (fn) => {
@@ -348,6 +348,16 @@ function defineClasses(): void {
       live.delete(this)
       this.#observer.disconnect()
       this.#diagrams.stop()
+    }
+
+    /**
+     * `disabled` on the element or on an enclosing `<fieldset>`: like a
+     * disabled `<textarea>`, no typing, no formatting, no form value. The
+     * views still switch: reading is not editing.
+     */
+    formDisabledCallback(disabled: boolean): void {
+      this.#input.disabled = disabled
+      for (const b of this.#toolbar.querySelectorAll<HTMLButtonElement>('button:not([data-view])')) b.disabled = disabled
     }
 
     #mount(): void {
