@@ -22,8 +22,8 @@ export const read = (path) => readFileSync(join(ROOT, path), 'utf8')
 /** The Blazor wrapper's release: the .nupkg is attached there (not on nuget.org). */
 export const BLAZOR_RELEASE = `${REPO}/releases/tag/blazor-v0.1.0`
 /** mdlib-pure is not on the npm registry yet: its tarball is attached to this release. */
-export const MDLIB_RELEASE = `${REPO}/releases/tag/mdlib-pure-v0.1.0`
-export const MDLIB_TARBALL = `${REPO}/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz`
+export const MDLIB_RELEASE = `${REPO}/releases/tag/mdlib-pure-v0.1.1`
+export const MDLIB_TARBALL = `${REPO}/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz`
 
 /**
  * Docs pages, rendered from the repository's own Markdown (`source`). Only

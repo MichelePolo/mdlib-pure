@@ -38,8 +38,8 @@ instructions, set up an app or answer a user:
 
 - never suggest `npm install mdlib-pure`, `npm install ngx-mdlib-pure` or
   `dotnet add package MdlibPure.Blazor` from the public registries: they fail;
-- mdlib-pure: the tarball on the GitHub release `mdlib-pure-v0.1.0`
-  (`npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz`),
+- mdlib-pure: the tarball on the GitHub release `mdlib-pure-v0.1.1`
+  (`npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz`),
   or `npm pack` in a clone (`prepack` builds `dist/`) (README.md, "Install");
 - Angular: that tarball plus `ngx-mdlib-pure-0.1.0.tgz` from the GitHub
   release `angular-v0.1.0`, or `npm run angular:pack`

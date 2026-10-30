@@ -18,10 +18,10 @@ Lightweight Markdown renderer for the browser.
 
 **Not on the npm registry yet**: `npm install mdlib-pure` does not work. Until
 the first release there, install the tarball attached to the
-[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.0):
+[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.1):
 
 ```sh
-npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz
+npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz
 ```
 
 npm records the URL in your `package.json` and the tarball's checksum in
@@ -35,10 +35,10 @@ To build the tarball yourself instead (Node 22.18 or later):
 git clone https://github.com/MichelePolo/mdlib-pure.git
 cd mdlib-pure
 npm ci      # dev tools only: the package itself has no dependencies
-npm pack    # builds dist/, writes mdlib-pure-0.1.0.tgz
+npm pack    # builds dist/, writes mdlib-pure-0.1.1.tgz
 
 cd ../my-app
-npm install ../mdlib-pure/mdlib-pure-0.1.0.tgz
+npm install ../mdlib-pure/mdlib-pure-0.1.1.tgz
 ```
 
 The framework wrappers are not on a registry either, and have GitHub
@@ -252,7 +252,7 @@ standalone components: `<mdlib-editor [(value)]>` (also a form control for
 contents and HTML. Server-side rendering and hydration work. **Not on npm**,
 like mdlib-pure itself: install both tarballs from the GitHub releases
 ([`angular-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.0),
-[`mdlib-pure-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.0)).
+[`mdlib-pure-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.1)).
 
 ## Performance
 

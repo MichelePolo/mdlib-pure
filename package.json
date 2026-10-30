@@ -1,6 +1,6 @@
 {
   "name": "mdlib-pure",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight, zero-dependency, CommonMark-compliant Markdown renderer for the browser. Extensible via plugins, styled with semantic tokens, Tailwind-friendly.",
   "license": "MIT",
   "author": "Michele Polo <michele.polo@gmail.com>",

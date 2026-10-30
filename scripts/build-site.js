@@ -196,7 +196,7 @@ ${link('Playground', '/playground.md', 'the live editor and what it can do')}
 ## Optional
 
 ${docLine('changelog')}
-- [mdlib-pure 0.1.0 release](${REPO}/releases/tag/mdlib-pure-v0.1.0): the npm tarball (not on the npm registry)
+- [mdlib-pure 0.1.1 release](${REPO}/releases/tag/mdlib-pure-v0.1.1): the npm tarball (not on the npm registry)
 - [ngx-mdlib-pure 0.1.0 release](${REPO}/releases/tag/angular-v0.1.0): the npm tarball of the Angular wrapper (not on the npm registry)
 - [MdlibPure.Blazor 0.1.0 release](${BLAZOR_RELEASE}): the .nupkg of the Blazor wrapper (not on nuget.org)
 ${link('Built with AI', '/story.md', 'how the library was built with AI agents, from the git history')}

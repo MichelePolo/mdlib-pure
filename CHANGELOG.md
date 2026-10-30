@@ -5,7 +5,11 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (before 1.0, minor versions may
 break the API).
 
-## [Unreleased]
+## [0.1.1] — 2026-10-30
+
+mdlib-pure only, as the npm tarball of the GitHub release `mdlib-pure-v0.1.1`
+(still not on the npm registry). `ngx-mdlib-pure` 0.1.0 works with it
+unchanged; `MdlibPure.Blazor` 0.1.0 still bundles the 0.1.0 elements and theme.
 
 ### Fixed
 

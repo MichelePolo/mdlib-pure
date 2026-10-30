@@ -61,10 +61,10 @@ This package adds Angular on top, without a second renderer:
 is published, so `npm install ngx-mdlib-pure` fails. Until the first release
 there, install both tarballs from the GitHub releases
 ([`angular-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.0),
-[`mdlib-pure-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.0)):
+[`mdlib-pure-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.1)):
 
 ```sh
-npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz \
+npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz \
   https://github.com/MichelePolo/mdlib-pure/releases/download/angular-v0.1.0/ngx-mdlib-pure-0.1.0.tgz
 npm install katex mermaid   # optional: math and diagrams
 ```
@@ -82,14 +82,14 @@ To build the tarballs yourself instead:
    npm ci                              # mdlib-pure's dev tools
    npm ci --prefix bindings/angular    # Angular, ng-packagr…
    npm run angular:build               # mdlib-pure dist/, then the Angular package and its demo
-   npm run angular:pack                # → bindings/angular/dist/mdlib-pure-0.1.0.tgz
+   npm run angular:pack                # → bindings/angular/dist/mdlib-pure-0.1.1.tgz
                                        #   bindings/angular/dist/ngx-mdlib-pure-0.1.0.tgz
    ```
 
 2. Copy them into your app (for example a `vendor/` folder, committed) and install both:
 
    ```sh
-   npm install ./vendor/mdlib-pure-0.1.0.tgz ./vendor/ngx-mdlib-pure-0.1.0.tgz
+   npm install ./vendor/mdlib-pure-0.1.1.tgz ./vendor/ngx-mdlib-pure-0.1.0.tgz
    ```
 
    npm records them as `file:vendor/…tgz` in your `package.json`.
@@ -444,7 +444,6 @@ More: mdlib-pure's [`docs/security.md`](https://github.com/MichelePolo/mdlib-pur
 | Symptom | Cause |
 |---|---|
 | The elements stay empty | `provideMdlibPure()` is missing from the app config (nothing defines the elements). |
-| Build warnings `Ignoring this import because "…/chunk-….js" was marked as having no side effects` | mdlib-pure 0.1.0's build: harmless (those chunks only declare functions). |
 | Build warnings `Module 'dayjs' used by '…mermaid…' is not ESM` | Mermaid's CommonJS dependencies: see `allowedCommonJsDependencies` [above](#katex-and-mermaid-loaders). |
 | `TS2322` on the `katex` loader | Wrap `renderMathInElement` as shown [above](#katex-and-mermaid-loaders). |
 | `TS2322` on `plugins="gfm math"` | Use a list: `[plugins]="['gfm', 'math']"`. |

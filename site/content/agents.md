@@ -117,8 +117,8 @@ installed from the GitHub releases as the Install section says.
 `MdlibPure.Blazor` is not on nuget.org. Install instructions you write must
 use what works today:
 
-- mdlib-pure: the tarball on the GitHub release `mdlib-pure-v0.1.0`,
-  `npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.0/mdlib-pure-0.1.0.tgz`,
+- mdlib-pure: the tarball on the GitHub release `mdlib-pure-v0.1.1`,
+  `npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz`,
   or `npm pack` in a clone (Getting started,
   [Install](/docs/getting-started/#install));
 - Angular: that tarball and `ngx-mdlib-pure-0.1.0.tgz` from the GitHub release
