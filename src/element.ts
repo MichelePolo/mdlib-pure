@@ -248,7 +248,8 @@ function defineClasses(): void {
   class MdlibEditor extends HTMLElement {
     static observedAttributes = ['value', 'plugins', 'config', 'view', 'label']
     static formAssociated = true
-    #internals = this.attachInternals()
+    // Optional: test DOMs (jsdom) may lack attachInternals() or setFormValue().
+    #internals: ElementInternals | undefined = this.attachInternals?.()
     #input = document.createElement('textarea')
     #preview = document.createElement('div')
     #toolbar = document.createElement('div')
@@ -315,6 +316,15 @@ function defineClasses(): void {
         const p = this.#preview
         p.scrollTop = range > 0 ? (input.scrollTop / range) * (p.scrollHeight - p.clientHeight) : 0
       })
+
+      // `value` set before the class was defined is an own property that
+      // would hide the setter: hand it over to the setter.
+      if (Object.hasOwn(this, 'value')) {
+        const self = this as unknown as Record<string, unknown>
+        const v = self.value
+        delete self.value
+        this.value = String(v ?? '')
+      }
     }
 
     get value(): string {
@@ -325,7 +335,7 @@ function defineClasses(): void {
       if (v === this.#input.value) return
       this.#input.value = v
       this.#sent = []
-      this.#internals.setFormValue(v)
+      this.#internals?.setFormValue?.(v)
       this.#render()
     }
 
@@ -333,8 +343,10 @@ function defineClasses(): void {
       if (!this.#panes.firstChild) {
         this.#panes.className = 'mdlib-editor-panes'
         this.#panes.append(this.#input, this.#preview)
-        this.#input.value = this.getAttribute('value') ?? ''
-        this.#internals.setFormValue(this.#input.value)
+        // The `value` attribute is already applied (attributeChangedCallback
+        // runs for initial attributes too); a value set as a property before
+        // connection (React 19, Vue) must not be overwritten.
+        this.#internals?.setFormValue?.(this.#input.value)
         this.#syncView()
         this.#input.setAttribute('aria-label', this.getAttribute('label') ?? 'Markdown')
       }
@@ -401,7 +413,7 @@ function defineClasses(): void {
     }
 
     #changed(): void {
-      this.#internals.setFormValue(this.#input.value)
+      this.#internals?.setFormValue?.(this.#input.value)
       // Render on the next frame: several keystrokes in one frame render once.
       cancelAnimationFrame(this.#frame)
       this.#frame = requestAnimationFrame(() => this.#render())

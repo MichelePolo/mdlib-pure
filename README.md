@@ -148,7 +148,8 @@ See [docs/tokens.md](docs/tokens.md).
 
 **Tailwind CSS v4.** The integration file loads the theme under your
 utilities and exposes the tokens as theme values (`text-md-link`,
-`bg-md-surface`…):
+`bg-md-surface`…). Tailwind's preflight changes nothing inside `.md`: list
+markers, link underlines and inline images stay as in the plain theme.
 
 ```css
 @import "tailwindcss";

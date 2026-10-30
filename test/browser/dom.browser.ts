@@ -200,6 +200,30 @@ describe('Tailwind CSS v4 integration (real build)', () => {
     assert.deepEqual(r.preflightRestoredByTheme, { h1Size: '32px', ulPadding: '28px' })
     assert.equal(r.mappedHeading, 'rgb(10, 20, 30)') // --md-color-heading: var(--color-primary)
   })
+
+  test("the preflight changes nothing in .md: markers, underlines, inline images, code size, every element's height", async () => {
+    const doc = '# H1\n\n## H2\n\n###### H6\n\nText **b** *i* `code` [link](/x) ![i](data:image/gif;base64,R0lGODlhAQABAAAAACw=) ~~d~~ and a note[^1].\n\n> quote\n\n- a\n  - b\n    - c\n- d\n\n1. one\n   1. inner\n\n- [x] done\n- [ ] todo\n\n```js\nconst x = 1\n```\n\n---\n\n| h | i |\n|---|--:|\n| c | d |\n\n> [!NOTE]\n> Alert.\n\n[^1]: The note.\n'
+    const PROPS = ['list-style-type', 'text-decoration-line', 'display', 'vertical-align', 'font-size', 'font-weight', 'margin-top', 'margin-bottom', 'margin-left', 'padding-left']
+    const measure = async (sheet: string) => {
+      // The same font on both pages: Tailwind's preflight also sets the page font.
+      const page = await openPage(browser, { css: `${sheet}\nhtml { font-family: Arial }` })
+      return page.evaluate(
+        ({ doc, PROPS }) => {
+          const out = document.querySelector('#out')!
+          window.mdlib.createMarkdown({ plugins: window.mdlib.gfm() }).renderTo(out, doc)
+          return [...out.querySelectorAll('*')].map((el) => {
+            const cs = getComputedStyle(el)
+            return `${el.tagName.toLowerCase()} h=${Math.round(el.getBoundingClientRect().height * 2) / 2} ${PROPS.map((p) => `${p}=${cs.getPropertyValue(p)}`).join(' ')}`
+          })
+        },
+        { doc, PROPS },
+      )
+    }
+    const alone = await measure(readRepoFile('styles/theme.css'))
+    assert.deepEqual(await measure(css), alone)
+    const markers = alone.filter((l) => /^[uo]l /.test(l)).map((l) => /list-style-type=(\w+)/.exec(l)![1])
+    assert.deepEqual(markers, ['disc', 'circle', 'square', 'decimal', 'decimal', 'disc', 'decimal'])
+  })
 })
 
 describe('math plugin with KaTeX auto-render (no configuration)', () => {

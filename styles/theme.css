@@ -96,8 +96,10 @@
 
   /* --- Inline ------------------------------------------------------------------ */
 
+  /* Underlined as by the browser, also under resets (Tailwind's preflight). */
   :where(.md) :where(a) {
     color: var(--md-color-link);
+    text-decoration-line: underline;
     text-underline-offset: 0.15em;
   }
 
@@ -122,6 +124,17 @@
     background: var(--md-color-code-bg);
   }
 
+  /* Raised without growing the line box (footnote references). */
+  :where(.md) :where(sub, sup) {
+    position: relative;
+    font-size: 75%;
+    line-height: 0;
+    vertical-align: baseline;
+  }
+
+  :where(.md) :where(sub) { inset-block-end: -0.25em; }
+  :where(.md) :where(sup) { inset-block-start: -0.5em; }
+
   :where(.md) :where(mark) {
     padding: 0.05em 0.2em;
     border-radius: calc(var(--md-radius) * 0.5);
@@ -129,14 +142,20 @@
     color: inherit;
   }
 
+  /* Inline, as by the browser (Tailwind's preflight makes images blocks). */
   :where(.md) :where(img) {
+    display: inline;
     max-inline-size: 100%;
     block-size: auto;
+    vertical-align: baseline;
   }
 
   /* --- Blocks --------------------------------------------------------------------- */
 
+  /* The family is set here, not only on <code>: with the browser's bare
+     `monospace`, Chromium computes 0.875em from 13px (11.4px, not 14px). */
   :where(.md) :where(pre) {
+    font-family: var(--md-font-mono);
     padding: var(--md-pad-code);
     border-radius: var(--md-radius);
     background: var(--md-color-surface);
@@ -163,9 +182,16 @@
     border-block-start: var(--md-border-width) solid var(--md-color-border);
   }
 
+  /* Markers as by the browser, also under resets (Tailwind's preflight sets
+     `list-style: none`); nested lists keep circle, then square. */
   :where(.md) :where(ul, ol) {
     padding-inline-start: var(--md-space-indent);
   }
+
+  :where(.md) :where(ul) { list-style-type: disc; }
+  :where(.md) :where(ol) { list-style-type: decimal; }
+  :where(.md) :where(ul, ol) :where(ul) { list-style-type: circle; }
+  :where(.md) :where(ul, ol) :where(ul, ol) :where(ul) { list-style-type: square; }
 
   :where(.md) :where(li + li, li > ul, li > ol) {
     margin-block-start: var(--md-space-item);
@@ -180,8 +206,11 @@
     list-style: none;
   }
 
+  /* `font: inherit` so that the em margin matches the list indent. */
   :where(.md) :where(li > input[type='checkbox']:first-child) {
+    margin-block: 0;
     margin-inline: calc(var(--md-space-indent) * -1) 0.4em;
+    font: inherit;
     accent-color: var(--md-color-accent);
     vertical-align: -0.1em;
   }

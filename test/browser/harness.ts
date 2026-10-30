@@ -49,6 +49,26 @@ export function mermaidBundle(): Promise<string> {
   return mermaidCode
 }
 
+let reactCode: Promise<string> | undefined
+
+/** Real React 19 (dev dependency) as a classic script setting `window.__react`. */
+export function reactBundle(): Promise<string> {
+  reactCode ??= build({
+    stdin: {
+      contents: "import { createElement } from 'react'; import { flushSync } from 'react-dom'; import { createRoot } from 'react-dom/client'; window.__react = { createElement, createRoot, flushSync }",
+      resolveDir: root,
+      loader: 'js',
+    },
+    bundle: true,
+    format: 'iife',
+    target: 'es2022',
+    define: { 'process.env.NODE_ENV': '"development"' },
+    write: false,
+    logLevel: 'silent',
+  }).then((r) => r.outputFiles[0].text)
+  return reactCode
+}
+
 export const launch = (): Promise<Browser> => chromium.launch()
 
 /** A blank page with `window.mdlib` and an empty `<div id="out" class="md">`. */

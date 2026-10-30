@@ -5,7 +5,23 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (before 1.0, minor versions may
 break the API).
 
-## [0.1.0] — unreleased
+## [Unreleased]
+
+### Fixed
+
+- `<mdlib-editor>`: a `value` set as a property before the element was
+  connected (React 19, Vue) was replaced by the missing attribute, so the
+  editor started empty; a `value` set before `defineElements()` hid the
+  setter. Both now work ([#1](https://github.com/MichelePolo/mdlib-pure/issues/1)).
+- `<mdlib-editor>` in test DOMs: no `TypeError` where `ElementInternals`
+  has no `setFormValue()` (jsdom 29) or `attachInternals()` is missing.
+- `theme.css` under Tailwind's preflight: list markers, link underlines and
+  inline images are kept, so `.md` looks the same with or without Tailwind.
+- `theme.css`: code blocks are 14px as intended (they were 11.4px: the
+  browser's bare `monospace` shrinks em sizes); footnote references no
+  longer stretch their line; task-list checkboxes line up with the indent.
+
+## [0.1.0] — 2026-10-29
 
 First release. Not on a registry yet: mdlib-pure and ngx-mdlib-pure are not
 on npm, MdlibPure.Blazor is not on nuget.org. Each is attached to a GitHub

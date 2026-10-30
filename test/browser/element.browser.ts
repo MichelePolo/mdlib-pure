@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { after, before, describe, test } from 'node:test'
 import type { Browser, Page } from 'playwright'
 import type { ElementsOptions } from '../../src/element.ts'
-import { launch, mermaidBundle, openPage, readRepoFile } from './harness.ts'
+import { launch, mermaidBundle, openPage, reactBundle, readRepoFile } from './harness.ts'
 
 let browser: Browser
 before(async () => {
@@ -108,6 +108,92 @@ describe('<mdlib-editor>', () => {
     assert.equal(before, 0, 'no input event while typing fast')
     assert.deepEqual(afterDelay, [['input', '# Start and *more*']])
     assert.deepEqual(afterBlur.at(-1), ['change', '# Start and *more*'])
+  })
+
+  test('the value property set before connection is kept (frameworks set properties first)', async () => {
+    const page = await setup()
+    const r = await page.evaluate(() => {
+      const state = (ed: any) => ({ value: ed.value, text: ed.querySelector('textarea').value, preview: ed.querySelector('.mdlib-editor-preview').innerHTML })
+      const prop = document.createElement('mdlib-editor') as any
+      prop.value = '# Property'
+      document.body.append(prop)
+      // Attribute first, then the property: the later one wins, as for a set after connection.
+      const both = document.createElement('mdlib-editor') as any
+      both.setAttribute('value', '# Attribute')
+      both.value = '# Both'
+      document.body.append(both)
+      const attr = document.createElement('mdlib-editor')
+      attr.setAttribute('value', '# Attribute')
+      document.body.append(attr)
+      return { prop: state(prop), both: state(both), attr: state(attr), form: (() => { const f = document.createElement('form'); const ed = document.createElement('mdlib-editor') as any; ed.setAttribute('name', 'b'); ed.value = 'x'; f.append(ed); document.body.append(f); return new FormData(f).get('b') })() }
+    })
+    assert.deepEqual(r.prop, { value: '# Property', text: '# Property', preview: '<h1>Property</h1>' })
+    assert.deepEqual(r.both, { value: '# Both', text: '# Both', preview: '<h1>Both</h1>' })
+    assert.deepEqual(r.attr, { value: '# Attribute', text: '# Attribute', preview: '<h1>Attribute</h1>' })
+    assert.equal(r.form, 'x')
+  })
+
+  test('a value property set before defineElements() survives the upgrade', async () => {
+    const page = await openPage(browser, { css })
+    const r = await page.evaluate(() => {
+      const ed = document.createElement('mdlib-editor') as any
+      ed.value = '# Early' // a plain own property: the class does not exist yet
+      document.body.append(ed)
+      ;(window as any).mdlib.defineElements()
+      return { own: Object.hasOwn(ed, 'value'), value: ed.value, preview: ed.querySelector('.mdlib-editor-preview').innerHTML }
+    })
+    assert.deepEqual(r, { own: false, value: '# Early', preview: '<h1>Early</h1>' })
+  })
+
+  test('React 19: <mdlib-editor value={…}> renders the value and follows re-renders', async () => {
+    const page = await setup()
+    await page.addScriptTag({ content: await reactBundle() })
+    const r = await page.evaluate(() => {
+      const { createElement, createRoot, flushSync } = (window as any).__react
+      const host = document.createElement('div')
+      document.body.append(host)
+      const root = createRoot(host)
+      const ed = () => host.querySelector('mdlib-editor') as any
+      const state = () => ({ value: ed().value, preview: ed().querySelector('.mdlib-editor-preview').innerHTML })
+      flushSync(() => root.render(createElement('mdlib-editor', { value: '# From React', plugins: 'gfm' })))
+      const first = state()
+      const w = window as any
+      w.received = []
+      flushSync(() => root.render(createElement('mdlib-editor', { value: '# Again', plugins: 'gfm', delay: '50', onInput: (e: any) => w.received.push(e.target.value) })))
+      return { first, second: state(), attribute: ed().getAttribute('value') }
+    })
+    // React 19 sets `value` as a property (the element has a setter), never as an attribute.
+    assert.deepEqual(r, { first: { value: '# From React', preview: '<h1>From React</h1>' }, second: { value: '# Again', preview: '<h1>Again</h1>' }, attribute: null })
+    // onInput gets the element's debounced `input` event, not every keystroke.
+    await page.locator('mdlib-editor textarea').click()
+    await page.keyboard.press('End')
+    await page.keyboard.type('!')
+    await page.waitForTimeout(200)
+    assert.deepEqual(await page.evaluate(() => (window as any).received), ['# Again!'])
+  })
+
+  test('test DOMs without ElementInternals form support (jsdom): no errors', async () => {
+    const page = await openPage(browser, { css })
+    const errors: string[] = []
+    page.on('pageerror', (e) => errors.push(e.message))
+    const r = await page.evaluate(() => {
+      // jsdom 29 has attachInternals() but no setFormValue(); older versions have neither.
+      delete (ElementInternals.prototype as any).setFormValue
+      ;(window as any).mdlib.defineElements()
+      const ed = document.createElement('mdlib-editor') as any
+      ed.value = '# One'
+      document.body.append(ed)
+      ed.value = '# Two'
+      delete (HTMLElement.prototype as any).attachInternals
+      const old = document.createElement('mdlib-editor') as any
+      old.setAttribute('value', '# Three')
+      document.body.append(old)
+      return [ed.value, old.value]
+    })
+    await page.locator('mdlib-editor textarea').first().fill('# Typed')
+    await page.waitForTimeout(300)
+    assert.deepEqual(r, ['# Two', '# Three'])
+    assert.deepEqual(errors, [])
   })
 
   test('a stale echo while typing is ignored; a deliberate set is applied', async () => {

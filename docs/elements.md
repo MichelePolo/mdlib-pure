@@ -92,8 +92,10 @@ editor.addEventListener('change', (e) => save(e.target.value)) // on blur
 editor.value = '# Replaced' // set it from code
 ```
 
-Inside a `<form>`, an editor with a `name` submits its text like a
-`<textarea>` would.
+`value` works as a property or as an attribute, before or after the element
+is connected, and even before `defineElements()` runs: frameworks that set
+properties on custom elements (React 19, Vue) need nothing special. Inside a
+`<form>`, an editor with a `name` submits its text like a `<textarea>` would.
 
 ## Frameworks that rewrite the page
 
@@ -110,8 +112,18 @@ refreshes the elements already in the page (e.g. loaders registered late).
 - **Angular**: use [ngx-mdlib-pure](../bindings/angular/README.md): standalone
   components with `[(value)]`, a form control for `ngModel` and reactive
   forms, SSR with hydration, and a service for the AST.
-- **React 19, Vue, Svelte**: custom elements work as-is. Pass `source`/`value`
-  as attributes and listen to `input`/`change` events.
+- **React 19, Vue, Svelte**: custom elements work as-is:
+  `<mdlib-editor value={text} onInput={(e) => setText(e.target.value)} />`
+  in React 19 (which sets `value` as a property), `:value` in Vue. Pass
+  `source` and `plugins` as attributes.
+
+## Testing
+
+Unit tests in jsdom (Vitest, Jest) work without polyfills: the editor skips
+the form value where `ElementInternals.setFormValue()` is missing. In jsdom,
+`value` and the preview are updated at once; the `input` event comes after
+`delay` ms (use fake timers), `change` on blur. KaTeX and Mermaid do not run
+there: test math and diagrams in a real browser.
 
 ## Security
 
