@@ -54,6 +54,17 @@ instructions, set up an app or answer a user:
 When a package is published, update this section, `README.md`, the
 `bindings/*/README.md` and the site in the same commit.
 
+## Branching: gitflow
+
+- Work on `feature/<name>` branched from `develop`; open the PR against
+  `develop`. Never commit to, or open feature PRs against, `main`.
+- Releases go `develop` → `release/x.y.z` → `main`, then `main` is merged back
+  into `develop`; urgent fixes use `hotfix/<name>` from `main`, merged into
+  `main` and back into `develop`. Join release, hotfix and back-merge branches
+  with merge commits (`--no-ff`) so both lines keep the same history.
+- Cutting a release (version bump, tag, GitHub release) stays the maintainer's
+  decision (see "Distribution" above).
+
 ## Commands
 
 ```sh
