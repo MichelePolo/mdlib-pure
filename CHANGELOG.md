@@ -5,6 +5,17 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (before 1.0, minor versions may
 break the API).
 
+## [Unreleased]
+
+### Added
+
+- Copyable podcast plugin example and split editor at `/podcast/`: participant
+  completion, section durations (`[](time:5:00:00)`), interactive checkboxes,
+  linked supporting documents, local drafts and per-document undo/redo.
+  Markdown links open in a new browser tab. All sample people and content are
+  fictional; the guide explains the separate integration needed for Blazor.
+  See `docs/podcast.md`; the library's package exports and core syntax are unchanged.
+
 ## [0.1.1] — 2026-10-30
 
 mdlib-pure only, as the npm tarball of the GitHub release `mdlib-pure-v0.1.1`

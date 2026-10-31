@@ -59,6 +59,7 @@ export const DOCS = [
     note: `Neither \`ngx-mdlib-pure\` nor \`mdlib-pure\` is on the npm registry yet: install both tarballs from the [GitHub releases](${REPO}/releases/tag/angular-v0.1.0), as described under [Install](#install).`,
   },
   { slug: 'tokens', title: 'Design tokens', source: 'docs/tokens.md', summary: 'the `--md-*` tokens of `theme.css`, light and dark, Tailwind CSS v4' },
+  { slug: 'podcast', title: 'Custom plugin: podcast', source: 'docs/podcast.md', summary: 'a copyable custom plugin with a split editor, participant completion, planned section durations and linked documents' },
   { slug: 'security', title: 'Security', source: 'docs/security.md', summary: 'what is guaranteed by default, raw HTML, URL policy, DOM clobbering' },
   { slug: 'extending', title: 'Extending: plugin guide', source: 'AGENTS.md', summary: 'AGENTS.md: rules, how parsing works, recipes for every extension point' },
   { slug: 'changelog', title: 'Changelog', source: 'CHANGELOG.md', summary: 'notable changes in each version' },

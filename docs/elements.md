@@ -64,6 +64,11 @@ Toolbar: bold, italic, heading, link, lists, quote, code (Ctrl+B, Ctrl+I,
 Ctrl+K). Math and diagrams load KaTeX and Mermaid only when a document uses
 them; diagrams already drawn are reused while typing.
 
+For an editor with application-specific tags and toolbar actions, see the
+[podcast sample](podcast.md). It builds a dedicated split editor with the public
+parser/render APIs; custom plugins and commands are not registration options of
+`defineElements()`.
+
 `getMarkdown(plugins, config)` returns the shared `Markdown` instance behind
 an attribute combination (e.g. to `parse()` the editor's text).
 

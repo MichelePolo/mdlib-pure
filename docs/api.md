@@ -2,6 +2,10 @@
 
 Entry points (all ES modules, all tree-shakable):
 
+For a complete application built through the plugin API, see the
+[podcast sample](podcast.md): custom tags, an AST-derived duration total and a
+dedicated split editor. Its plugin is copyable source, not a package entry point.
+
 | Import | Contents |
 |---|---|
 | `mdlib-pure` | `createMarkdown`, rendering helpers, types |

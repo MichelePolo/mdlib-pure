@@ -107,6 +107,11 @@ src/
 styles/               theme.css (tokens), tailwind.css (Tailwind v4 bridge)
 docs/                 api.md, elements.md (Web Components), tokens.md, security.md, screenshots/
 templates/plugin/     a complete tested plugin to copy (runs in `npm test`)
+templates/podcast/    application plugin example (mentions, planned durations, documents,
+                      tasks); site/client/podcast.js is its dedicated split editor,
+                      docs/podcast.md the guide; ordinary links open new browser tabs,
+                      document controls open in the editor; fictional people/content only;
+                      no new package export, core syntax or Blazor component
 demo/                 the first live editor (needs `npm run build`)
 site/                 the website: `npm run site:build` → site/out/ (pages, samples, playground)
 bench/                benchmark against other libraries (own package.json)

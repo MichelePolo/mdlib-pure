@@ -118,7 +118,8 @@ html:not(.js) .js-only { display: none !important; }
   display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem;
 }
 
-select, .btn, button {
+/* The embedded podcast application owns its controls and typography. */
+select:not(:where(.podcast *)), .btn, button:not(:where(.podcast *)) {
   font: inherit; color: inherit;
 }
 
@@ -367,7 +368,7 @@ h3.title { font-size: 1.5rem; }
 
 /* --- Rendered Markdown, site additions ------------------------------------- */
 
-.md {
+.md:not(:where(.podcast *)) {
   & h1, & h2 { font-weight: 400; }
   & h1 { font-size: clamp(2.1rem, 1.6rem + 2vw, 2.75rem); line-height: 1.1; }
   & h3, & h4, & h5, & h6 { font-family: var(--font-ui); font-weight: 650; }

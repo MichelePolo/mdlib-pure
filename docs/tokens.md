@@ -99,6 +99,26 @@ Without the theme, plain semantic output works with `@tailwindcss/typography`
 (`<article class="prose">`), or add utilities per node type with the
 `classes` option (see the README).
 
+## Podcast sample tokens
+
+The [podcast sample](podcast.md) scopes these tokens to `.podcast` in
+`site/assets/podcast.css`. They belong to the example, not to the core theme.
+
+| Token | Role |
+|---|---|
+| `--podcast-bg` | Studio background |
+| `--podcast-panel` | Toolbar and preview surface |
+| `--podcast-input` | Source editor and input surface |
+| `--podcast-border` | Pane dividers and control outlines |
+| `--podcast-text` | Primary text |
+| `--podcast-muted` | Secondary text and completed items |
+| `--podcast-accent` | Active controls and focus |
+| `--podcast-duration` | Planned duration and validation messages |
+| `--podcast-speaker-duke`, `--podcast-speaker-duke-bg` | Duke badge text and background |
+| `--podcast-speaker-campa`, `--podcast-speaker-campa-bg` | Campa badge text and background |
+| `--podcast-speaker-michele`, `--podcast-speaker-michele-bg` | Michele badge text and background |
+| `--podcast-split` | Source pane width, adjusted by the separator (25–75%) |
+
 ## Naming rules (for contributors)
 
 `--md-{category}-{role}[-{state}]`: `--md-color-link-hover`,

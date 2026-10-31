@@ -203,6 +203,12 @@ A plugin can provide:
 | `transform` | changes to the AST after parsing (heading ids, TOC) |
 | `render` | HTML output per node type, including core nodes |
 
+For a complete application example, see the [podcast plugin guide](docs/podcast.md)
+and [copyable source](templates/podcast/README.md): a split editor with participant
+completion, planned section durations, interactive tasks and linked supporting
+documents, using fictional people and content. Try the
+[interactive sample](https://michelepolo.github.io/mdlib-pure/podcast/).
+
 First-party plugins:
 
 - `mdlib-pure/headings`: GitHub-style heading ids, optional `#` permalinks,

@@ -232,6 +232,12 @@ KaTeX (~540 KB) and Mermaid (~5 MB, split in chunks per diagram type) ship
 inside the package and are downloaded only by pages whose Markdown contains
 math or a diagram.
 
+Application-specific grammars need a separate integration. The
+[podcast sample](../../docs/podcast.md#using-this-example-with-blazor) demonstrates
+custom mentions, durations, documents and toolbar actions using a dedicated
+JavaScript editor. It is not included in `MarkdownPlugins.All` or the released
+Blazor package; named configs do not register additional syntax plugins.
+
 ## Render modes
 
 | | Static SSR | Interactive Server | Interactive WebAssembly | Interactive Auto |

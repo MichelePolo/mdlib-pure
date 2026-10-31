@@ -180,6 +180,7 @@ ${afterMd ? `\n${afterMd}` : ''}`)
       <h1 class="title"><span class="mk" aria-hidden="true">#</span>Samples</h1>
       <p class="lede">${escapeHtml(intro)}</p>
       <nav aria-label="Samples on this page"><ul class="jump">${SAMPLES.map((s) => `<li><a href="#${s.id}">${escapeHtml(s.title)}</a></li>`).join('')}</ul></nav>
+      <p class="lede"><a href="${rel(PATH, '/podcast/')}">Podcast rundown: a complete custom-plugin sample →</a><br>A split editor with participant completion, planned durations and separate supporting documents. <a href="${rel(PATH, '/docs/podcast/')}">Implementation guide</a>.</p>
     </header>
     ${sections.join('\n')}`
 
@@ -194,6 +195,6 @@ ${afterMd ? `\n${afterMd}` : ''}`)
     head: `${usesMath ? katexHead(PATH) : ''}${usesMermaid ? `\n  <script type="module" src="${asset(PATH, 'js/mermaid-init.js')}"></script>` : ''}\n  <link rel="stylesheet" href="${asset(PATH, 'tailwind-sample.css')}">${usesElements ? `\n  <link rel="stylesheet" href="${asset(PATH, 'editor.css')}">` : ''}`,
     scripts: usesElements ? [asset(PATH, 'js/elements.js')] : [],
   })
-  const twin = `# Samples\n\n${intro}\n\n${twinParts.join('\n')}`
+  const twin = `# Samples\n\n${intro}\n\n[Podcast rundown](/podcast/): a complete custom-plugin sample with a split editor, participant completion, planned durations and linked documents. [Implementation guide](/docs/podcast/).\n\n${twinParts.join('\n')}`
   return { path: PATH, html, md: twin }
 }

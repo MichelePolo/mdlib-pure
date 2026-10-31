@@ -20,6 +20,7 @@ import { home } from '../site/build/pages/home.js'
 import { PLAYGROUND_SAMPLES, playground } from '../site/build/pages/playground.js'
 import { plugins } from '../site/build/pages/plugins.js'
 import { samples, TW_CLASSES } from '../site/build/pages/samples.js'
+import { podcastSample } from '../site/build/pages/podcast.js'
 import { SHOTS_DIR, story } from '../site/build/pages/story.js'
 import { measureAll } from '../site/build/sizes.js'
 
@@ -36,6 +37,7 @@ async function buildSite() {
   copyFileSync(join(ROOT, 'styles/theme.css'), join(OUT, 'assets/theme.css'))
   copyFileSync(join(ROOT, 'styles/editor.css'), join(OUT, 'assets/editor.css'))
   copyFileSync(join(SITE, 'assets/site.css'), join(OUT, 'assets/site.css'))
+  copyFileSync(join(SITE, 'assets/podcast.css'), join(OUT, 'assets/podcast.css'))
   copyFileSync(join(SITE, 'assets/favicon.svg'), join(OUT, 'favicon.svg'))
   const katex = join(ROOT, 'node_modules/katex/dist')
   const katexOut = join(OUT, 'assets/katex')
@@ -78,6 +80,7 @@ async function buildSite() {
   // The Web Components sample: src/element.ts (core and every plugin) in one
   // file of its own, so the other bundles and their chunks stay as they are.
   await build({ entryPoints: ['site/client/elements.js'], absWorkingDir: ROOT, outfile: join(OUT, 'assets/js/elements.js'), bundle: true, format: 'esm', platform: 'browser', minify: true, legalComments: 'none', target: 'es2022' })
+  await build({ entryPoints: ['site/client/podcast.js'], absWorkingDir: ROOT, outfile: join(OUT, 'assets/js/podcast.js'), bundle: true, format: 'esm', platform: 'browser', minify: true, legalComments: 'none', target: 'es2022' })
 
   // --- Mermaid (dev dependency), split per diagram type, loaded on demand ------
   await build({ entryPoints: ['site/client/mermaid-init.js'], absWorkingDir: ROOT, outfile: join(OUT, 'assets/js/mermaid-init.js'), bundle: true, format: 'esm', minify: true, target: 'es2022' })
@@ -111,7 +114,7 @@ async function buildSite() {
 
   // Asset version for cache busting: a hash of the CSS and the entry scripts.
   const hash = createHash('sha256')
-  for (const f of ['assets/theme.css', 'assets/editor.css', 'assets/site.css', 'assets/tailwind-sample.css', 'assets/js/site.js', 'assets/js/home.js', 'assets/js/playground.js', 'assets/js/katex-init.js', 'assets/js/elements.js']) {
+  for (const f of ['assets/theme.css', 'assets/editor.css', 'assets/site.css', 'assets/podcast.css', 'assets/tailwind-sample.css', 'assets/js/site.js', 'assets/js/home.js', 'assets/js/playground.js', 'assets/js/katex-init.js', 'assets/js/elements.js', 'assets/js/podcast.js']) {
     hash.update(readFileSync(join(OUT, f)))
   }
   assets.version = hash.digest('hex').slice(0, 10)
@@ -125,6 +128,7 @@ async function buildSite() {
     home({ sizes, llmsHead: llms.split('\n').slice(0, 9).join('\n') }),
     ...docsOut.pages,
     samples(),
+    podcastSample(),
     plugins({ sizes, tocs: docsOut.tocs }),
     playground(),
     storyOut,
@@ -192,6 +196,7 @@ ${DOCS.filter((d) => d.slug !== 'changelog').map((d) => docLine(d.slug)).join('\
 ${link('Samples', '/samples.md', 'Markdown source and rendered output for CommonMark, GFM, math, Mermaid, definition lists, containers, mark, front matter, syntax highlighting, Tailwind classes and React, and a live <mdlib-editor> and <mdlib-markdown>')}
 ${link('Plugins', '/plugins.md', 'import path, gzip size, syntax and AST nodes of every first-party plugin, and the size of mdlib-pure/element')}
 ${link('Playground', '/playground.md', 'the live editor and what it can do')}
+${link('Podcast rundown', '/podcast.md', 'a complete custom-plugin sample: split editor, participant completion, planned durations and supporting documents')}
 
 ## Optional
 
