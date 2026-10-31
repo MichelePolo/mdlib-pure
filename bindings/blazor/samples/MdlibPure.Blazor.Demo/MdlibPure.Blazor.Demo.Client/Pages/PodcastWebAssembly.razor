@@ -1,0 +1,5 @@
+@page "/podcast/wasm"
+@rendermode InteractiveWebAssembly
+<PageTitle>Podcast editor · WebAssembly</PageTitle>
+<PodcastPlayground Mode="Interactive WebAssembly" Delay="Delay" />
+@code { [SupplyParameterFromQuery] public int? Delay { get; set; } }

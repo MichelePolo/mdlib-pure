@@ -3,6 +3,8 @@
 Markdown **editor with live preview** and Markdown **viewer** for Blazor (.NET 10),
 in every render mode: Static SSR, Interactive Server, Interactive WebAssembly
 and Interactive Auto. Plus a C# service for the AST, the table of contents and HTML.
+Version **0.1.1** (build from source) also includes a dedicated **PodcastEditor**
+with custom tags, participant completion, supporting documents and planned duration.
 
 ```razor
 <MarkdownEditor @bind-Value="Body" Plugins="MarkdownPlugins.All" Style="block-size: 30rem" />
@@ -26,14 +28,14 @@ diagrams, containers, definition lists, highlights, front matter. Safe by defaul
 - **Nothing is rendered on the server**: no SEO prerendering of Markdown, by design.
 
 Contents: [Install](#install) · [Setup](#setup) · [Editor](#markdowneditor) ·
-[Viewer](#markdown) · [Plugins](#plugins) · [Render modes](#render-modes) ·
+[Viewer](#markdown) · [Podcast editor](#podcasteditor) · [Plugins](#plugins) · [Render modes](#render-modes) ·
 [AST service](#ast-service-imarkdownservice) · [Named configs](#named-configs-highlighting-url-policy) ·
 [Styling](#styling) · [Security](#security) · [Troubleshooting](#troubleshooting) ·
 [Building from source](#building-from-source)
 
 ## How it works
 
-The package wraps two Web Components of mdlib-pure, `<mdlib-markdown>` and
+The standard components wrap two Web Components of mdlib-pure, `<mdlib-markdown>` and
 `<mdlib-editor>`. The Razor components render the element *empty* and only
 ever set its attributes (`source`, `value`, `plugins`…); the element renders
 the Markdown into itself, in the browser, with DOM APIs (no HTML parsing). The
@@ -81,6 +83,25 @@ bundles mdlib-pure, which is not on npm either; you need no npm.)
    | Standalone Blazor WebAssembly | the app project |
 
 The package depends only on `Microsoft.AspNetCore.Components.Web`.
+
+**For `PodcastEditor`, use 0.1.1 built from source.** The existing
+`blazor-v0.1.0` release does not contain it. From a current repository checkout:
+
+```sh
+npm ci
+npm run blazor:assets
+dotnet pack bindings/blazor/src/MdlibPure.Blazor -c Release -o bindings/blazor/artifacts
+```
+
+Copy `bindings/blazor/artifacts/MdlibPure.Blazor.0.1.1.nupkg` to your application's
+local `packages/` feed, then run in that application:
+
+```sh
+dotnet add package MdlibPure.Blazor --version 0.1.1 --source ./packages
+```
+
+The package includes the editor, plugin and styles. The consuming app needs no
+Node build and no manually registered JavaScript.
 
 ## Setup
 
@@ -232,11 +253,86 @@ KaTeX (~540 KB) and Mermaid (~5 MB, split in chunks per diagram type) ship
 inside the package and are downloaded only by pages whose Markdown contains
 math or a diagram.
 
-Application-specific grammars need a separate integration. The
-[podcast sample](../../docs/podcast.md#using-this-example-with-blazor) demonstrates
-custom mentions, durations, documents and toolbar actions using a dedicated
-JavaScript editor. It is not included in `MarkdownPlugins.All` or the released
-Blazor package; named configs do not register additional syntax plugins.
+The [podcast sample](../../docs/podcast.md#using-this-example-with-blazor) is
+available through the dedicated `PodcastEditor` below. It is not a flag in
+`MarkdownPlugins.All`; named configs still do not register additional syntax plugins.
+
+## `<PodcastEditor>`
+
+Available in **0.1.1 built from source**, with the same editor and parser as the
+[public sample](https://michelepolo.github.io/mdlib-pure/podcast/). The full episode
+is bound as a typed `PodcastEpisode`, including separate supporting documents:
+
+```razor
+<PodcastEditor @bind-Value="Episode" Participants="People" Delay="300" />
+<p>Planned time: @Episode.PlannedDuration</p>
+
+@code {
+    private string[] People = ["Nora", "Elio", "Vera"];
+    private PodcastEpisode Episode { get; set; } = new()
+    {
+        Source = "# An imaginary garden\n\n[ ] @Nora Introduction [](time:5:00:00)\n\n[scheda](Notes)",
+        Documents = new() { ["Notes"] = "@Elio Ideas for the garden." }
+    };
+}
+```
+
+The toolbar inserts `@Name`, `[](time:M:SS:CC)`, `[scheda](name)` and checkboxes,
+alongside ordinary formatting. `_text_` underlines. Links open new browser tabs;
+document buttons switch the editor's document. Names are configurable, with no
+application-specific names embedded in the package. The default sample names
+are fictional. Participant names contain 1–32 letters, digits, underscores or
+hyphens; duplicates are ignored without case sensitivity (up to 100 names).
+
+| Parameter | Behavior |
+|---|---|
+| `Value` / `ValueChanged` / `ValueExpression` | `PodcastEpisode`; use `@bind-Value`, also inside an `EditForm`. |
+| `Participants` | `string[]`; updates both badges and completion, independently for each instance. |
+| `View` | `MarkdownEditorView.Split` by default; also `Write` and `Preview`. |
+| `Delay` | Typing pause before C# updates, 200 ms by default; pending changes flush on blur. |
+| `Name` | Form field for the entire episode serialized as JSON. |
+| `Label`, `Class`, `Style`, `InertUntilInteractive` | As for `MarkdownEditor`. Style controls the host layout; see the theme example below. |
+| Additional attributes | Passed to the host; `disabled` disables editing and form submission. |
+
+`PodcastEpisode` has `Source` (main rundown), `Documents` (a dictionary of
+supporting documents), `ActiveDocument` (`"Scaletta"` for the main rundown),
+`DurationCentiseconds` and the computed `PlannedDuration` (`TimeSpan`). The browser
+calculates the initial duration and updates it after edits; only main-rundown
+time tags count. Documents use the [sample's name rules](../../docs/podcast.md#syntax-and-behavior).
+
+Use `Episode.ToJson()` and `PodcastEpisode.FromJson(json)` to save and restore
+the complete state. JSON uses generated serialization metadata (trimming/AOT
+safe). The component has no implicit localStorage persistence: your application
+owns saving, for example with `@bind-Value:after="SaveAsync"`. The browser preview
+updates immediately, independently of Interactive Server round trips.
+
+In **Static SSR**, post JSON into a string form field, then call
+`PodcastEpisode.FromJson`. Do not bind a JSON field directly to a complex
+`[SupplyParameterFromForm]` property:
+
+```razor
+<PodcastEditor Value="Episode" Name="Input.Json" />
+```
+
+The demo's `/podcast/ssr` page contains a complete enhanced `EditForm` example.
+The `/podcast/server`, `/podcast/wasm` and `/podcast/auto` pages demonstrate typed
+binding, participant changes, replacement from C#, mounting/unmounting and two
+independent instances. All four render modes are tested in Chromium.
+
+The package-local `<mdlib-podcast-editor>` uses Shadow DOM to isolate IDs and
+styles between instances. Customize its semantic tokens through the exposed part:
+
+```css
+mdlib-podcast-editor::part(editor) {
+  --podcast-accent: #b8e986;
+  --podcast-speaker-first: #a5efbd;
+}
+```
+
+Its connected/disconnected lifecycle mounts and cleans
+up the shared editor; styles load automatically when a podcast editor appears.
+The standard `MarkdownEditor`, `Markdown` and `IMarkdownService` retain their
+existing grammar. Use `PodcastEditor` for these custom tags.
 
 ## Render modes
 
@@ -397,6 +493,8 @@ already has them. The viewer and the preview have the class `md`.
   in `App.razor`'s `<head>`.
 
 All rules are in `@layer mdlib` with zero specificity: any rule of yours wins.
+`PodcastEditor` loads its own shadow-root styles, independently of the document
+stylesheet opt-out above. Customize those with `::part(editor)` as shown in its section.
 
 ## Security
 
@@ -407,7 +505,9 @@ All rules are in `@layer mdlib` with zero specificity: any rule of yours wins.
 - **URL allowlist**: every `href`/`src` goes through it. Allowed: relative
   URLs, `http:`, `https:`, `mailto:`, `tel:`, `sms:`, and `data:image/png|gif|jpeg|webp`
   for images. `javascript:` and other schemes lose their URL.
-- **No HTML parsing**: the elements build DOM nodes directly.
+- **Markdown content is never parsed as HTML**: the renderers build DOM nodes.
+  PodcastEditor clones a source-controlled static UI template; episode contents,
+  names and documents are assigned through safe DOM APIs.
 - **Mermaid** runs with `securityLevel: 'strict'` (no HTML labels, no click
   handlers). **KaTeX** runs with its defaults (`trust: false`: no `\href`
   links, no `\includegraphics`).
@@ -459,14 +559,14 @@ dotnet build bindings/blazor/MdlibPure.Blazor.slnx
 (cd bindings/blazor && dotnet test)   # bUnit; global.json there selects Microsoft.Testing.Platform
 npx playwright install chromium   # once
 npm run test:blazor            # end-to-end: builds and starts the demo, drives every render mode
-dotnet pack bindings/blazor/src/MdlibPure.Blazor -c Release -o packages   # → packages/MdlibPure.Blazor.0.1.0.nupkg
+dotnet pack bindings/blazor/src/MdlibPure.Blazor -c Release -o packages   # → packages/MdlibPure.Blazor.0.1.1.nupkg
 ```
 
 Run the demo: `dotnet run --project bindings/blazor/samples/MdlibPure.Blazor.Demo/MdlibPure.Blazor.Demo`,
 then open <http://localhost:5088>.
 
 Run `npm run blazor:assets` again after changing mdlib-pure's `src/` or
-`styles/`. The npm package itself stays zero-dependency: KaTeX and Mermaid are
+`styles/`, `templates/podcast/` or `site/assets/podcast.css`. The npm package itself stays zero-dependency: KaTeX and Mermaid are
 dev dependencies of the repository, shipped only inside the NuGet package.
 
 ## License

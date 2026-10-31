@@ -1,0 +1,5 @@
+@page "/podcast/auto"
+@rendermode InteractiveAuto
+<PageTitle>Podcast editor · Auto</PageTitle>
+<PodcastPlayground Mode="Interactive Auto" Delay="Delay" />
+@code { [SupplyParameterFromQuery] public int? Delay { get; set; } }

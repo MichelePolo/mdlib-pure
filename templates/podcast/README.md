@@ -29,10 +29,13 @@ The custom `[scheda](…)` control opens its document inside the editor.
 
 - `plugin.ts`: parsing, safe VNode rendering, summary and source-range helpers.
 - `plugin.test.ts`: grammar, source mapping, GFM interactions and pathological input.
-- `../../site/client/podcast.js`: split editor, toolbar, document tabs and storage.
+- `editor.js`: shared, instance-scoped editor with state, callbacks and cleanup.
+- `../../site/client/podcast.js`: site initialization with opt-in local drafts.
 - `../../site/lib/podcast-data.js`: initial rundown and supporting documents.
-- `../../site/lib/podcast-ui.js`: static UI markup, shared with browser tests.
+- `ui.js`: static UI markup, shared with the website and Blazor.
 - `../../site/assets/podcast.css`: sample-local theme and responsive layout.
 
 Run `npm run site:build` then `npm run site:serve`; open `/podcast/`.
 Run `npm run verify` and `npm run test:browser` to check the sample with the library.
+
+The [Blazor wrapper](../../bindings/blazor/README.md#podcasteditor) packages this editor as `PodcastEditor` in version 0.1.1 built from source.

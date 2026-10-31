@@ -114,9 +114,9 @@ The [podcast sample](podcast.md) scopes these tokens to `.podcast` in
 | `--podcast-muted` | Secondary text and completed items |
 | `--podcast-accent` | Active controls and focus |
 | `--podcast-duration` | Planned duration and validation messages |
-| `--podcast-speaker-duke`, `--podcast-speaker-duke-bg` | Duke badge text and background |
-| `--podcast-speaker-campa`, `--podcast-speaker-campa-bg` | Campa badge text and background |
-| `--podcast-speaker-michele`, `--podcast-speaker-michele-bg` | Michele badge text and background |
+| `--podcast-speaker-first`, `--podcast-speaker-first-bg` | First participant badge text and background |
+| `--podcast-speaker-second`, `--podcast-speaker-second-bg` | Second participant badge text and background |
+| `--podcast-speaker-third`, `--podcast-speaker-third-bg` | Third participant badge text and background |
 | `--podcast-split` | Source pane width, adjusted by the separator (25–75%) |
 
 ## Naming rules (for contributors)

@@ -1,0 +1,23 @@
+<PodcastNavigation />
+@page "/podcast/ssr"
+<PageTitle>Podcast editor · Static SSR</PageTitle>
+<h1>Podcast editor · Static SSR</h1>
+<EditForm Model="Input" FormName="podcast-ssr" OnValidSubmit="Save" Enhance>
+    <PodcastEditor id="episode-editor" Value="Episode" Name="Input.Json" />
+    <button id="episode-save" type="submit">Save episode</button>
+</EditForm>
+@if (_saved) { <p id="episode-saved">Episode received.</p> }
+<pre id="episode-json">@Episode.ToJson()</pre>
+
+@code {
+    [SupplyParameterFromForm(FormName = "podcast-ssr")] private EpisodeForm? Input { get; set; }
+    private PodcastEpisode Episode { get; set; } = new();
+    private bool _saved;
+    protected override void OnInitialized()
+    {
+        Input ??= new() { Json = new PodcastEpisode { Source = "# Giardino\n\n[ ] @Vera Introduzione [](time:5:00:00)", Documents = new() { ["Appunti"] = "@Nora Idee per le piante" } }.ToJson() };
+        Episode = PodcastEpisode.FromJson(Input.Json);
+    }
+    private void Save() { Episode = PodcastEpisode.FromJson(Input!.Json); _saved = true; }
+    public sealed class EpisodeForm { public string Json { get; set; } = "{}"; }
+}

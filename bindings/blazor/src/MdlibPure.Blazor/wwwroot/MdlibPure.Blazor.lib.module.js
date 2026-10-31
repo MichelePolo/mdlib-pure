@@ -98,7 +98,7 @@ function refresh(el) {
 }
 
 function start() {
-  started ??= prepare().then(({ defineElements }) => {
+  started ??= prepare().then(async ({ defineElements }) => {
     const early = customElements.get('mdlib-markdown') !== undefined
     defineElements({
       loaders: {
@@ -108,6 +108,8 @@ function start() {
     })
     // Defined earlier by the app (registering configs): math and diagrams were skipped.
     if (early) for (const el of document.querySelectorAll('mdlib-markdown, mdlib-editor')) refresh(el)
+    const { definePodcastEditor } = await import(asset('mdlib-podcast.js'))
+    definePodcastEditor({ styles: [asset('theme.css'), asset('podcast.css')] })
   })
   return started
 }

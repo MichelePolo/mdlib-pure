@@ -10,6 +10,7 @@ per la condivisione. Nomi, titoli e documenti sono interamente di fantasia.
 | [03-durata-sezione.png](03-durata-sezione.png) | Inserimento guidato di minuti, secondi e centesimi |
 | [04-documento-collegato.png](04-documento-collegato.png) | Il gobbo di Vera aperto come documento separato |
 | [05-editor-split-mobile.png](05-editor-split-mobile.png) | Split verticale su uno schermo stretto |
+| [06-editor-blazor.png](06-editor-blazor.png) | Componente PodcastEditor in un’app Blazor che installa il pacchetto 0.1.1 |
 
 Anteprima interattiva locale: <http://localhost:4173/podcast/>.
 
@@ -21,5 +22,8 @@ npm run site:serve
 # In un secondo terminale, dalla radice del repository:
 node previews/podcast/capture.mjs
 ```
+
+L’immagine Blazor è acquisita dalla pagina `/podcast/server` della demo, usando
+il pacchetto installabile e un’app separata dal progetto del wrapper.
 
 ![Editor split desktop](01-editor-split-desktop.png)

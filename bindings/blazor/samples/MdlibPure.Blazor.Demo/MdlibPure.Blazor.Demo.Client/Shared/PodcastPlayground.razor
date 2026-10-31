@@ -1,0 +1,33 @@
+<PodcastNavigation />
+<p id="podcast-status" data-interactive="@(RendererInfo.IsInteractive ? "true" : "false")" data-renderer="@RendererInfo.Name">@Mode</p>
+<p>Fictional participants and documents. Changes, supporting documents and the total are bound to C#.</p>
+@if (_visible)
+{
+    <PodcastEditor id="episode-editor" @bind-Value="Episode" Participants="People" Delay="Delay" />
+}
+<p>
+    <button id="episode-reset" @onclick="Reset">Replace from C#</button>
+    <button id="episode-cast" @onclick="ChangeCast">Change participants</button>
+    <button id="episode-toggle" @onclick="() => _visible = !_visible">Mount / unmount</button>
+</p>
+<p>Planned duration: <output id="episode-total">@Episode.DurationCentiseconds</output> centiseconds</p>
+<pre id="episode-json">@Episode.ToJson()</pre>
+<details>
+    <summary>Independent second editor</summary>
+    <PodcastEditor id="second-episode" @bind-Value="Second" Participants="@(new[] { "Ari", "Bea" })" />
+</details>
+
+@code {
+    [Parameter] public string Mode { get; set; } = "";
+    [Parameter] public int? Delay { get; set; }
+    private bool _visible = true;
+    private string[] People { get; set; } = ["Nora", "Elio", "Vera"];
+    private PodcastEpisode Episode { get; set; } = new()
+    {
+        Source = "# Un giardino sul tetto\n\n[ ] @Vera presenta il progetto [](time:5:00:00)\n\n[scheda](Appunti)\n\n[Materiale](https://example.com)",
+        Documents = new() { ["Appunti"] = "# Appunti\n\n@Elio propone tre piante aromatiche." }
+    };
+    private PodcastEpisode Second { get; set; } = new() { Source = "# Secondo episodio\n\n@Ari Una passeggiata tra le stelle." };
+    private void Reset() => Episode = new() { Source = "# Nuova scaletta\n\n[ ] @Nora Introduzione [](time:2:30:00)" };
+    private void ChangeCast() => People = ["Ari", "Bea"];
+}

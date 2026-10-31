@@ -1,0 +1,69 @@
+@namespace MdlibPure.Blazor
+@using System.Diagnostics.CodeAnalysis
+@using System.Linq.Expressions
+@using System.Text.Json
+@inherits InputBase<PodcastEpisode>
+
+<mdlib-podcast-editor @attributes="AdditionalAttributes"
+                      class="@ClassAttribute" style="@Style"
+                      value="@CurrentValueAsString" participants="@ParticipantsAttribute"
+                      view="@View.ToString().ToLowerInvariant()" delay="@Delay" label="@Label"
+                      name="@NameAttribute" inert="@Inert" data-permanent
+                      @oninput="OnInput"></mdlib-podcast-editor>
+
+@code {
+    private bool _unbound;
+
+    /// <summary>Names offered by @ completion and rendered as badges. Defaults to fictional sample names.</summary>
+    [Parameter] public string[]? Participants { get; set; }
+    /// <summary>Initial pane layout; the editor toolbar can change it.</summary>
+    [Parameter] public MarkdownEditorView View { get; set; }
+    /// <summary>Typing pause before ValueChanged, in milliseconds. Default 200.</summary>
+    [Parameter] public int? Delay { get; set; }
+    /// <summary>Accessible name of the Markdown input.</summary>
+    [Parameter] public string? Label { get; set; }
+    /// <summary>Form field name. Its submitted value is PodcastEpisode JSON.</summary>
+    [Parameter] public string? Name { get; set; }
+    /// <summary>Additional classes, alongside EditForm validation classes.</summary>
+    [Parameter] public string? Class { get; set; }
+    /// <summary>Inline styles for the host layout. Use ::part(editor) for internal theme tokens.</summary>
+    [Parameter] public string? Style { get; set; }
+    /// <summary>Keep the prerendered editor inert until Blazor is interactive, preventing lost edits.</summary>
+    [Parameter] public bool InertUntilInteractive { get; set; } = true;
+
+    /// <inheritdoc />
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        if (ValueExpression is null && !parameters.TryGetValue<Expression<Func<PodcastEpisode>>>(nameof(ValueExpression), out _))
+        {
+            _unbound = true;
+            ValueExpression = () => Value!;
+        }
+        return base.SetParametersAsync(parameters);
+    }
+
+    /// <inheritdoc />
+    protected override string FormatValueAsString(PodcastEpisode? value) => (value ?? new()).ToJson();
+
+    /// <inheritdoc />
+    protected override bool TryParseValueFromString(string? value, out PodcastEpisode result, [NotNullWhen(false)] out string? validationErrorMessage)
+    {
+        try
+        {
+            result = PodcastEpisode.FromJson(value ?? "{}");
+            validationErrorMessage = null;
+            return true;
+        }
+        catch (JsonException)
+        {
+            result = Value ?? new();
+            validationErrorMessage = "The episode must contain valid JSON.";
+            return false;
+        }
+    }
+    private void OnInput(ChangeEventArgs args) => CurrentValueAsString = args.Value?.ToString();
+    private string? ParticipantsAttribute => Participants is null ? null : JsonSerializer.Serialize(Participants, PodcastJsonContext.Default.StringArray);
+    private string? NameAttribute => !string.IsNullOrEmpty(Name) ? Name : _unbound ? null : NameAttributeValue;
+    private string? ClassAttribute => string.Join(' ', new[] { Class, EditContext?.FieldCssClass(FieldIdentifier) }.Where(c => !string.IsNullOrWhiteSpace(c))) is { Length: > 0 } css ? css : null;
+    private bool Inert => InertUntilInteractive && AssignedRenderMode is not null && !RendererInfo.IsInteractive;
+}

@@ -377,6 +377,78 @@ describe('Static SSR', { timeout: TIMEOUT }, () => {
 
 // --- Enhanced navigation ------------------------------------------------------------
 
+for (const mode of ['server', 'wasm', 'auto']) {
+  test(`podcast editor binds the whole episode in ${mode}`, { timeout: TIMEOUT }, async () => {
+    const s = await open(`/podcast/${mode}?delay=0`)
+    const page = s.page
+    try {
+      await page.waitForSelector('#podcast-status[data-interactive="true"]', { timeout: 60_000 })
+      const editor = page.locator('#episode-editor')
+      const input = editor.locator('textarea')
+      await input.waitFor()
+      await page.waitForFunction(() => document.querySelector('#episode-total')?.textContent === '30000')
+      assert.equal(await editor.locator('#podcast-total').textContent(), '5:00:00')
+      assert.equal(await editor.locator('.podcast').evaluate((el) => getComputedStyle(el).backgroundColor), 'rgb(16, 31, 27)')
+      await page.addStyleTag({ content: '#episode-editor::part(editor) { --podcast-accent: rgb(1, 2, 3); }' })
+      assert.equal(await editor.locator('.podcast').evaluate((el) => getComputedStyle(el).getPropertyValue('--podcast-accent').trim()), 'rgb(1, 2, 3)')
+      assert.equal(await editor.locator('#podcast-preview a').getAttribute('target'), '_blank')
+      await editor.getByRole('button', { name: 'Apri scheda: Appunti', exact: true }).click()
+      await input.fill('@Elio note [](time:90:00:00)')
+      await page.waitForFunction(() => JSON.parse(document.querySelector('#episode-json')!.textContent!).documents.Appunti === '@Elio note [](time:90:00:00)')
+      assert.equal(await page.locator('#episode-total').textContent(), '30000')
+      await editor.getByRole('tab', { name: 'Scaletta', exact: true }).click()
+      await input.fill('[ ] @Nora una proposta [](time:2:00:00)')
+      await input.press('Control+End')
+      await input.pressSequentially(' altre idee', { delay: 5 })
+      await page.waitForFunction(() => JSON.parse(document.querySelector('#episode-json')!.textContent!).source.endsWith(' altre idee'))
+      assert.equal(await input.inputValue(), '[ ] @Nora una proposta [](time:2:00:00) altre idee')
+      assert.equal(await page.locator('#episode-total').textContent(), '12000')
+      await editor.locator('#podcast-preview [data-task="0"]').click()
+      await page.waitForFunction(() => JSON.parse(document.querySelector('#episode-json')!.textContent!).source.startsWith('[x]'))
+      await page.locator('#episode-cast').click()
+      await page.waitForFunction(() => document.querySelector('#episode-editor')?.getAttribute('participants') === '["Ari","Bea"]')
+      await input.fill('@')
+      assert.deepEqual(await editor.getByRole('option').allTextContents(), ['@Ari', '@Bea'])
+      await input.press('Escape')
+      await page.locator('#episode-reset').click()
+      await page.waitForFunction(() => document.querySelector('#episode-total')?.textContent === '15000')
+      assert.match(await input.inputValue(), /Nuova scaletta/)
+      const second = page.locator('#second-episode textarea')
+      assert.match(await second.inputValue(), /Secondo episodio/)
+      await page.locator('#episode-toggle').click()
+      await page.locator('#episode-editor').waitFor({ state: 'detached' })
+      await page.locator('#episode-toggle').click()
+      await page.locator('#episode-editor textarea').waitFor()
+      assert.match(await page.locator('#episode-editor textarea').inputValue(), /Nuova scaletta/)
+    } finally { await close(s) }
+  })
+}
+
+test('podcast Static SSR posts every document as JSON and survives enhanced navigation', { timeout: TIMEOUT }, async () => {
+  const s = await open('/podcast/ssr')
+  const page = s.page
+  try {
+    const editor = page.locator('#episode-editor')
+    const input = editor.locator('textarea')
+    await input.waitFor()
+    await editor.getByRole('tab', { name: 'Appunti', exact: true }).click()
+    await input.fill('@Nora appunti modificati')
+    const posted = await page.evaluate(() => JSON.parse(new FormData(document.querySelector('form')!).get('Input.Json') as string))
+    assert.equal(posted.documents.Appunti, '@Nora appunti modificati')
+    assert.equal(posted.durationCentiseconds, 30000)
+    await page.locator('#episode-save').click()
+    await page.locator('#episode-saved').waitFor()
+    assert.equal(JSON.parse(await page.locator('#episode-json').textContent() ?? '{}').documents.Appunti, '@Nora appunti modificati')
+    assert.equal(await input.inputValue(), '@Nora appunti modificati')
+    await page.locator('nav[aria-label="Podcast render modes"] a[href="podcast/server"]').click()
+    await page.waitForSelector('#podcast-status[data-interactive="true"]')
+    await page.locator('#episode-editor textarea').waitFor()
+    await page.locator('nav[aria-label="Podcast render modes"] a[href="podcast/ssr"]').click()
+    await page.locator('#episode-editor textarea').waitFor()
+    assert.equal(await page.locator('#episode-editor .podcast-toolbar').count(), 1)
+  } finally { await close(s) }
+})
+
 describe('Enhanced navigation', { timeout: TIMEOUT * 2 }, () => {
   test('moving between all pages keeps the elements rendered and the styles in place', async () => {
     const s = await open('/ssr')

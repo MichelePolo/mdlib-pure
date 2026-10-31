@@ -13,8 +13,13 @@ break the API).
   completion, section durations (`[](time:5:00:00)`), interactive checkboxes,
   linked supporting documents, local drafts and per-document undo/redo.
   Markdown links open in a new browser tab. All sample people and content are
-  fictional; the guide explains the separate integration needed for Blazor.
+  fictional; the guide covers its Blazor integration.
   See `docs/podcast.md`; the library's package exports and core syntax are unchanged.
+
+- Blazor wrapper 0.1.1 (from source): `PodcastEditor` and `PodcastEpisode`,
+  with configurable participants, typed episode binding, supporting documents,
+  planned durations and automatic assets. Shared with the site sample; tested
+  in Server, WebAssembly, Auto and Static SSR, including enhanced navigation.
 
 ## [0.1.1] — 2026-10-30
 

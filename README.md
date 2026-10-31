@@ -247,7 +247,9 @@ public registry yet.
 every render mode: `<MarkdownEditor @bind-Value>`, `<Markdown>` and an AST
 service. **Not on nuget.org**: download the `.nupkg` from the
 [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0)
-and add it from a local package feed.
+and add it from a local package feed. Version 0.1.1 built from source adds
+[`PodcastEditor`](bindings/blazor/README.md#podcasteditor), with typed episode
+binding, configurable participants, supporting documents and planned duration.
 
 ### Angular (21, 22)
 

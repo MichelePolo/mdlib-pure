@@ -46,9 +46,9 @@ export const DOCS = [
     slug: 'blazor',
     title: 'Blazor',
     source: 'bindings/blazor/README.md',
-    summary: '`MdlibPure.Blazor` 0.1.0 for .NET 10: `<MarkdownEditor>`, `<Markdown>`, every render mode, the AST service; the `.nupkg` is on the GitHub release',
+    summary: '`MdlibPure.Blazor` for .NET 10: Markdown editor, viewer, AST service; 0.1.1 from source adds a podcast editor with typed episode binding',
     description: 'MdlibPure.Blazor: a Markdown editor with live preview and a viewer for Blazor (.NET 10) in every render mode, built on the mdlib-pure Web Components, with a C# AST service.',
-    note: `The package is not on nuget.org yet: download \`MdlibPure.Blazor.0.1.0.nupkg\` from the [GitHub release](${BLAZOR_RELEASE}) and use it from a local feed as described under [Install](#install).`,
+    note: `The package is not on nuget.org yet: download \`MdlibPure.Blazor.0.1.0.nupkg\` from the [GitHub release](${BLAZOR_RELEASE}) and use it from a local feed as described under [Install](#install). For \`PodcastEditor\`, build 0.1.1 from source following that section.`,
   },
   {
     slug: 'angular',

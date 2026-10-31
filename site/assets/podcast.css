@@ -11,12 +11,12 @@
     --podcast-muted: #9db6aa;
     --podcast-accent: #c8eb72;
     --podcast-duration: #ffa69b;
-    --podcast-speaker-duke: #a5efbd;
-    --podcast-speaker-duke-bg: #234c35;
-    --podcast-speaker-campa: #f2d28d;
-    --podcast-speaker-campa-bg: #4c3d22;
-    --podcast-speaker-michele: #eac2fa;
-    --podcast-speaker-michele-bg: #50335e;
+    --podcast-speaker-first: #a5efbd;
+    --podcast-speaker-first-bg: #234c35;
+    --podcast-speaker-second: #f2d28d;
+    --podcast-speaker-second-bg: #4c3d22;
+    --podcast-speaker-third: #eac2fa;
+    --podcast-speaker-third-bg: #50335e;
     --md-color-text: var(--podcast-text);
     --md-color-muted: var(--podcast-muted);
     --md-color-link: var(--podcast-accent);
@@ -84,9 +84,9 @@
   :where(#podcast-preview ul) { padding-inline-start: 1.1rem; }
   :where(#podcast-preview li::marker) { color: var(--podcast-muted); }
   :where(.podcast-mention) { display: inline-block; border-radius: 6px; padding: .08em .5em; font-weight: 650; font-size: .88em; line-height: 1.5; vertical-align: baseline; white-space: nowrap; }
-  :where(.podcast-person-0) { color: var(--podcast-speaker-duke); background: var(--podcast-speaker-duke-bg); }
-  :where(.podcast-person-1) { color: var(--podcast-speaker-campa); background: var(--podcast-speaker-campa-bg); }
-  :where(.podcast-person-2) { color: var(--podcast-speaker-michele); background: var(--podcast-speaker-michele-bg); }
+  :where(.podcast-person-0) { color: var(--podcast-speaker-first); background: var(--podcast-speaker-first-bg); }
+  :where(.podcast-person-1) { color: var(--podcast-speaker-second); background: var(--podcast-speaker-second-bg); }
+  :where(.podcast-person-2) { color: var(--podcast-speaker-third); background: var(--podcast-speaker-third-bg); }
   :where(.podcast-time) { display: inline-block; color: var(--podcast-duration); border: 1px solid var(--podcast-border); padding: .06em .55em; border-radius: 20px; font: .75em/1.7 var(--md-font-mono); vertical-align: baseline; white-space: nowrap; }
   :where(.podcast-item) { line-height: 2; }
   :where(.podcast-item.is-complete .podcast-words) { color: var(--podcast-muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--podcast-muted) 70%, transparent); }

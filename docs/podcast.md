@@ -91,7 +91,7 @@ The new AST node shapes are documented at the top of `plugin.ts`.
 transformed content without an exact paragraph/heading source location (for
 example a table cell) remain read-only. Their syntax is still rendered.
 
-The [editor controller](../site/client/podcast.js) implements the application:
+The [shared editor controller](../templates/podcast/editor.js) implements the application:
 
 - Default split view, resizable horizontally with a pointer or the separator's
   arrow keys; stacked panes on narrow screens, plus write/read views.
@@ -105,23 +105,39 @@ The [editor controller](../site/client/podcast.js) implements the application:
   the UI explicitly reports session-only storage. No data is sent to a server.
 - Reset asks before replacing local drafts with the example.
 
-The markup lives in [podcast-ui.js](../site/lib/podcast-ui.js) and the initial
+The markup lives in [ui.js](../templates/podcast/ui.js) and the initial
 documents in [podcast-data.js](../site/lib/podcast-data.js). To use another cast,
 configure both the plugin's participant list and the controller's suggestions.
 
 ## Using this example with Blazor
 
-The current [Blazor wrapper](../bindings/blazor/README.md) wraps the standard
-`<mdlib-editor>` element. Its `MarkdownPlugins` flags select built-in plugins;
-`Config` accepts rendering options, not additional syntax plugins or toolbar
-commands. The podcast editor is not included in the released Blazor package.
+The [Blazor wrapper 0.1.1](../bindings/blazor/README.md#podcasteditor) includes
+`PodcastEditor`, sharing this sample's parser, controller, toolbar and styles.
+It binds the entire episode to a C# `PodcastEpisode`, with configurable
+participants, supporting documents and the planned total:
 
-Reusing this example in a Blazor application requires a dedicated integration
-for its JavaScript editor: mount and dispose it with the component, exchange
-document contents and the planned total through JS interop, and connect drafts
-to the application's storage. The parser plugin can be reused without changing
-its syntax. This repository's sample currently demonstrates the browser editor;
-it does not yet provide that Razor component or its interop lifecycle.
+```razor
+<PodcastEditor @bind-Value="Episode" Participants="People" />
+
+@code {
+    private string[] People = ["Nora", "Elio", "Vera"];
+    private PodcastEpisode Episode { get; set; } = new()
+    {
+        Source = "[ ] @Nora Introduction [](time:5:00:00)"
+    };
+}
+```
+
+Build the 0.1.1 package from source using the [installation instructions](../bindings/blazor/README.md#install).
+The existing `blazor-v0.1.0` GitHub release predates this component. The package
+loads its JavaScript and styles automatically; the app owns saving via
+`ValueChanged` or `@bind-Value:after`. No localStorage is used by the wrapper.
+Static SSR posts the whole episode as JSON; the interactive render modes bind
+it directly. The demo has `/podcast/server`, `/podcast/wasm`, `/podcast/auto` and
+`/podcast/ssr` pages, covered by end-to-end tests.
+
+The standard `MarkdownEditor`, `MarkdownPlugins`, named configs and AST service
+remain unchanged. `PodcastEditor` is the dedicated component for this grammar.
 
 ## Styling and tests
 

@@ -54,6 +54,7 @@ const mdlib = await build({
   entryPoints: {
     'mdlib-element': 'src/element.ts',
     'mdlib-service': 'bindings/blazor/src/MdlibPure.Blazor/Scripts/mdlib-service.js',
+    'mdlib-podcast': 'bindings/blazor/src/MdlibPure.Blazor/Scripts/mdlib-podcast.js',
   },
   outdir: OUT,
   chunkNames: 'chunks/[name]-[hash]',
@@ -62,6 +63,7 @@ const mdlib = await build({
 
 copyFileSync(join(ROOT, 'styles/theme.css'), join(OUT, 'theme.css'))
 copyFileSync(join(ROOT, 'styles/editor.css'), join(OUT, 'editor.css'))
+copyFileSync(join(ROOT, 'site/assets/podcast.css'), join(OUT, 'podcast.css'))
 
 // --- KaTeX: auto-render as one ES module, the stylesheet and the woff2 fonts ---
 const katexDist = join(NM, 'katex/dist')
