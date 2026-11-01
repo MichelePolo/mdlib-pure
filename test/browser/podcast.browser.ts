@@ -220,6 +220,7 @@ describe('podcast sample, in Chromium', () => {
     assert.equal(await preview.locator('li').count(), 2)
     assert.equal(await preview.locator('li br').count(), 2, 'lazy continuation lines stay in the item, one per row')
     assert.equal(await page.locator('.podcast-header').isVisible(), false, 'compact hides the chrome')
+    assert.ok((await page.locator('#podcast-input').boundingBox())!.height > 300, 'without the pane label the source still fills the pane')
     assert.equal(await page.locator('#podcast-tabs').isVisible(), false, 'host documents have no tabs')
     const before = await page.locator('#podcast-input').inputValue()
     await preview.locator('[data-line="4"][data-box="1"]').click()

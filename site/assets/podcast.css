@@ -156,5 +156,6 @@
   :where(.podcast[data-compact]) { padding: 0; border: 0; border-radius: 0; background: transparent; }
   :where(.podcast[data-compact] .podcast-header, .podcast[data-compact] .podcast-below, .podcast[data-compact] .podcast-legend, .podcast[data-compact] .podcast-status, .podcast[data-compact] .podcast-pane-label, .podcast[data-compact] .podcast-local) { display: none; }
   :where(.podcast[data-compact] .podcast-workspace) { border-radius: 8px; }
+  :where(.podcast[data-compact] .podcast-write, .podcast[data-compact] .podcast-read) { grid-template-rows: minmax(0, 1fr); } /* no pane label: the single row must fill */
   :where(.podcast[data-compact] #podcast-preview) { padding: .6rem .9rem 1rem; }
 }
