@@ -278,6 +278,35 @@ hyphens; duplicates are ignored without case sensitivity (up to 100 names).
 | `Name` | Form field for the entire episode serialized as JSON. |
 | `Label`, `Class`, `Style`, `InertUntilInteractive` | As for `MarkdownEditor`. Style controls the host layout; see the theme example below. |
 | Additional attributes | Passed to the host; `disabled` disables editing and form submission. |
+| `Grammar` | `PodcastGrammar`, read when the element connects: `Durations` (`Centiseconds`, the sample's `M:SS:CC`, or `Clock`: `m:ss`, `h:mm:ss`, `5m`, `90s`, with titles `[intro](time:04:30)`), `Tags` (`Mentions`: `Participants` or `Any`; `Hashtags`), `LineBlocks` (one source line = one block), `LooseTasks` (`[]`, `[ x ]`, `-[]`). |
+| `TagColors` | Fixed tag colours by name, compared ignoring case (e.g. the participants' profile colours); otherwise `#name(color:green)` in the text, otherwise a hue hashed from the name. Live. |
+| `Tasks` | `PodcastTaskMode.Edit` (default: a click rewrites the source) or `Notify`: the source is untouched and `OnTaskToggle` receives `PodcastTaskEventArgs` (`Document`, `Id`, `Checked`, `Line`, `Box`, lines and boxes 0-based); the host changes `Value`. |
+| `Documents` | `PodcastDocumentMode.Local` (default: tabs over `PodcastEpisode.Documents`) or `Host`: no tabs, a document button only raises `OnOpenDocument` (`PodcastDocumentEventArgs`: `Name`, `Title`) and the toolbar inserts `[name](doc:name)`. |
+| `ReadOnly` | Preview only: toolbar and source hidden, checkboxes and document buttons still live. Live. |
+| `Compact` | No header, legend, status bar or pane labels: the editor fits a column. Read when the element connects. |
+| `CurrentLine` | 0-based source line of the current point, highlighted in the preview (`.is-current`). Live. |
+| `RunningTimer` | `(Line, Index)`: the timer chip to show as running (`.is-running`). Live. |
+| `OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged` | Callbacks of the three modes above; `OnActiveDocumentChanged` follows the tabs in `Local` mode. |
+
+Hosted use, for an application with its own rundown server (the demo's
+"Hosted editor" section does the same):
+
+```razor
+<PodcastEditor @bind-Value="Episode" Participants="Members" Grammar="Grammar" TagColors="Colors"
+               Tasks="PodcastTaskMode.Notify" Documents="PodcastDocumentMode.Host" Compact="true"
+               CurrentLine="CurrentLine" RunningTimer="(CurrentLine, 0)"
+               OnTaskToggle="ToggleAsync" OnOpenDocument="e => OpenPrompterAsync(e.Name)"
+               Style="--podcast-height: 60vh" />
+
+@code {
+    private static readonly PodcastGrammar Grammar = new() { Durations = PodcastDurations.Clock, LineBlocks = true, LooseTasks = true, Tags = new() { Mentions = PodcastMentions.Any, Hashtags = true } };
+    private Task ToggleAsync(PodcastTaskEventArgs e) => Api.PostAsync("rundown/toggle", new { e.Line, e.Box, e.Checked });
+}
+```
+
+The custom DOM events behind the callbacks (`podcast-task`, `podcast-document`,
+`podcast-active`) are registered by the package's JS initializer, so nothing is
+needed in the app.
 
 `PodcastEpisode` has `Source` (main rundown), `Documents` (a dictionary of
 supporting documents), `ActiveDocument` (`"Scaletta"` for the main rundown),
@@ -311,6 +340,8 @@ styles between instances. Customize its semantic tokens through the exposed part
 mdlib-podcast-editor::part(editor) {
   --podcast-accent: #b8e986;
   --podcast-speaker-first: #a5efbd;
+  --podcast-height: 60vh;        /* panes height (default 650px) */
+  --podcast-font-size: 18px;     /* preview text (default 15px) */
 }
 ```
 

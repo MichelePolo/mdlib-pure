@@ -110,7 +110,10 @@ styles/               theme.css (tokens), tailwind.css (Tailwind v4 bridge)
 docs/                 api.md, elements.md (Web Components), tokens.md, security.md, screenshots/
 templates/plugin/     a complete tested plugin to copy (runs in `npm test`)
 templates/podcast/    application plugin example (mentions, planned durations, documents,
-                      tasks); editor.js/ui.js share the split editor between the site and Blazor,
+                      tasks; options for a hosting application: clock durations with titles,
+                      free coloured tags, one line = one block, loose boxes, notify-only tasks,
+                      host documents, read-only, current line, running timer);
+                      editor.js/ui.js share the split editor between the site and Blazor,
                       docs/podcast.md the guide; ordinary links open new browser tabs,
                       document controls open in the editor; fictional people/content only;
                       no new npm export or core syntax; Blazor 0.1.1 ships PodcastEditor

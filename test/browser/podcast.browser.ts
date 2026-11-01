@@ -14,6 +14,42 @@ before(async () => {
 })
 after(() => browser?.close())
 
+let studioHtml: string
+before(async () => {
+  const bundle = await build({
+    stdin: {
+      contents: `
+        import { mountPodcastEditor } from './templates/podcast/editor.js'
+        window.events = []
+        window.editor = mountPodcastEditor(document.querySelector('.podcast'), {
+          value: { source: '# Puntata\\n- [ ] Apertura @Campa [intro](time:04:30) [](time:1:05:00)\\n-[] Ospite #tema(color:green) [Scheda ospite](doc:Scheda ospite.md)\\nRiga libera\\n[x] fatto [ ] da fare' },
+          participants: ['Campa', 'Duke'],
+          grammar: { durations: 'clock', lineBlocks: true, looseTasks: true, tags: { mentions: 'any', hashtags: true } },
+          tagColors: { campa: '#123456' },
+          tasks: 'notify', documents: 'host', compact: true, current: 1, runningTimer: { line: 1, index: 1 },
+          onChange: (state) => window.events.push(['change', state.source]),
+          onTaskToggle: (e) => window.events.push(['task', e]),
+          onOpenDocument: (e) => window.events.push(['document', e]),
+        })`,
+      resolveDir: new URL('../../', import.meta.url).pathname,
+      loader: 'js',
+    },
+    bundle: true, format: 'iife', target: 'es2022', write: false,
+  })
+  studioHtml = `<!doctype html><html lang="it"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${readRepoFile('styles/theme.css')}\n${readRepoFile('site/assets/podcast.css')}</style></head><body><div class="podcast-page">${podcastMarkup()}</div><script>${bundle.outputFiles[0].text.replace(/<\/script/gi, '<\\/script')}</script></body></html>`
+})
+
+async function openStudio(t: TestContext): Promise<Page> {
+  const page = await browser.newPage({ viewport: { width: 1400, height: 1100 } })
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  t.after(async () => { await page.close(); assert.deepEqual(errors, [], 'no browser errors') })
+  await page.route('http://studio.test/**', (route) => route.fulfill({ contentType: 'text/html', body: studioHtml }))
+  await page.goto('http://studio.test/')
+  await page.waitForSelector('#podcast-preview .podcast-check')
+  return page
+}
+
 async function open(t: TestContext, width = 1400, storage = true): Promise<Page> {
   const page = await browser.newPage({ viewport: { width, height: 1100 } })
   const errors: string[] = []
@@ -169,5 +205,37 @@ describe('podcast sample, in Chromium', () => {
     await page.waitForFunction(() => document.querySelector('#podcast-save')?.textContent === 'Solo in questa sessione')
     assert.equal(await page.locator('#podcast-total').textContent(), '1:30:00')
     assert.equal(await page.locator('#podcast-preview .podcast-mention').textContent(), '@Elio')
+  })
+
+  test('hosting options: notify tasks, host documents, tags, clock timers, current line and running timer', async (t) => {
+    const page = await openStudio(t)
+    const preview = page.locator('#podcast-preview')
+    assert.equal(await preview.locator('.podcast-check').count(), 4)
+    assert.equal(await preview.locator('.podcast-check:disabled').count(), 0, 'notify mode needs no source ranges')
+    assert.equal(await preview.locator('.podcast-tag[data-tag="campa"]').evaluate((el) => (el as HTMLElement).style.background), 'rgb(18, 52, 86)', 'fixed colour from tagColors')
+    assert.equal(await preview.locator('.podcast-tag[data-tag="tema"]').evaluate((el) => (el as HTMLElement).style.background), 'rgb(0, 128, 0)', 'colour defined in the text')
+    assert.deepEqual(await preview.locator('.podcast-time').allTextContents(), ['⏱ intro 04:30', '⏱ 1:05:00'])
+    assert.equal(await preview.locator('.podcast-time.is-running').textContent(), '⏱ 1:05:00')
+    assert.equal(await preview.locator('.is-current').evaluate((el) => el.textContent?.trim().slice(0, 8)), 'Apertura')
+    assert.equal(await preview.locator('li').count(), 2)
+    assert.equal(await preview.locator('li br').count(), 2, 'lazy continuation lines stay in the item, one per row')
+    assert.equal(await page.locator('.podcast-header').isVisible(), false, 'compact hides the chrome')
+    assert.equal(await page.locator('#podcast-tabs').isVisible(), false, 'host documents have no tabs')
+    const before = await page.locator('#podcast-input').inputValue()
+    await preview.locator('[data-line="4"][data-box="1"]').click()
+    await preview.locator('[data-document]').click()
+    const events = await page.evaluate(() => (window as unknown as { events: unknown[] }).events)
+    assert.deepEqual(events, [
+      ['task', { document: 'Scaletta', id: 3, checked: true, line: 4, box: 1 }],
+      ['document', { name: 'Scheda ospite.md', title: 'Scheda ospite' }],
+    ])
+    assert.equal(await page.locator('#podcast-input').inputValue(), before, 'notify mode never edits the source')
+    await page.evaluate(() => { const w = window as unknown as { editor: { setCurrent(l: number): void; setRunningTimer(t: null): void; setReadOnly(v: boolean): void } }; w.editor.setCurrent(4); w.editor.setRunningTimer(null); w.editor.setReadOnly(true) })
+    assert.equal(await preview.locator('.is-current').evaluate((el) => el.textContent?.includes('da fare')), true)
+    assert.equal(await preview.locator('.is-running').count(), 0)
+    assert.equal(await page.locator('.podcast-toolbar').isVisible(), false, 'read-only hides the toolbar')
+    assert.equal(await page.locator('.podcast-write').isVisible(), false, 'read-only hides the source')
+    await preview.locator('[data-line="1"][data-box="0"]').click()
+    assert.equal(await page.evaluate(() => (window as unknown as { events: unknown[] }).events.length), 3, 'read-only keeps the checkboxes live')
   })
 })

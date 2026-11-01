@@ -118,6 +118,11 @@ The [podcast sample](podcast.md) scopes these tokens to `.podcast` in
 | `--podcast-speaker-second`, `--podcast-speaker-second-bg` | Second participant badge text and background |
 | `--podcast-speaker-third`, `--podcast-speaker-third-bg` | Third participant badge text and background |
 | `--podcast-split` | Source pane width, adjusted by the separator (25–75%) |
+| `--podcast-height`, `--podcast-max-height`, `--podcast-min-height` | Height of the panes (650px, 76vh, 360px) |
+| `--podcast-font-size` | Preview text size (15px), e.g. larger for a prompter |
+
+Tag chips (`.podcast-tag`) carry their own background and text colour inline:
+the colour belongs to the name, not to the theme.
 
 ## Naming rules (for contributors)
 

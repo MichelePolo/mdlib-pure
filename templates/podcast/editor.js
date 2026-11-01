@@ -2,12 +2,23 @@
 // knows nothing about the editor, localStorage, document tabs or autocomplete.
 import { createMarkdown } from '../../src/index.ts'
 import { gfm } from '../../src/gfm/index.ts'
-import { durationLabel, formatDuration, getPodcastSummary, PARTICIPANTS, parseDuration, podcast, taskRanges } from './plugin.ts'
+import { durationLabel, formatClock, formatDuration, getPodcastSummary, PARTICIPANTS, parseClock, parseDuration, podcast, taskRanges } from './plugin.ts'
 const EPISODE = 'Scaletta'
 
 /** Mount into the source-controlled podcast markup. Returns an instance with
- * explicit state and cleanup; persistence is opt-in and scoped by storageKey. */
-export function mountPodcastEditor(host, { value = {}, participants = PARTICIPANTS, storageKey = null, reset = false, onChange = () => {} } = {}) {
+ * explicit state and cleanup; persistence is opt-in and scoped by storageKey.
+ *
+ * Hosting options (an application that keeps the rundown on its own server):
+ * - grammar: options of podcast() (durations, tags, lineBlocks, looseTasks); tagColors: fixed colours by name;
+ * - tasks: 'edit' (a click rewrites the source) or 'notify' (only onTaskToggle({ document, id, checked, line, box }));
+ * - documents: 'local' (tabs and local documents) or 'host' (a document button only calls onOpenDocument({ name, title }));
+ * - readOnly (preview only, controls stay live), compact (no header, legend, status), current (0-based line of the
+ *   current point), runningTimer ({ line, index }); onActiveDocument(name) follows the tabs. */
+export function mountPodcastEditor(host, {
+  value = {}, participants = PARTICIPANTS, storageKey = null, reset = false, onChange = () => {},
+  grammar = {}, tagColors = null, tasks = 'edit', documents: documentMode = 'local', readOnly = false, compact = false,
+  current = null, runningTimer = null, onTaskToggle = () => {}, onOpenDocument = () => {}, onActiveDocument = () => {},
+} = {}) {
   const lifetime = new AbortController()
   const on = (target, type, listener) => target.addEventListener(type, listener, { signal: lifetime.signal })
   let people = participantNames(participants)
@@ -17,7 +28,26 @@ export function mountPodcastEditor(host, { value = {}, participants = PARTICIPAN
   const input = $('#podcast-input')
   const preview = $('#podcast-preview')
   const suggestions = $('#podcast-mentions')
-  let md = createMarkdown({ plugins: [...gfm(), podcast({ participants: people })], positions: true })
+  const clock = grammar.durations === 'clock'
+  // Blocks carry their source line (0-based) and how many lines they span, so the host can point at a line.
+  const blockAttributes = (node) => {
+    if (!node.position || (node.type !== 'paragraph' && node.type !== 'heading' && node.type !== 'listItem')) return null
+    const attrs = { 'data-line': node.position.start.line - 1, 'data-lines': node.position.end.line - node.position.start.line + 1 }
+    if (node.podcastDone) attrs.class = 'is-done'
+    return attrs
+  }
+  const parser = () => createMarkdown({
+    plugins: [...gfm(), podcast({ ...grammar, participants: people, tags: { ...(grammar.tags ?? {}), colors: tagColors ?? grammar.tags?.colors ?? undefined } })],
+    positions: true,
+    attributes: blockAttributes,
+  })
+  let md = parser()
+  host.dataset.tasks = tasks
+  host.dataset.documents = documentMode
+  host.dataset.durations = clock ? 'clock' : 'centiseconds'
+  host.toggleAttribute('data-readonly', readOnly)
+  host.toggleAttribute('data-compact', compact)
+  current = Number.isInteger(current) ? current : null
   const STORAGE = storageKey
   let documents = initial.documents
   let active = initial.active
@@ -105,19 +135,20 @@ export function mountPodcastEditor(host, { value = {}, participants = PARTICIPAN
     const root = md.parse(input.value)
     md.renderTo(preview, root)
     ranges = taskRanges(input.value, root)
-    for (const check of preview.querySelectorAll('[data-task]')) check.disabled = !ranges.has(Number(check.dataset.task))
+    for (const check of preview.querySelectorAll('[data-task]')) check.disabled = tasks === 'notify' ? check.dataset.line === undefined : !ranges.has(Number(check.dataset.task))
+    applyMarks()
     preview.scrollTop = scroll
     const summary = getPodcastSummary(active === EPISODE ? root : md.parse(documents.get(EPISODE)))
     total = summary.centiseconds
-    $('#podcast-total').textContent = formatDuration(summary.centiseconds)
+    $('#podcast-total').textContent = clock ? formatClock(Math.round(summary.centiseconds / 100)) : formatDuration(summary.centiseconds)
     $('#podcast-total-label').textContent = `${durationLabel(summary.centiseconds)} · durata indicativa`
-    const current = getPodcastSummary(root)
-    $('#podcast-progress').textContent = `${current.completed} di ${current.tasks} interventi completati`
+    const progress = getPodcastSummary(root)
+    $('#podcast-progress').textContent = `${progress.completed} di ${progress.tasks} interventi completati`
     $('#podcast-length').textContent = `${input.value.length.toLocaleString('it-IT')} caratteri`
     $('#podcast-source-name').textContent = active
     $('#podcast-panel').setAttribute('aria-label', active)
     $('#podcast-hint').textContent = active === EPISODE ? 'Scrivi @ per scegliere una voce' : 'Scheda di supporto · durata esclusa dal totale episodio'
-    announce(current.invalid ? 'Durata non valida: usa [](time:minuti:secondi:centesimi), con secondi da 00 a 59.' : '')
+    announce(progress.invalid ? (clock ? 'Durata non valida: usa [titolo](time:minuti:secondi), ore:minuti:secondi, 5m o 90s.' : 'Durata non valida: usa [](time:minuti:secondi:centesimi), con secondi da 00 a 59.') : '')
     const h = currentHistory()
     $('[data-action="undo"]').disabled = h.index === 0
     $('[data-action="redo"]').disabled = h.index === h.entries.length - 1
@@ -153,6 +184,20 @@ export function mountPodcastEditor(host, { value = {}, participants = PARTICIPAN
     preview.scrollTop = previewScroll
     input.focus()
     saveSoon()
+    onActiveDocument(active)
+  }
+  // The current point and the running timer are marks the host sets: classes on the rendered blocks and chips.
+  function applyMarks() {
+    for (const el of preview.querySelectorAll('.is-current, .is-running')) el.classList.remove('is-current', 'is-running')
+    if (current !== null) {
+      let best = null
+      for (const el of preview.querySelectorAll(':is(p, h1, h2, h3, h4, h5, h6, li)[data-line]')) {
+        const start = Number(el.dataset.line)
+        if (start <= current && current < start + Number(el.dataset.lines ?? 1) && (!best || start >= Number(best.dataset.line))) best = el
+      }
+      best?.classList.add('is-current')
+    }
+    if (runningTimer) preview.querySelector(`.podcast-time[data-line="${Number(runningTimer.line)}"][data-timer="${Number(runningTimer.index)}"]`)?.classList.add('is-running')
   }
   on($('#podcast-tabs'), 'keydown', (event) => {
     if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return
@@ -165,9 +210,18 @@ export function mountPodcastEditor(host, { value = {}, participants = PARTICIPAN
   })
   on(preview, 'click', (event) => {
     const documentButton = event.target.closest('[data-document]')
-    if (documentButton) { openDocument(documentButton.dataset.document); return }
+    if (documentButton) {
+      if (documentMode === 'host') onOpenDocument({ name: documentButton.dataset.document, title: documentButton.dataset.title ?? documentButton.dataset.document })
+      else openDocument(documentButton.dataset.document)
+      return
+    }
     const check = event.target.closest('[data-task]')
-    const range = check && ranges.get(Number(check.dataset.task))
+    if (!check || check.disabled) return
+    if (tasks === 'notify') {
+      onTaskToggle({ document: active, id: Number(check.dataset.task), checked: check.getAttribute('aria-checked') !== 'true', line: Number(check.dataset.line), box: Number(check.dataset.box) })
+      return
+    }
+    const range = ranges.get(Number(check.dataset.task))
     if (!range) return
     const selection = [input.selectionStart, input.selectionEnd]
     replace(check.getAttribute('aria-checked') === 'true' ? '[ ]' : '[x]', ...range)
@@ -267,11 +321,17 @@ export function mountPodcastEditor(host, { value = {}, participants = PARTICIPAN
       const form = $('#podcast-time-form')
       form.reset()
       // Editing a duration under the caret replaces the complete original tag.
-      const re = /\[\]\(time:[^\r\n)]{0,32}\)/g
+      const re = /\[([^[\]\n]{0,160})\]\(time:([^\r\n)]{0,32})\)/g
       for (let match; (match = re.exec(input.value));) {
         if (match.index <= savedSelection[0] && re.lastIndex >= savedSelection[1]) {
-          const value = parseDuration(match[0].slice(8, -1))
           savedSelection = [match.index, re.lastIndex]
+          form.elements.title.value = match[1]
+          if (clock) {
+            const seconds = parseClock(match[2])
+            if (seconds !== null) { form.elements.minutes.value = Math.floor(seconds / 60); form.elements.seconds.value = seconds % 60 }
+            break
+          }
+          const value = parseDuration(match[2])
           if (value !== null) {
             form.elements.minutes.value = Math.floor(value / 6000)
             form.elements.seconds.value = Math.floor(value / 100) % 60
@@ -294,10 +354,18 @@ export function mountPodcastEditor(host, { value = {}, participants = PARTICIPAN
   on($('#podcast-time-form'), 'submit', (event) => {
     event.preventDefault()
     const fields = event.target.elements
+    const title = fields.title.value.trim().replace(/[\\[\]]/g, '\\$&')
+    if (clock) {
+      const value = `${Number(fields.minutes.value)}:${String(Number(fields.seconds.value)).padStart(2, '0')}`
+      if (parseClock(value) === null) return
+      $('#podcast-time-dialog').close()
+      replace(`[${title}](time:${value})`, ...savedSelection)
+      return
+    }
     const value = `${Number(fields.minutes.value)}:${String(Number(fields.seconds.value)).padStart(2, '0')}:${String(Number(fields.centiseconds.value)).padStart(2, '0')}`
     if (parseDuration(value) === null) return
     $('#podcast-time-dialog').close()
-    replace(`[](time:${value})`, ...savedSelection)
+    replace(`[${title}](time:${value})`, ...savedSelection)
   })
   on($('#podcast-document-form').elements.document, 'input', (event) => event.target.setCustomValidity(''))
   on($('#podcast-document-form'), 'submit', (event) => {
@@ -306,6 +374,7 @@ export function mountPodcastEditor(host, { value = {}, participants = PARTICIPAN
     const name = field.value.trim()
     if (!validName(name) || name === EPISODE) { field.setCustomValidity('Scegli un nome senza parentesi, barre inverse o prefisso doc:, diverso da Scaletta.'); field.reportValidity(); return }
     $('#podcast-document-dialog').close()
+    if (documentMode === 'host') { replace(`[${name.replace(/[\\[\]]/g, '\\$&')}](doc:${name})`, ...savedSelection); return }
     replace(`[scheda](${name})`, ...savedSelection)
     openDocument(name)
   })
@@ -395,9 +464,13 @@ export function mountPodcastEditor(host, { value = {}, participants = PARTICIPAN
     },
     setParticipants(next = PARTICIPANTS) {
       people = participantNames(next)
-      md = createMarkdown({ plugins: [...gfm(), podcast({ participants: people })], positions: true })
+      md = parser()
       closeMentions(); renderPeople(); render()
     },
+    setTagColors(next) { tagColors = next ?? null; md = parser(); render() },
+    setReadOnly(next) { host.toggleAttribute('data-readonly', !!next); closeMentions() },
+    setCurrent(line) { current = Number.isInteger(line) ? line : null; applyMarks() },
+    setRunningTimer(next) { runningTimer = next && Number.isInteger(next.line) && Number.isInteger(next.index) ? { line: next.line, index: next.index } : null; applyMarks() },
     setView(view) {
       host.dataset.view = ['split', 'write', 'preview'].includes(view) ? view : 'split'
       for (const button of host.querySelectorAll('button[data-view]')) button.setAttribute('aria-pressed', String(button.dataset.view === host.dataset.view))

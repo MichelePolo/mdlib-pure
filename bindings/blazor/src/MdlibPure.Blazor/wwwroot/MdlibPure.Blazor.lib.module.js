@@ -114,12 +114,23 @@ function start() {
   return started
 }
 
+// The podcast editor's custom events, as Razor event attributes (@onpodcasttask…, see PodcastEvents.cs).
+let eventsRegistered = false
+function registerEvents(blazor) {
+  if (eventsRegistered || typeof blazor?.registerCustomEventType !== 'function') return
+  eventsRegistered = true
+  for (const [name, browserEventName] of [['podcasttask', 'podcast-task'], ['podcastdocument', 'podcast-document'], ['podcastactive', 'podcast-active']]) {
+    blazor.registerCustomEventType(name, { browserEventName, createEventArgs: (event) => event.detail ?? {} })
+  }
+}
+
 // Blazor Web App (blazor.web.js), in every render mode including Static SSR.
 export function beforeWebStart() {
   void prepare()
 }
 
-export function afterWebStarted() {
+export function afterWebStarted(blazor) {
+  registerEvents(blazor)
   return start()
 }
 
@@ -128,6 +139,7 @@ export function beforeStart() {
   void prepare()
 }
 
-export function afterStarted() {
+export function afterStarted(blazor) {
+  registerEvents(blazor)
   return start()
 }

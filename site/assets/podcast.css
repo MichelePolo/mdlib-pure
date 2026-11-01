@@ -68,7 +68,7 @@
   :where(.podcast-views button) { font-size: .7rem; display: flex; align-items: center; gap: .4rem; padding: .3rem .55rem; color: var(--podcast-muted); }
   :where(.podcast-views svg) { inline-size: 14px; block-size: 14px; }
   :where(.podcast-views button[aria-pressed='true']) { color: var(--podcast-accent); background: var(--podcast-panel); }
-  :where(.podcast-panes) { --podcast-split: 50%; display: grid; grid-template-columns: minmax(0, var(--podcast-split)) 5px minmax(0, 1fr); block-size: 650px; max-block-size: 76vh; min-block-size: 360px; }
+  :where(.podcast-panes) { --podcast-split: 50%; display: grid; grid-template-columns: minmax(0, var(--podcast-split)) 5px minmax(0, 1fr); block-size: var(--podcast-height, 650px); max-block-size: var(--podcast-max-height, 76vh); min-block-size: var(--podcast-min-height, 360px); }
   :where(.podcast-write, .podcast-read) { min-inline-size: 0; min-block-size: 0; position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr); }
   :where(.podcast-write) { background: var(--podcast-input); }
   :where(.podcast-pane-label) { display: flex; justify-content: space-between; gap: 1rem; padding: .9rem 1.3rem .45rem; color: var(--podcast-muted); font-size: .62rem; letter-spacing: .1em; }
@@ -77,7 +77,7 @@
   :where(.podcast-write:focus-within) { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--podcast-accent) 45%, transparent); }
   :where(.podcast-divider) { cursor: col-resize; background: var(--podcast-border); touch-action: none; position: relative; }
   :where(.podcast-divider::after) { content: ''; position: absolute; inset: 46% 1px; background: var(--podcast-muted); border-radius: 3px; }
-  :where(#podcast-preview) { overflow: auto; padding: .9rem 1.7rem 2rem; font-size: 15px; line-height: 1.85; overflow-wrap: anywhere; }
+  :where(#podcast-preview) { overflow: auto; padding: .9rem 1.7rem 2rem; font-size: var(--podcast-font-size, 15px); line-height: 1.85; overflow-wrap: anywhere; }
   :where(#podcast-preview h1) { font-size: 1.5rem; letter-spacing: -.04em; margin-block: 0 1.4rem; border: 0; }
   :where(#podcast-preview p) { margin-block: 1.25rem; }
   :where(#podcast-preview li) { padding-inline-start: .2rem; margin-block: .45rem; }
@@ -94,6 +94,19 @@
   :where(.podcast-check[aria-checked='true']) { background: var(--podcast-accent); color: var(--podcast-input); border-color: var(--podcast-accent); }
   :where(.podcast-document) { color: var(--podcast-accent); border: 1px solid var(--podcast-border); font-size: .82rem; padding: .3rem .7rem; margin-block: .2rem; }
   :where(.podcast-invalid) { color: var(--podcast-duration); text-decoration: underline wavy; }
+  :where(.podcast-tag) { display: inline-block; border-radius: 6px; padding: .08em .5em; font-weight: 650; font-size: .88em; line-height: 1.5; vertical-align: baseline; white-space: nowrap; }
+  :where(.podcast-time.is-running) { color: var(--podcast-bg); background: var(--podcast-accent); border-color: var(--podcast-accent); }
+  :where(#podcast-preview .is-current) { background: color-mix(in srgb, var(--podcast-accent) 14%, transparent); box-shadow: -8px 0 0 color-mix(in srgb, var(--podcast-accent) 14%, transparent), 8px 0 0 color-mix(in srgb, var(--podcast-accent) 14%, transparent); border-radius: 4px; }
+  :where(#podcast-preview .is-done) { color: var(--podcast-muted); }
+  :where(.podcast-clock-only, .podcast[data-durations='clock'] .podcast-cs) { display: none; }
+  :where(.podcast[data-durations='clock'] .podcast-clock-only) { display: block; }
+  :where(.podcast[data-durations='clock'] .podcast-time-fields) { grid-template-columns: 1fr 1fr; }
+  :where(.podcast[data-documents='host'] .podcast-docbar, .podcast[data-readonly] .podcast-toolbar, .podcast[data-readonly] .podcast-write, .podcast[data-readonly] .podcast-divider, .podcast[data-readonly] .podcast-docbar) { display: none; }
+  :where(.podcast[data-readonly] .podcast-panes) { grid-template-columns: minmax(0, 1fr); block-size: auto; max-block-size: none; min-block-size: 0; }
+  :where(.podcast[data-compact]) { padding: 0; border: 0; border-radius: 0; background: transparent; }
+  :where(.podcast[data-compact] .podcast-header, .podcast[data-compact] .podcast-below, .podcast[data-compact] .podcast-legend, .podcast[data-compact] .podcast-status, .podcast[data-compact] .podcast-pane-label, .podcast[data-compact] .podcast-local) { display: none; }
+  :where(.podcast[data-compact] .podcast-workspace) { border-radius: 8px; }
+  :where(.podcast[data-compact] #podcast-preview) { padding: .6rem .9rem 1rem; }
   :where(.podcast-status) { display: flex; justify-content: space-between; gap: 1rem; padding: .65rem 1rem; border-block-start: 1px solid var(--podcast-border); color: var(--podcast-muted); font-size: .65rem; }
   :where(.podcast-below) { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-block: 1.2rem; }
   :where(.podcast-people) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .82rem; }

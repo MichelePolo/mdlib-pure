@@ -30,7 +30,9 @@ public sealed record PodcastEpisode
         ?? throw new JsonException("An episode must be a JSON object.");
 }
 
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, UseStringEnumConverter = true)]
 [JsonSerializable(typeof(PodcastEpisode))]
+[JsonSerializable(typeof(PodcastGrammar))]
+[JsonSerializable(typeof(Dictionary<string, string>))]
 [JsonSerializable(typeof(string[]))]
 internal partial class PodcastJsonContext : JsonSerializerContext;
