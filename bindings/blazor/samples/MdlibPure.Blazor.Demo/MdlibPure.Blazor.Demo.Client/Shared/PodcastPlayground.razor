@@ -16,6 +16,18 @@
     <summary>Independent second editor</summary>
     <PodcastEditor id="second-episode" @bind-Value="Second" Participants="@(new[] { "Ari", "Bea" })" />
 </details>
+<details open>
+    <summary>Hosted editor: the application owns checkboxes and documents</summary>
+    <PodcastEditor id="hosted-editor" @bind-Value="Hosted" Participants="@(new[] { "Ari", "Bea" })" Delay="Delay"
+                   Grammar="HostedGrammar" TagColors="HostedColors" Tasks="PodcastTaskMode.Notify" Documents="PodcastDocumentMode.Host"
+                   Compact="true" ReadOnly="_readOnly" CurrentLine="_currentLine" RunningTimer="(1, 0)"
+                   OnTaskToggle="OnTask" OnOpenDocument="OnDocument" />
+    <p>
+        <button id="hosted-readonly" @onclick="() => _readOnly = !_readOnly">Read-only on / off</button>
+        <button id="hosted-next" @onclick="() => _currentLine = (_currentLine ?? 0) + 1">Next point</button>
+    </p>
+    <p>Last event: <output id="hosted-event">@_hostedEvent</output></p>
+</details>
 
 @code {
     [Parameter] public string Mode { get; set; } = "";
@@ -30,4 +42,24 @@
     private PodcastEpisode Second { get; set; } = new() { Source = "# Secondo episodio\n\n@Ari Una passeggiata tra le stelle." };
     private void Reset() => Episode = new() { Source = "# Nuova scaletta\n\n[ ] @Nora Introduzione [](time:2:30:00)" };
     private void ChangeCast() => People = ["Ari", "Bea"];
+
+    // Hosted mode: the grammar of an application whose rundowns are one line per point, with clock durations and tags.
+    private static readonly PodcastGrammar HostedGrammar = new() { Durations = PodcastDurations.Clock, LineBlocks = true, LooseTasks = true, Tags = new() { Mentions = PodcastMentions.Any, Hashtags = true } };
+    private static readonly Dictionary<string, string> HostedColors = new() { ["ari"] = "#123456" };
+    private bool _readOnly;
+    private int? _currentLine = 1;
+    private string _hostedEvent = "";
+    private PodcastEpisode Hosted { get; set; } = new() { Source = "# Puntata\n- [ ] Apertura @Ari [intro](time:04:30)\n-[] Ospite #tema [Scheda ospite](doc:Scheda ospite.md)\n[x] fatto [ ] da fare" };
+    private void OnTask(PodcastTaskEventArgs e)
+    {
+        _hostedEvent = $"task {e.Line}:{e.Box} {(e.Checked ? "on" : "off")}";
+        // The host applies the change: here by rewriting the box on that line.
+        var lines = Hosted.Source.Split('\n');
+        var line = lines[e.Line]; var at = -1;
+        for (var i = 0; i <= e.Box; i++) at = line.IndexOf('[', at + 1);
+        var end = line.IndexOf(']', at);
+        lines[e.Line] = line[..at] + (e.Checked ? "[x]" : "[ ]") + line[(end + 1)..];
+        Hosted = Hosted with { Source = string.Join('\n', lines) };
+    }
+    private void OnDocument(PodcastDocumentEventArgs e) => _hostedEvent = $"document {e.Name} ({e.Title})";
 }

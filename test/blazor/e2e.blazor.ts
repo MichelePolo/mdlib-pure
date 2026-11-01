@@ -424,6 +424,34 @@ for (const mode of ['server', 'wasm', 'auto']) {
   })
 }
 
+for (const mode of ['server', 'wasm']) {
+  test(`hosted podcast editor raises task and document events to C# in ${mode}`, { timeout: TIMEOUT }, async () => {
+    const s = await open(`/podcast/${mode}?delay=0`)
+    const page = s.page
+    try {
+      await page.waitForSelector('#podcast-status[data-interactive="true"]', { timeout: 60_000 })
+      const editor = page.locator('#hosted-editor')
+      await editor.locator('#podcast-preview .podcast-check').first().waitFor()
+      assert.equal(await editor.locator('.podcast-header').isVisible(), false, 'compact')
+      assert.equal(await editor.locator('#podcast-tabs').isVisible(), false, 'host documents')
+      assert.equal(await editor.locator('.podcast-tag[data-tag="ari"]').evaluate((el) => (el as HTMLElement).style.background), 'rgb(18, 52, 86)')
+      assert.equal(await editor.locator('.podcast-time.is-running').textContent(), '⏱ intro 04:30')
+      assert.equal(await editor.locator('.is-current').evaluate((el) => el.textContent?.includes('Apertura')), true)
+      await editor.locator('#podcast-preview [data-line="3"][data-box="1"]').click()
+      await page.waitForFunction(() => document.querySelector('#hosted-event')?.textContent === 'task 3:1 on')
+      // The editor lives in a shadow root: document.querySelector does not reach into it, locators do.
+      await page.waitForFunction(() => document.querySelector('#hosted-editor')?.shadowRoot?.querySelector('textarea')?.value.endsWith('[x] fatto [x] da fare'))
+      await editor.locator('#podcast-preview [data-document]').click()
+      await page.waitForFunction(() => document.querySelector('#hosted-event')?.textContent === 'document Scheda ospite.md (Scheda ospite)')
+      await page.locator('#hosted-next').click()
+      await page.waitForFunction(() => document.querySelector('#hosted-editor')?.shadowRoot?.querySelector('#podcast-preview .is-current')?.textContent?.includes('Ospite'))
+      await page.locator('#hosted-readonly').click()
+      await page.waitForFunction(() => document.querySelector('#hosted-editor')?.hasAttribute('readonly'))
+      assert.equal(await editor.locator('.podcast-toolbar').isVisible(), false)
+    } finally { await close(s) }
+  })
+}
+
 test('podcast Static SSR posts every document as JSON and survives enhanced navigation', { timeout: TIMEOUT }, async () => {
   const s = await open('/podcast/ssr')
   const page = s.page

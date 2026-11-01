@@ -9,7 +9,13 @@
                       value="@CurrentValueAsString" participants="@ParticipantsAttribute"
                       view="@View.ToString().ToLowerInvariant()" delay="@Delay" label="@Label"
                       name="@NameAttribute" inert="@Inert" data-permanent
-                      @oninput="OnInput"></mdlib-podcast-editor>
+                      grammar="@GrammarAttribute" tag-colors="@TagColorsAttribute"
+                      tasks="@(Tasks == PodcastTaskMode.Notify ? "notify" : null)"
+                      documents="@(Documents == PodcastDocumentMode.Host ? "host" : null)"
+                      readonly="@ReadOnly" compact="@Compact"
+                      current-line="@CurrentLine" running-timer="@RunningTimerAttribute"
+                      @oninput="OnInput"
+                      @onpodcasttask="OnTaskToggle" @onpodcastdocument="OnOpenDocument" @onpodcastactive="OnActive"></mdlib-podcast-editor>
 
 @code {
     private bool _unbound;
@@ -30,6 +36,29 @@
     [Parameter] public string? Style { get; set; }
     /// <summary>Keep the prerendered editor inert until Blazor is interactive, preventing lost edits.</summary>
     [Parameter] public bool InertUntilInteractive { get; set; } = true;
+
+    /// <summary>Grammar options of the podcast plugin, read when the element connects (the sample's grammar by default).</summary>
+    [Parameter] public PodcastGrammar? Grammar { get; set; }
+    /// <summary>Fixed tag colours by name (compared ignoring case), e.g. the participants' profile colours. Live.</summary>
+    [Parameter] public IReadOnlyDictionary<string, string>? TagColors { get; set; }
+    /// <summary>What a checkbox click does: edit the source, or only raise <see cref="OnTaskToggle"/>.</summary>
+    [Parameter] public PodcastTaskMode Tasks { get; set; }
+    /// <summary>Where supporting documents live: in the editor's tabs, or in the host (<see cref="OnOpenDocument"/>).</summary>
+    [Parameter] public PodcastDocumentMode Documents { get; set; }
+    /// <summary>Preview only: toolbar and source hidden, checkboxes and document buttons still live. Live.</summary>
+    [Parameter] public bool ReadOnly { get; set; }
+    /// <summary>No header, legend, status bar or pane labels: the editor fits a column. Read when the element connects.</summary>
+    [Parameter] public bool Compact { get; set; }
+    /// <summary>Source line (0-based) of the current point, highlighted in the preview. Live.</summary>
+    [Parameter] public int? CurrentLine { get; set; }
+    /// <summary>The timer chip to mark as running: (line, ordinal of the timer on that line), both 0-based. Live.</summary>
+    [Parameter] public (int Line, int Index)? RunningTimer { get; set; }
+    /// <summary>A checkbox was clicked while <see cref="Tasks"/> is <see cref="PodcastTaskMode.Notify"/>.</summary>
+    [Parameter] public EventCallback<PodcastTaskEventArgs> OnTaskToggle { get; set; }
+    /// <summary>A document button was clicked while <see cref="Documents"/> is <see cref="PodcastDocumentMode.Host"/>.</summary>
+    [Parameter] public EventCallback<PodcastDocumentEventArgs> OnOpenDocument { get; set; }
+    /// <summary>The editor switched tabs (<see cref="PodcastDocumentMode.Local"/>): the name of the document shown.</summary>
+    [Parameter] public EventCallback<string> OnActiveDocumentChanged { get; set; }
 
     /// <inheritdoc />
     public override Task SetParametersAsync(ParameterView parameters)
@@ -62,7 +91,11 @@
         }
     }
     private void OnInput(ChangeEventArgs args) => CurrentValueAsString = args.Value?.ToString();
+    private Task OnActive(PodcastActiveEventArgs args) => OnActiveDocumentChanged.InvokeAsync(args.Name);
     private string? ParticipantsAttribute => Participants is null ? null : JsonSerializer.Serialize(Participants, PodcastJsonContext.Default.StringArray);
+    private string? GrammarAttribute => Grammar is null ? null : JsonSerializer.Serialize(Grammar, PodcastJsonContext.Default.PodcastGrammar);
+    private string? TagColorsAttribute => TagColors is null ? null : JsonSerializer.Serialize(TagColors as Dictionary<string, string> ?? new Dictionary<string, string>(TagColors), PodcastJsonContext.Default.DictionaryStringString);
+    private string? RunningTimerAttribute => RunningTimer is { } t ? $"{t.Line}:{t.Index}" : null;
     private string? NameAttribute => !string.IsNullOrEmpty(Name) ? Name : _unbound ? null : NameAttributeValue;
     private string? ClassAttribute => string.Join(' ', new[] { Class, EditContext?.FieldCssClass(FieldIdentifier) }.Where(c => !string.IsNullOrWhiteSpace(c))) is { Length: > 0 } css ? css : null;
     private bool Inert => InertUntilInteractive && AssignedRenderMode is not null && !RendererInfo.IsInteractive;

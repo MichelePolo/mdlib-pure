@@ -55,6 +55,50 @@ Ordinary Markdown links always open in a new browser tab, both in the rundown
 and in supporting documents. The custom `[scheda](…)` control opens its document
 inside the editor.
 
+## Hosting the editor in an application
+
+An application that keeps the rundown on its own server, with its own grammar,
+turns on what it needs and keeps the rest:
+
+```js
+const editor = mountPodcastEditor(host, {
+  value: { source },
+  participants: members,
+  grammar: { durations: 'clock', lineBlocks: true, looseTasks: true, tags: { mentions: 'any', hashtags: true } },
+  tagColors: { duke: '#a02622' },       // fixed colours by name; the same name gives the same colour everywhere
+  tasks: 'notify',                      // a checkbox click only reports { document, id, checked, line, box }
+  documents: 'host',                    // a document button only reports { name, title }; no tabs
+  compact: true,                        // no header, legend or status bar
+  current: 3,                           // 0-based source line of the current point, highlighted
+  runningTimer: { line: 3, index: 0, text: '04:12' },  // the timer chip counting down: text replaces its planned value
+  onTaskToggle: (e) => post('toggle', e),
+  onOpenDocument: (e) => openPrompter(e.name),
+  onChange: (state) => save(state.source),
+})
+editor.setCurrent(4); editor.setRunningTimer(null); editor.setReadOnly(true); editor.setTagColors(colors)
+```
+
+| Option | Grammar it adds (defaults keep the sample) |
+|---|---|
+| `durations: 'clock'` | `[titolo](time:04:30)`, `h:mm:ss`, `5m`, `90s`, `2m30s` (1 s to 10 h): the chip reads `⏱ titolo 04:30` |
+| `tags.mentions: 'any'` | Every `@name` is a coloured chip, not only the participants; `tags.hashtags` adds `#topic` |
+| `tags.colors` / `tagColors` | Fixed colours by name, compared ignoring case; otherwise `#name(color:green)` in the text, otherwise a hue hashed from the name (`tagColor()` in `plugin.ts`) |
+| `lineBlocks: true` | One source line = one block: no paragraphs over several lines, no setext headings, no indented code |
+| `looseTasks: true` | `[]`, `[ x ]`, a box without a following space, `-[]` / `1.[]` |
+
+Blocks in the preview carry `data-line` (0-based) and `data-lines`; checkboxes
+carry `data-line` and `data-box`, timer chips `data-line` and `data-timer`, so
+the host's own line-based protocol keeps working. `readOnly` hides the toolbar
+and the source while checkboxes and document buttons stay live; `disabled`
+(the element attribute) makes everything inert. The panes take their height from
+`--podcast-height` and the preview its font size from `--podcast-font-size`.
+
+The Blazor `PodcastEditor` exposes the same options as parameters
+(`Grammar`, `TagColors`, `Tasks`, `Documents`, `ReadOnly`, `Compact`,
+`CurrentLine`, `RunningTimer`) and the callbacks as `EventCallback`s
+(`OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged`); see the
+[Blazor README](../bindings/blazor/README.md#podcasteditor).
+
 ## How it is built
 
 The [plugin source](../templates/podcast/plugin.ts) contains inline rules,

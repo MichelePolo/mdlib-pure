@@ -16,6 +16,16 @@ break the API).
   fictional; the guide covers its Blazor integration.
   See `docs/podcast.md`; the library's package exports and core syntax are unchanged.
 
+- Podcast sample, hosting options for an application with its own rundown server
+  (defaults unchanged): grammar options of `podcast()` (`durations: 'clock'` with titled
+  `[titolo](time:04:30)` tags, free `@name` / `#topic` tags with fixed, written or hashed
+  colours, `lineBlocks`, `looseTasks`), `[titolo](doc:name)` document links, and editor
+  options `tasks: 'notify'`, `documents: 'host'`, `readOnly`, `compact`, `current`,
+  `runningTimer` (with an optional countdown text shown in the chip) with their callbacks. `PodcastEditor` exposes them as parameters and
+  `EventCallback`s (`OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged`), with
+  `PodcastGrammar`, `PodcastTaskMode`, `PodcastDocumentMode`. New tokens `--podcast-height`,
+  `--podcast-font-size`.
+
 - Blazor wrapper 0.1.1 (GitHub release `blazor-v0.1.1`): `PodcastEditor` and `PodcastEpisode`,
   with configurable participants, typed episode binding, supporting documents,
   planned durations and automatic assets. Shared with the site sample; tested
