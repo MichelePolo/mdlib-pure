@@ -20,7 +20,7 @@ export const PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
 export const read = (path) => readFileSync(join(ROOT, path), 'utf8')
 
 /** The Blazor wrapper's release: the .nupkg is attached there (not on nuget.org). */
-export const BLAZOR_RELEASE = `${REPO}/releases/tag/blazor-v0.1.0`
+export const BLAZOR_RELEASE = `${REPO}/releases/tag/blazor-v0.1.1`
 /** mdlib-pure is not on the npm registry yet: its tarball is attached to this release. */
 export const MDLIB_RELEASE = `${REPO}/releases/tag/mdlib-pure-v0.1.1`
 export const MDLIB_TARBALL = `${REPO}/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz`
@@ -46,9 +46,9 @@ export const DOCS = [
     slug: 'blazor',
     title: 'Blazor',
     source: 'bindings/blazor/README.md',
-    summary: '`MdlibPure.Blazor` for .NET 10: Markdown editor, viewer, AST service; 0.1.1 from source adds a podcast editor with typed episode binding',
+    summary: '`MdlibPure.Blazor` for .NET 10: Markdown editor, viewer, AST service, podcast editor with typed episode binding (0.1.1)',
     description: 'MdlibPure.Blazor: a Markdown editor with live preview and a viewer for Blazor (.NET 10) in every render mode, built on the mdlib-pure Web Components, with a C# AST service.',
-    note: `The package is not on nuget.org yet: download \`MdlibPure.Blazor.0.1.0.nupkg\` from the [GitHub release](${BLAZOR_RELEASE}) and use it from a local feed as described under [Install](#install). For \`PodcastEditor\`, build 0.1.1 from source following that section.`,
+    note: `The package is not on nuget.org yet: download \`MdlibPure.Blazor.0.1.1.nupkg\` from the [GitHub release](${BLAZOR_RELEASE}) and use it from a local feed as described under [Install](#install).`,
   },
   {
     slug: 'angular',

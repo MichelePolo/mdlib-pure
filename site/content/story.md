@@ -82,7 +82,8 @@ editor bound with `@bind-Value`, and a C# service for the AST. It has 48 bUnit
 tests and 20 Playwright end-to-end tests across Static SSR, Interactive
 Server, WebAssembly and Auto. Version 0.1.0 is attached to a
 [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0);
-the guide is [its README](/docs/blazor/).
+version 0.1.1 ([release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.1))
+adds `PodcastEditor`. The guide is [its README](/docs/blazor/).
 
 Building the wrapper found three problems in the elements, each reproduced
 in a test before the fix ([60c7298]):

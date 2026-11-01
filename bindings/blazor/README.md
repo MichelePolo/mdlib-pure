@@ -3,7 +3,7 @@
 Markdown **editor with live preview** and Markdown **viewer** for Blazor (.NET 10),
 in every render mode: Static SSR, Interactive Server, Interactive WebAssembly
 and Interactive Auto. Plus a C# service for the AST, the table of contents and HTML.
-Version **0.1.1** (build from source) also includes a dedicated **PodcastEditor**
+Since version **0.1.1** it also includes a dedicated **PodcastEditor**
 with custom tags, participant completion, supporting documents and planned duration.
 
 ```razor
@@ -55,8 +55,8 @@ and ignores it.
 nothing. Until the first release there, use a local package feed. (The package
 bundles mdlib-pure, which is not on npm either; you need no npm.)
 
-1. Download `MdlibPure.Blazor.0.1.0.nupkg` from the
-   [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0)
+1. Download `MdlibPure.Blazor.0.1.1.nupkg` from the
+   [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.1)
    (or build it, see [Building from source](#building-from-source)) and put it
    in a folder, for example `packages/` next to your solution.
 2. Add a `nuget.config` next to your solution:
@@ -73,7 +73,7 @@ bundles mdlib-pure, which is not on npm either; you need no npm.)
 3. Reference the package from the project that contains your components:
 
    ```sh
-   dotnet add package MdlibPure.Blazor --version 0.1.0
+   dotnet add package MdlibPure.Blazor --version 0.1.1
    ```
 
    | App | Reference it from |
@@ -84,24 +84,9 @@ bundles mdlib-pure, which is not on npm either; you need no npm.)
 
 The package depends only on `Microsoft.AspNetCore.Components.Web`.
 
-**For `PodcastEditor`, use 0.1.1 built from source.** The existing
-`blazor-v0.1.0` release does not contain it. From a current repository checkout:
-
-```sh
-npm ci
-npm run blazor:assets
-dotnet pack bindings/blazor/src/MdlibPure.Blazor -c Release -o bindings/blazor/artifacts
-```
-
-Copy `bindings/blazor/artifacts/MdlibPure.Blazor.0.1.1.nupkg` to your application's
-local `packages/` feed, then run in that application:
-
-```sh
-dotnet add package MdlibPure.Blazor --version 0.1.1 --source ./packages
-```
-
-The package includes the editor, plugin and styles. The consuming app needs no
-Node build and no manually registered JavaScript.
+`PodcastEditor` needs 0.1.1 or later: the older `blazor-v0.1.0` release does not
+contain it. The package includes the editor, plugin and styles. The consuming app
+needs no Node build and no manually registered JavaScript.
 
 ## Setup
 
@@ -259,7 +244,7 @@ available through the dedicated `PodcastEditor` below. It is not a flag in
 
 ## `<PodcastEditor>`
 
-Available in **0.1.1 built from source**, with the same editor and parser as the
+Available since **0.1.1**, with the same editor and parser as the
 [public sample](https://michelepolo.github.io/mdlib-pure/podcast/). The full episode
 is bound as a typed `PodcastEpisode`, including separate supporting documents:
 

@@ -83,11 +83,11 @@ are in [`/llms-full.txt`](/llms-full.txt) and have `.md` twins:
   preview, for plain HTML and any framework. Attributes, loaders for KaTeX
   and Mermaid, named configs (the only way to set functions or `html`),
   events and form value, frameworks that rewrite the page.
-- [`bindings/blazor/README.md`](/docs/blazor/): `MdlibPure.Blazor` 0.1.0,
+- [`bindings/blazor/README.md`](/docs/blazor/): `MdlibPure.Blazor` 0.1.1,
   the Blazor wrapper (.NET 10) built on those elements: `<MarkdownEditor>`
   and `<Markdown>` in every render mode, `IMarkdownService` for the AST. It is
   not on nuget.org: the `.nupkg` is attached to the
-  [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.0).
+  [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.1).
 - [`bindings/angular/README.md`](/docs/angular/): `ngx-mdlib-pure` 0.1.0, the
   Angular wrapper (21, 22) built on the same elements: `MarkdownEditor` with
   `[(value)]` and a `ControlValueAccessor`, `MarkdownViewer`,
