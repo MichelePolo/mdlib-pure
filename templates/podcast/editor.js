@@ -48,6 +48,7 @@ export function mountPodcastEditor(host, {
   host.toggleAttribute('data-readonly', readOnly)
   host.toggleAttribute('data-compact', compact)
   current = Number.isInteger(current) ? current : null
+  if (clock) $('#podcast-time-dialog p').textContent = 'Il tempo previsto per questo punto, in minuti e secondi. Il titolo è facoltativo.'
   const STORAGE = storageKey
   let documents = initial.documents
   let active = initial.active
