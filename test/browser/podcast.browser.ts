@@ -231,7 +231,12 @@ describe('podcast sample, in Chromium', () => {
       ['document', { name: 'Scheda ospite.md', title: 'Scheda ospite' }],
     ])
     assert.equal(await page.locator('#podcast-input').inputValue(), before, 'notify mode never edits the source')
-    await page.evaluate(() => { const w = window as unknown as { editor: { setCurrent(l: number): void; setRunningTimer(t: null): void; setReadOnly(v: boolean): void } }; w.editor.setCurrent(4); w.editor.setRunningTimer(null); w.editor.setReadOnly(true) })
+    type Editor = { setCurrent(l: number): void; setRunningTimer(t: { line: number; index: number; text?: string } | null): void; setReadOnly(v: boolean): void }
+    await page.evaluate(() => (window as unknown as { editor: Editor }).editor.setRunningTimer({ line: 1, index: 0, text: '-00:12' }))
+    assert.deepEqual(await preview.locator('.podcast-time').allTextContents(), ['⏱ intro -00:12', '⏱ 1:05:00'], 'the countdown replaces the planned value of the running chip')
+    assert.equal(await preview.locator('.podcast-time.is-over').count(), 1)
+    await page.evaluate(() => { const w = window as unknown as { editor: Editor }; w.editor.setCurrent(4); w.editor.setRunningTimer(null); w.editor.setReadOnly(true) })
+    assert.deepEqual(await preview.locator('.podcast-time').allTextContents(), ['⏱ intro 04:30', '⏱ 1:05:00'], 'the planned value comes back')
     assert.equal(await preview.locator('.is-current').evaluate((el) => el.textContent?.includes('da fare')), true)
     assert.equal(await preview.locator('.is-running').count(), 0)
     assert.equal(await page.locator('.podcast-toolbar').isVisible(), false, 'read-only hides the toolbar')

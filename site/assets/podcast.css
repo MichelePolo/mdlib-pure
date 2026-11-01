@@ -96,6 +96,7 @@
   :where(.podcast-invalid) { color: var(--podcast-duration); text-decoration: underline wavy; }
   :where(.podcast-tag) { display: inline-block; border-radius: 6px; padding: .08em .5em; font-weight: 650; font-size: .88em; line-height: 1.5; vertical-align: baseline; white-space: nowrap; }
   :where(.podcast-time.is-running) { color: var(--podcast-bg); background: var(--podcast-accent); border-color: var(--podcast-accent); }
+  :where(.podcast-time.is-over) { background: var(--podcast-duration); border-color: var(--podcast-duration); }
   :where(#podcast-preview .is-current) { background: color-mix(in srgb, var(--podcast-accent) 14%, transparent); box-shadow: -8px 0 0 color-mix(in srgb, var(--podcast-accent) 14%, transparent), 8px 0 0 color-mix(in srgb, var(--podcast-accent) 14%, transparent); border-radius: 4px; }
   :where(#podcast-preview .is-done) { color: var(--podcast-muted); }
   :where(.podcast-status) { display: flex; justify-content: space-between; gap: 1rem; padding: .65rem 1rem; border-block-start: 1px solid var(--podcast-border); color: var(--podcast-muted); font-size: .65rem; }

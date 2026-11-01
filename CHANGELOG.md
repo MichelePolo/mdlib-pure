@@ -21,7 +21,7 @@ break the API).
   `[titolo](time:04:30)` tags, free `@name` / `#topic` tags with fixed, written or hashed
   colours, `lineBlocks`, `looseTasks`), `[titolo](doc:name)` document links, and editor
   options `tasks: 'notify'`, `documents: 'host'`, `readOnly`, `compact`, `current`,
-  `runningTimer` with their callbacks. `PodcastEditor` exposes them as parameters and
+  `runningTimer` (with an optional countdown text shown in the chip) with their callbacks. `PodcastEditor` exposes them as parameters and
   `EventCallback`s (`OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged`), with
   `PodcastGrammar`, `PodcastTaskMode`, `PodcastDocumentMode`. New tokens `--podcast-height`,
   `--podcast-font-size`.

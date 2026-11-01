@@ -22,17 +22,18 @@ function grammarOf(value) {
   const tags = g.tags && typeof g.tags === 'object' ? { ...g.tags, mentions: lower(g.tags.mentions) } : undefined
   return { ...g, durations: lower(g.durations), tags }
 }
-/** "line:index" → { line, index }, or null. */
+/** "line:index" or "line:index:text" (text shown in place of the planned value, e.g. a countdown) → { line, index, text? }, or null. */
 function timerOf(value) {
-  const m = /^(\d+):(\d+)$/.exec(value ?? '')
-  return m ? { line: Number(m[1]), index: Number(m[2]) } : null
+  const m = /^(\d+):(\d+)(?::(.{1,40}))?$/.exec(value ?? '')
+  return m ? { line: Number(m[1]), index: Number(m[2]), text: m[3] } : null
 }
 
 /** Package-local element: JSON state is the form value and the input event value.
  * Hosting attributes (read when the element connects): grammar (JSON options of the podcast plugin), tasks
  * ("notify": a checkbox click only raises `podcast-task`), documents ("host": a document button only raises
  * `podcast-document`), compact. Live attributes: tag-colors (JSON), readonly, current-line, running-timer
- * ("line:index"). Events: podcast-task, podcast-document, podcast-active (detail = the editor's payload). */
+ * ("line:index" or "line:index:text", the text replacing the planned value while the timer runs).
+ * Events: podcast-task, podcast-document, podcast-active (detail = the editor's payload). */
 export function definePodcastEditor({ styles = [] } = {}) {
   if (customElements.get('mdlib-podcast-editor')) return
   class PodcastEditor extends HTMLElement {

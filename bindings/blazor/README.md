@@ -285,7 +285,7 @@ hyphens; duplicates are ignored without case sensitivity (up to 100 names).
 | `ReadOnly` | Preview only: toolbar and source hidden, checkboxes and document buttons still live. Live. |
 | `Compact` | No header, legend, status bar or pane labels: the editor fits a column. Read when the element connects. |
 | `CurrentLine` | 0-based source line of the current point, highlighted in the preview (`.is-current`). Live. |
-| `RunningTimer` | `(Line, Index)`: the timer chip to show as running (`.is-running`). Live. |
+| `RunningTimer` | `(Line, Index)`: the timer chip to show as running (`.is-running`). Live. The element attribute `running-timer` also takes a third field, `line:index:text`, shown in place of the planned value while the timer runs (a countdown written by the host's own script; `.is-over` when it starts with a minus). |
 | `OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged` | Callbacks of the three modes above; `OnActiveDocumentChanged` follows the tabs in `Local` mode. |
 
 Hosted use, for an application with its own rundown server (the demo's

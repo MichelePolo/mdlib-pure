@@ -3,7 +3,7 @@
 // _underline_; with options: #topic and free @name tags with colours, "clock" durations
 // (m:ss, h:mm:ss, 5m, 90s), one line = one block, loose checkboxes ("[]", "-[]").
 // AST: podcastMention { name, tone }; podcastTag { prefix, name, color, text, defined };
-// podcastTime { centiseconds, title, line, index }; podcastDocument { name, title };
+// podcastTime { centiseconds, title, line, index } (rendered with a .podcast-clock span); podcastDocument { name, title };
 // podcastTask { checked, id, line, box, inlineOffset, inlineSource, blockLine? };
 // podcastInvalidTime { value }; podcastItem { checked, children }; podcastWords /
 // podcastUnderline { children }. Blocks that hold tasks get podcastTasks / podcastDone.
@@ -342,8 +342,11 @@ export function podcast({ participants = PARTICIPANTS, durations = 'centiseconds
       podcastTime: (n, r) => {
         const title = (n.title as string | undefined) || ''
         const at = { 'data-line': n.line as number | undefined, 'data-timer': n.index as number | undefined }
-        if (clock) return r.h('span', { class: 'podcast-time', ...at, title: 'Parte quando questo punto diventa quello corrente e conta solo in registrazione' }, '⏱ ', title ? `${title} ` : '', formatClock((n.centiseconds as number) / 100))
-        return r.h('span', { class: 'podcast-time', ...at, title: `Durata prevista: ${formatDuration(n.centiseconds as number)}` }, '◷ ', title ? `${title} ` : '', durationLabel(n.centiseconds as number))
+        const planned = clock ? formatClock((n.centiseconds as number) / 100) : durationLabel(n.centiseconds as number)
+        // The planned value in its own span: a host may show a countdown in its place (running timer) and restore it.
+        const value = r.h('span', { class: 'podcast-clock', 'data-planned': planned }, planned)
+        if (clock) return r.h('span', { class: 'podcast-time', ...at, title: 'Parte quando questo punto diventa quello corrente e conta solo in registrazione' }, '⏱ ', title ? `${title} ` : '', value)
+        return r.h('span', { class: 'podcast-time', ...at, title: `Durata prevista: ${formatDuration(n.centiseconds as number)}` }, '◷ ', title ? `${title} ` : '', value)
       },
       podcastInvalidTime: (n, r) => r.h('span', { class: 'podcast-invalid', title: clock ? 'Durata non valida: usa minuti:secondi, ore:minuti:secondi, 5m o 90s' : 'Durata non valida: usa minuti:secondi:centesimi' }, n.value as string),
       podcastDocument: (n, r) => r.h('button', { type: 'button', class: 'podcast-document', 'data-document': n.name as string, 'data-title': (n.title as string) || (n.name as string), 'aria-label': `Apri scheda: ${n.name}` }, '▤ ', (n.title as string) || (n.name as string), (n.title as string) ? '' : ' ↗'),

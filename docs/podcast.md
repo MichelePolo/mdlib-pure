@@ -70,7 +70,7 @@ const editor = mountPodcastEditor(host, {
   documents: 'host',                    // a document button only reports { name, title }; no tabs
   compact: true,                        // no header, legend or status bar
   current: 3,                           // 0-based source line of the current point, highlighted
-  runningTimer: { line: 3, index: 0 },  // the timer chip counting down
+  runningTimer: { line: 3, index: 0, text: '04:12' },  // the timer chip counting down: text replaces its planned value
   onTaskToggle: (e) => post('toggle', e),
   onOpenDocument: (e) => openPrompter(e.name),
   onChange: (state) => save(state.source),

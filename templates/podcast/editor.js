@@ -13,7 +13,8 @@ const EPISODE = 'Scaletta'
  * - tasks: 'edit' (a click rewrites the source) or 'notify' (only onTaskToggle({ document, id, checked, line, box }));
  * - documents: 'local' (tabs and local documents) or 'host' (a document button only calls onOpenDocument({ name, title }));
  * - readOnly (preview only, controls stay live), compact (no header, legend, status), current (0-based line of the
- *   current point), runningTimer ({ line, index }); onActiveDocument(name) follows the tabs. */
+ *   current point), runningTimer ({ line, index, text? }: text, e.g. a countdown, replaces the chip's planned value
+ *   while it runs); onActiveDocument(name) follows the tabs. */
 export function mountPodcastEditor(host, {
   value = {}, participants = PARTICIPANTS, storageKey = null, reset = false, onChange = () => {},
   grammar = {}, tagColors = null, tasks = 'edit', documents: documentMode = 'local', readOnly = false, compact = false,
@@ -189,7 +190,7 @@ export function mountPodcastEditor(host, {
   }
   // The current point and the running timer are marks the host sets: classes on the rendered blocks and chips.
   function applyMarks() {
-    for (const el of preview.querySelectorAll('.is-current, .is-running')) el.classList.remove('is-current', 'is-running')
+    for (const el of preview.querySelectorAll('.is-current, .is-running, .is-over')) el.classList.remove('is-current', 'is-running', 'is-over')
     if (current !== null) {
       let best = null
       for (const el of preview.querySelectorAll(':is(p, h1, h2, h3, h4, h5, h6, li)[data-line]')) {
@@ -198,7 +199,14 @@ export function mountPodcastEditor(host, {
       }
       best?.classList.add('is-current')
     }
-    if (runningTimer) preview.querySelector(`.podcast-time[data-line="${Number(runningTimer.line)}"][data-timer="${Number(runningTimer.index)}"]`)?.classList.add('is-running')
+    for (const clock of preview.querySelectorAll('.podcast-clock')) clock.textContent = clock.dataset.planned ?? clock.textContent
+    if (!runningTimer) return
+    const chip = preview.querySelector(`.podcast-time[data-line="${Number(runningTimer.line)}"][data-timer="${Number(runningTimer.index)}"]`)
+    if (!chip) return
+    chip.classList.add('is-running')
+    if (typeof runningTimer.text !== 'string') return
+    chip.querySelector('.podcast-clock').textContent = runningTimer.text
+    chip.classList.toggle('is-over', /^[-−]/.test(runningTimer.text.trim()))
   }
   on($('#podcast-tabs'), 'keydown', (event) => {
     if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return
@@ -471,7 +479,7 @@ export function mountPodcastEditor(host, {
     setTagColors(next) { tagColors = next ?? null; md = parser(); render() },
     setReadOnly(next) { host.toggleAttribute('data-readonly', !!next); closeMentions() },
     setCurrent(line) { current = Number.isInteger(line) ? line : null; applyMarks() },
-    setRunningTimer(next) { runningTimer = next && Number.isInteger(next.line) && Number.isInteger(next.index) ? { line: next.line, index: next.index } : null; applyMarks() },
+    setRunningTimer(next) { runningTimer = next && Number.isInteger(next.line) && Number.isInteger(next.index) ? { line: next.line, index: next.index, text: typeof next.text === 'string' ? next.text : undefined } : null; applyMarks() },
     setView(view) {
       host.dataset.view = ['split', 'write', 'preview'].includes(view) ? view : 'split'
       for (const button of host.querySelectorAll('button[data-view]')) button.setAttribute('aria-pressed', String(button.dataset.view === host.dataset.view))

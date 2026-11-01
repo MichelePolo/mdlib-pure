@@ -129,7 +129,7 @@ describe('podcast plugin, studio options', () => {
     assert.equal(formatClock(3900), '1:05:00')
     const timers = pick('- [ ] Apertura [intro](time:04:30) [](time:1:05:00) [x](time:5m)', 'podcastTime')
     assert.deepEqual(timers.map((t) => [t.title, t.centiseconds, t.line, t.index]), [['intro', 27000, 0, 0], ['', 390000, 0, 1], ['x', 30000, 0, 2]])
-    assert.match(studio.render('[intro](time:04:30)'), /<span class="podcast-time" data-line="0" data-timer="0" title="[^"]*">⏱ intro 04:30<\/span>/)
+    assert.match(studio.render('[intro](time:04:30)'), /<span class="podcast-time" data-line="0" data-timer="0" title="[^"]*">⏱ intro <span class="podcast-clock" data-planned="04:30">04:30<\/span><\/span>/)
     assert.equal(pick('[](time:0:00) [](time:5:60)', 'podcastInvalidTime').length, 2)
     assert.equal(getPodcastSummary(studio.parse('[](time:5:00:00)')).centiseconds, 1800000, 'h:mm:ss, not centiseconds')
   })
