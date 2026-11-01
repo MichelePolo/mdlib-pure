@@ -44,10 +44,10 @@ instructions, set up an app or answer a user:
 - Angular: that tarball plus `ngx-mdlib-pure-0.1.0.tgz` from the GitHub
   release `angular-v0.1.0`, or `npm run angular:pack`
   (bindings/angular/README.md, "Install");
-- Blazor: the `.nupkg` attached to the GitHub release `blazor-v0.1.0`, from a
-  local NuGet feed (bindings/blazor/README.md, "Install"). `PodcastEditor` requires
-  0.1.1 built from current source (`npm run blazor:assets`, then `dotnet pack`);
-  it is not in the existing `blazor-v0.1.0` release;
+- Blazor: `MdlibPure.Blazor.0.1.1.nupkg` attached to the GitHub release
+  `blazor-v0.1.1`, from a local NuGet feed (bindings/blazor/README.md,
+  "Install"). `PodcastEditor` needs 0.1.1: the older `blazor-v0.1.0` release
+  does not contain it;
 - never publish: no `npm publish`, no `v*` tags (`.github/workflows/release.yml`
   publishes to npm on them), no `dotnet nuget push`, no new GitHub releases
   or replaced release assets (lockfiles pin their checksums). Publishing is
@@ -113,7 +113,7 @@ templates/podcast/    application plugin example (mentions, planned durations, d
                       tasks); editor.js/ui.js share the split editor between the site and Blazor,
                       docs/podcast.md the guide; ordinary links open new browser tabs,
                       document controls open in the editor; fictional people/content only;
-                      no new npm export or core syntax; Blazor 0.1.1 includes PodcastEditor
+                      no new npm export or core syntax; Blazor 0.1.1 ships PodcastEditor
 demo/                 the first live editor (needs `npm run build`)
 site/                 the website: `npm run site:build` → site/out/ (pages, samples, playground)
 bench/                benchmark against other libraries (own package.json)

@@ -16,7 +16,7 @@ break the API).
   fictional; the guide covers its Blazor integration.
   See `docs/podcast.md`; the library's package exports and core syntax are unchanged.
 
-- Blazor wrapper 0.1.1 (from source): `PodcastEditor` and `PodcastEpisode`,
+- Blazor wrapper 0.1.1 (GitHub release `blazor-v0.1.1`): `PodcastEditor` and `PodcastEpisode`,
   with configurable participants, typed episode binding, supporting documents,
   planned durations and automatic assets. Shared with the site sample; tested
   in Server, WebAssembly, Auto and Static SSR, including enhanced navigation.

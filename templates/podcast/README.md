@@ -38,4 +38,4 @@ The custom `[scheda](…)` control opens its document inside the editor.
 Run `npm run site:build` then `npm run site:serve`; open `/podcast/`.
 Run `npm run verify` and `npm run test:browser` to check the sample with the library.
 
-The [Blazor wrapper](../../bindings/blazor/README.md#podcasteditor) packages this editor as `PodcastEditor` in version 0.1.1 built from source.
+The [Blazor wrapper](../../bindings/blazor/README.md#podcasteditor) packages this editor as `PodcastEditor` since version 0.1.1 (GitHub release `blazor-v0.1.1`).

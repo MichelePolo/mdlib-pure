@@ -128,8 +128,10 @@ participants, supporting documents and the planned total:
 }
 ```
 
-Build the 0.1.1 package from source using the [installation instructions](../bindings/blazor/README.md#install).
-The existing `blazor-v0.1.0` GitHub release predates this component. The package
+Install the 0.1.1 package from the
+[`blazor-v0.1.1` GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.1)
+following the [installation instructions](../bindings/blazor/README.md#install);
+the older `blazor-v0.1.0` release predates this component. The package
 loads its JavaScript and styles automatically; the app owns saving via
 `ValueChanged` or `@bind-Value:after`. No localStorage is used by the wrapper.
 Static SSR posts the whole episode as JSON; the interactive render modes bind
