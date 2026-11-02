@@ -42,13 +42,13 @@ instructions, set up an app or answer a user:
 - mdlib-pure: the tarball on the GitHub release `mdlib-pure-v0.1.1`
   (`npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz`),
   or `npm pack` in a clone (`prepack` builds `dist/`) (README.md, "Install");
-- Angular: that tarball plus `ngx-mdlib-pure-0.1.1.tgz` from the GitHub
-  release `angular-v0.1.1`, or `npm run angular:pack`
+- Angular: that tarball plus `ngx-mdlib-pure-0.2.0.tgz` from the GitHub
+  release `angular-v0.2.0`, or `npm run angular:pack`
   (bindings/angular/README.md, "Install");
-- Blazor: `MdlibPure.Blazor.0.1.1.nupkg` attached to the GitHub release
-  `blazor-v0.1.1`, from a local NuGet feed (bindings/blazor/README.md,
-  "Install"). `PodcastEditor` needs 0.1.1: the older `blazor-v0.1.0` release
-  does not contain it;
+- Blazor: `MdlibPure.Blazor.0.2.0.nupkg` attached to the GitHub release
+  `blazor-v0.2.0`, from a local NuGet feed (bindings/blazor/README.md,
+  "Install"). `PodcastEditor` needs 0.1.1 or later, `OnValueCommit` 0.2.0; the
+  Angular `ngx-mdlib-pure/podcast` needs 0.2.0;
 - never publish: no `npm publish`, no `v*` tags (`.github/workflows/release.yml`
   publishes to npm on them), no `dotnet nuget push`, no new GitHub releases
   or replaced release assets (lockfiles pin their checksums). Publishing is

@@ -20,7 +20,7 @@ export const PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
 export const read = (path) => readFileSync(join(ROOT, path), 'utf8')
 
 /** The Blazor wrapper's release: the .nupkg is attached there (not on nuget.org). */
-export const BLAZOR_RELEASE = `${REPO}/releases/tag/blazor-v0.1.1`
+export const BLAZOR_RELEASE = `${REPO}/releases/tag/blazor-v0.2.0`
 /** mdlib-pure is not on the npm registry yet: its tarball is attached to this release. */
 export const MDLIB_RELEASE = `${REPO}/releases/tag/mdlib-pure-v0.1.1`
 export const MDLIB_TARBALL = `${REPO}/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz`
@@ -48,15 +48,15 @@ export const DOCS = [
     source: 'bindings/blazor/README.md',
     summary: '`MdlibPure.Blazor` for .NET 10: Markdown editor, viewer, AST service, podcast editor with typed episode binding (0.1.1)',
     description: 'MdlibPure.Blazor: a Markdown editor with live preview and a viewer for Blazor (.NET 10) in every render mode, built on the mdlib-pure Web Components, with a C# AST service.',
-    note: `The package is not on nuget.org yet: download \`MdlibPure.Blazor.0.1.1.nupkg\` from the [GitHub release](${BLAZOR_RELEASE}) and use it from a local feed as described under [Install](#install).`,
+    note: `The package is not on nuget.org yet: download \`MdlibPure.Blazor.0.2.0.nupkg\` from the [GitHub release](${BLAZOR_RELEASE}) and use it from a local feed as described under [Install](#install).`,
   },
   {
     slug: 'angular',
     title: 'Angular',
     source: 'bindings/angular/README.md',
-    summary: '`ngx-mdlib-pure` 0.1.1 for Angular 21 and 22: `<mdlib-editor [(value)]>` (a form control too), `<mdlib-markdown>`, `provideMdlibPure()`, `MarkdownService`, SSR with hydration; `ngx-mdlib-pure/podcast` (next release) adds the podcast editor',
+    summary: '`ngx-mdlib-pure` 0.2.0 for Angular 21 and 22: `<mdlib-editor [(value)]>` (a form control too), `<mdlib-markdown>`, `provideMdlibPure()`, `MarkdownService`, SSR with hydration; `ngx-mdlib-pure/podcast` adds the podcast editor',
     description: 'ngx-mdlib-pure: a Markdown editor with live preview and a viewer for Angular 21 and 22, standalone components with signals and forms, SSR with hydration, built on the mdlib-pure Web Components.',
-    note: `Neither \`ngx-mdlib-pure\` nor \`mdlib-pure\` is on the npm registry yet: install both tarballs from the [GitHub releases](${REPO}/releases/tag/angular-v0.1.1), as described under [Install](#install).`,
+    note: `Neither \`ngx-mdlib-pure\` nor \`mdlib-pure\` is on the npm registry yet: install both tarballs from the [GitHub releases](${REPO}/releases/tag/angular-v0.2.0), as described under [Install](#install).`,
   },
   { slug: 'tokens', title: 'Design tokens', source: 'docs/tokens.md', summary: 'the `--md-*` tokens of `theme.css`, light and dark, Tailwind CSS v4' },
   { slug: 'podcast', title: 'Custom plugin: podcast', source: 'docs/podcast.md', summary: 'a copyable custom plugin with a split editor, participant completion, planned section durations and linked documents' },

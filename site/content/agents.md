@@ -83,12 +83,12 @@ are in [`/llms-full.txt`](/llms-full.txt) and have `.md` twins:
   preview, for plain HTML and any framework. Attributes, loaders for KaTeX
   and Mermaid, named configs (the only way to set functions or `html`),
   events and form value, frameworks that rewrite the page.
-- [`bindings/blazor/README.md`](/docs/blazor/): `MdlibPure.Blazor` 0.1.1,
+- [`bindings/blazor/README.md`](/docs/blazor/): `MdlibPure.Blazor` 0.2.0,
   the Blazor wrapper (.NET 10) built on those elements: `<MarkdownEditor>`
   and `<Markdown>` in every render mode, `IMarkdownService` for the AST. It is
   not on nuget.org: the `.nupkg` is attached to the
-  [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.1).
-- [`bindings/angular/README.md`](/docs/angular/): `ngx-mdlib-pure` 0.1.1, the
+  [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.2.0).
+- [`bindings/angular/README.md`](/docs/angular/): `ngx-mdlib-pure` 0.2.0, the
   Angular wrapper (21, 22) built on the same elements: `MarkdownEditor` with
   `[(value)]` and a `ControlValueAccessor`, `MarkdownViewer`,
   `provideMdlibPure()`, `MarkdownService`, SSR with hydration. It is not on
@@ -121,8 +121,8 @@ use what works today:
   `npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz`,
   or `npm pack` in a clone (Getting started,
   [Install](/docs/getting-started/#install));
-- Angular: that tarball and `ngx-mdlib-pure-0.1.1.tgz` from the GitHub release
-  `angular-v0.1.1` ([Install](/docs/angular/#install));
+- Angular: that tarball and `ngx-mdlib-pure-0.2.0.tgz` from the GitHub release
+  `angular-v0.2.0` ([Install](/docs/angular/#install));
 - Blazor: the `.nupkg` from the GitHub release, through a local NuGet feed
   ([Install](/docs/blazor/#install)).
 

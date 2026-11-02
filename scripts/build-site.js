@@ -202,8 +202,8 @@ ${link('Podcast rundown', '/podcast.md', 'a complete custom-plugin sample: split
 
 ${docLine('changelog')}
 - [mdlib-pure 0.1.1 release](${REPO}/releases/tag/mdlib-pure-v0.1.1): the npm tarball (not on the npm registry)
-- [ngx-mdlib-pure 0.1.1 release](${REPO}/releases/tag/angular-v0.1.1): the npm tarball of the Angular wrapper (not on the npm registry)
-- [MdlibPure.Blazor 0.1.1 release](${BLAZOR_RELEASE}): the .nupkg of the Blazor wrapper (not on nuget.org)
+- [ngx-mdlib-pure 0.2.0 release](${REPO}/releases/tag/angular-v0.2.0): the npm tarball of the Angular wrapper (not on the npm registry)
+- [MdlibPure.Blazor 0.2.0 release](${BLAZOR_RELEASE}): the .nupkg of the Blazor wrapper (not on nuget.org)
 ${link('Built with AI', '/story.md', 'how the library was built with AI agents, from the git history')}
 ${link('Home', '/index.md', 'overview, ways to use it (JavaScript, Web Components, React/Preact/Vue, Blazor, Angular), datasheet and benchmark')}
 ${link('All docs in one file', '/llms-full.txt')}

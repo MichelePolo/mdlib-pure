@@ -71,18 +71,18 @@ export const Markdown = ({ source }) => (
   {
     id: 'use-blazor',
     title: 'Blazor (.NET 10)',
-    text: '`MdlibPure.Blazor` 0.1.1 wraps the Web Components for every render mode (Static SSR, Server, WebAssembly, Auto): `@bind-Value`, `EditForm` validation, a C# service for the AST and a podcast editor (`PodcastEditor`). Not on nuget.org yet: the `.nupkg` is attached to the GitHub release.',
+    text: '`MdlibPure.Blazor` 0.2.0 wraps the Web Components for every render mode (Static SSR, Server, WebAssembly, Auto): `@bind-Value`, `EditForm` validation, a C# service for the AST and a podcast editor (`PodcastEditor`). Not on nuget.org yet: the `.nupkg` is attached to the GitHub release.',
     lang: 'razor',
     code: `@using MdlibPure.Blazor
 
 <MarkdownEditor @bind-Value="Body" Plugins="MarkdownPlugins.All" />
 <Markdown Value="@Body" Plugins="MarkdownPlugins.Gfm" />`,
-    links: `[Blazor guide](/docs/blazor/) · [Download 0.1.1 from the GitHub release](${BLAZOR_RELEASE})`,
+    links: `[Blazor guide](/docs/blazor/) · [Download 0.2.0 from the GitHub release](${BLAZOR_RELEASE})`,
   },
   {
     id: 'use-angular',
     title: 'Angular (21, 22)',
-    text: '`ngx-mdlib-pure` 0.1.1: standalone components whose tag is the Web Component, `[(value)]` with signals, a form control for `ngModel` and reactive forms, SSR with hydration, and a service for the AST. Not on npm yet, like mdlib-pure: both tarballs are attached to GitHub releases.',
+    text: '`ngx-mdlib-pure` 0.2.0: standalone components whose tag is the Web Component, `[(value)]` with signals, a form control for `ngModel` and reactive forms, SSR with hydration, a service for the AST and a podcast editor (`ngx-mdlib-pure/podcast`). Not on npm yet, like mdlib-pure: both tarballs are attached to GitHub releases.',
     lang: 'ts',
     code: `// app.config.ts
 providers: [provideMdlibPure({ loaders: { mermaid: () => import('mermaid') } })]
