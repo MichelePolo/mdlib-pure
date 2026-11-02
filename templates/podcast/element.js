@@ -40,14 +40,16 @@ function timerOf(value) {
  * Hosting attributes (read when the element connects): grammar (JSON options of the podcast plugin), tasks
  * ("notify": a checkbox click only raises `podcast-task`), documents ("host": a document button only raises
  * `podcast-document`), compact. Live attributes: tag-colors (JSON), readonly, current-line, running-timer
- * ("line:index" or "line:index:text", the text replacing the planned value while the timer runs).
+ * ("line:index" or "line:index:text", the text replacing the planned value while the timer runs), sounds (JSON array
+ * of the soundboard item names the host has: `[titolo](sound:nome)` buttons with another name are disabled; absent =
+ * every sound button enabled).
  * Events: input (debounced, and before change), change (focus left the editor), podcast-task, podcast-document,
- * podcast-active (detail = the editor's payload). */
+ * podcast-sound, podcast-active (detail = the editor's payload). */
 export function definePodcastEditor({ styles = [] } = {}) {
   if (customElements.get('mdlib-podcast-editor')) return
   class PodcastEditor extends HTMLElement {
     static formAssociated = true
-    static observedAttributes = ['value', 'participants', 'view', 'label', 'disabled', 'tag-colors', 'readonly', 'current-line', 'running-timer']
+    static observedAttributes = ['value', 'participants', 'view', 'label', 'disabled', 'tag-colors', 'readonly', 'current-line', 'running-timer', 'sounds']
     #root = this.attachShadow({ mode: 'open' })
     #internals = this.attachInternals?.()
     #editor
@@ -110,8 +112,10 @@ export function definePodcastEditor({ styles = [] } = {}) {
         compact: this.hasAttribute('compact'),
         current: this.getAttribute('current-line') === null ? null : Number(this.getAttribute('current-line')),
         runningTimer: timerOf(this.getAttribute('running-timer')),
+        sounds: parse(this.getAttribute('sounds'), null),
         onTaskToggle: (detail) => emit('podcast-task', detail),
         onOpenDocument: (detail) => emit('podcast-document', detail),
+        onPlaySound: (detail) => emit('podcast-sound', detail),
         onActiveDocument: (name) => emit('podcast-active', { name }),
       })
       this.#configure()
@@ -140,6 +144,7 @@ export function definePodcastEditor({ styles = [] } = {}) {
         if (name === 'tag-colors') this.#editor?.setTagColors(parse(value, null))
         if (name === 'current-line') this.#editor?.setCurrent(value === null ? null : Number(value))
         if (name === 'running-timer') this.#editor?.setRunningTimer(timerOf(value))
+        if (name === 'sounds') this.#editor?.setSounds(parse(value, null))
         this.#configure()
       }
     }

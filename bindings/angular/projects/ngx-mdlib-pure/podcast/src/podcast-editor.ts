@@ -2,7 +2,7 @@ import { isPlatformBrowser } from '@angular/common'
 import { booleanAttribute, ChangeDetectionStrategy, Component, computed, ElementRef, forwardRef, inject, input, model, numberAttribute, output, PLATFORM_ID, signal } from '@angular/core'
 import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { defineElement, PODCAST_STYLES } from './element.generated'
-import type { PodcastDocumentEvent, PodcastEpisode, PodcastGrammar, PodcastTaskEvent, PodcastTimer } from './podcast-types'
+import type { PodcastDocumentEvent, PodcastEpisode, PodcastGrammar, PodcastSoundEvent, PodcastTaskEvent, PodcastTimer } from './podcast-types'
 
 /** The `<mdlib-podcast-editor>` custom element. */
 export interface MdlibPodcastEditorElement extends HTMLElement {
@@ -76,10 +76,12 @@ function stylesheets(): CSSStyleSheet[] {
     '[attr.compact]': 'compact() ? "" : null',
     '[attr.current-line]': 'currentLine() ?? null',
     '[attr.running-timer]': 'runningTimerAttr()',
+    '[attr.sounds]': 'soundsAttr()',
     '(input)': 'onElementInput($event)',
     '(change)': 'onElementChange($event)',
     '(podcast-task)': 'onTask($event)',
     '(podcast-document)': 'onDocument($event)',
+    '(podcast-sound)': 'onSound($event)',
     '(podcast-active)': 'onActive($event)',
   },
 })
@@ -114,6 +116,8 @@ export class PodcastEditor implements ControlValueAccessor {
   readonly currentLine = input<number | null, unknown>(null, { transform: nullableNumber })
   /** The timer chip shown as running. Live. */
   readonly runningTimer = input<PodcastTimer | null | undefined>()
+  /** Names of the app's soundboard items: `[titolo](sound:nome)` buttons with another name (ignoring case) are disabled. Null: all enabled. Live. */
+  readonly sounds = input<readonly string[] | null | undefined>()
 
   /** When focus leaves the editor, with the episode at that moment. */
   readonly valueCommit = output<PodcastEpisode>()
@@ -121,6 +125,8 @@ export class PodcastEditor implements ControlValueAccessor {
   readonly taskToggle = output<PodcastTaskEvent>()
   /** A document button was clicked while `documents` is `host`. */
   readonly openDocument = output<PodcastDocumentEvent>()
+  /** A sound button was clicked: play that item of the soundboard. */
+  readonly playSound = output<PodcastSoundEvent>()
   /** The editor switched tabs: the name of the document shown. */
   readonly activeDocumentChange = output<string>()
 
@@ -133,6 +139,7 @@ export class PodcastEditor implements ControlValueAccessor {
   protected readonly participantsAttr = computed(() => json(this.participants()))
   protected readonly grammarAttr = computed(() => json(this.grammar()))
   protected readonly tagColorsAttr = computed(() => json(this.tagColors()))
+  protected readonly soundsAttr = computed(() => json(this.sounds()))
   protected readonly runningTimerAttr = computed(() => {
     const t = this.runningTimer()
     return t ? `${t.line}:${t.index}${t.text ? `:${t.text}` : ''}` : null
@@ -166,6 +173,10 @@ export class PodcastEditor implements ControlValueAccessor {
 
   protected onDocument(event: Event): void {
     this.openDocument.emit((event as CustomEvent<PodcastDocumentEvent>).detail)
+  }
+
+  protected onSound(event: Event): void {
+    this.playSound.emit((event as CustomEvent<PodcastSoundEvent>).detail)
   }
 
   protected onActive(event: Event): void {

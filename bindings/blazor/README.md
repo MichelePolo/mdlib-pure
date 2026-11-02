@@ -286,8 +286,9 @@ hyphens; duplicates are ignored without case sensitivity (up to 100 names).
 | `ReadOnly` | Preview only: toolbar and source hidden, checkboxes and document buttons still live. Live. |
 | `Compact` | No header, legend, status bar or pane labels: the editor fits a column. Read when the element connects. |
 | `CurrentLine` | 0-based source line of the current point, highlighted in the preview (`.is-current`). Live. |
+| `Sounds` | `string[]`: names of the app's soundboard items. A `[titolo](sound:nome)` link renders a button that raises `OnPlaySound` (`PodcastSoundEventArgs`: `Name`, `Title`); a name not in the list (compared ignoring case) is a disabled button. Null: every sound button is enabled. Live. |
 | `RunningTimer` | `(Line, Index)`: the timer chip to show as running (`.is-running`). Live. The element attribute `running-timer` also takes a third field, `line:index:text`, shown in place of the planned value while the timer runs (a countdown written by the host's own script; `.is-over` when it starts with a minus). |
-| `OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged` | Callbacks of the three modes above; `OnActiveDocumentChanged` follows the tabs in `Local` mode. |
+| `OnTaskToggle`, `OnOpenDocument`, `OnPlaySound`, `OnActiveDocumentChanged` | Callbacks of the modes above; `OnActiveDocumentChanged` follows the tabs in `Local` mode. |
 | `OnValueCommit` | `EventCallback<PodcastEpisode>`: focus left the editor (moves inside it, such as text area → toolbar, do not count); a pending `ValueChanged` is raised first. Since 0.2.0. |
 
 Hosted use, for an application with its own rundown server (the demo's
@@ -298,6 +299,7 @@ Hosted use, for an application with its own rundown server (the demo's
                Tasks="PodcastTaskMode.Notify" Documents="PodcastDocumentMode.Host" Compact="true"
                CurrentLine="CurrentLine" RunningTimer="(CurrentLine, 0)"
                OnTaskToggle="ToggleAsync" OnOpenDocument="e => OpenPrompterAsync(e.Name)"
+               Sounds="SoundNames" OnPlaySound="e => PlayAsync(e.Name)"
                Style="--podcast-height: 60vh" />
 
 @code {
@@ -307,7 +309,7 @@ Hosted use, for an application with its own rundown server (the demo's
 ```
 
 The custom DOM events behind the callbacks (`podcast-task`, `podcast-document`,
-`podcast-active`) are registered by the package's JS initializer, so nothing is
+`podcast-sound`, `podcast-active`) are registered by the package's JS initializer, so nothing is
 needed in the app.
 
 `PodcastEpisode` has `Source` (main rundown), `Documents` (a dictionary of

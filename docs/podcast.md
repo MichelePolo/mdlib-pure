@@ -29,6 +29,7 @@ npm run site:serve
 | `[](time:5:00:00)` | Duration of one section: minutes:seconds:centiseconds, **not** hours:minutes:seconds. |
 | `[](time:05:00)` | Two fields mean minutes:seconds. |
 | `[scheda](Gobbo Vera)` | A button opening a separate document in the editor. Spaces are allowed in names. The legacy `doc:` prefix is accepted. |
+| `[Sigla](sound:Sigla finale)` | A button that asks the hosting application to play an item of its soundboard, by name (`soundboard:` is a synonym). The application lists the names it has (`sounds`); the other buttons are disabled. |
 | `[ ]` / `[x]` / `[X]` | Tasks outside or inside lists, including multiple tasks on a line. Checking a task strikes its own segment. |
 | `_text_` | Underline for this application. Use stars for italic (`*text*`) and bold (`**text**`). Double underscores are not part of this preset. |
 
@@ -71,11 +72,13 @@ const editor = mountPodcastEditor(host, {
   compact: true,                        // no header, legend or status bar
   current: 3,                           // 0-based source line of the current point, highlighted
   runningTimer: { line: 3, index: 0, text: '04:12' },  // the timer chip counting down: text replaces its planned value
+  sounds: ['Sigla', 'Risata'],         // soundboard items the app has: [titolo](sound:nome) buttons with other names are disabled
   onTaskToggle: (e) => post('toggle', e),
   onOpenDocument: (e) => openPrompter(e.name),
+  onPlaySound: (e) => soundboard.play(e.name),
   onChange: (state) => save(state.source),
 })
-editor.setCurrent(4); editor.setRunningTimer(null); editor.setReadOnly(true); editor.setTagColors(colors)
+editor.setCurrent(4); editor.setRunningTimer(null); editor.setReadOnly(true); editor.setTagColors(colors); editor.setSounds(names)
 ```
 
 | Option | Grammar it adds (defaults keep the sample) |
@@ -88,15 +91,17 @@ editor.setCurrent(4); editor.setRunningTimer(null); editor.setReadOnly(true); ed
 
 Blocks in the preview carry `data-line` (0-based) and `data-lines`; checkboxes
 carry `data-line` and `data-box`, timer chips `data-line` and `data-timer`, so
-the host's own line-based protocol keeps working. `readOnly` hides the toolbar
-and the source while checkboxes and document buttons stay live; `disabled`
+the host's own line-based protocol keeps working. Sound buttons carry
+`data-sound` (the name) and are disabled when `sounds` does not list the name
+(compared ignoring case; `null` disables nothing). `readOnly` hides the toolbar
+and the source while checkboxes, document and sound buttons stay live; `disabled`
 (the element attribute) makes everything inert. The panes take their height from
 `--podcast-height` and the preview its font size from `--podcast-font-size`.
 
 The Blazor `PodcastEditor` exposes the same options as parameters
 (`Grammar`, `TagColors`, `Tasks`, `Documents`, `ReadOnly`, `Compact`,
-`CurrentLine`, `RunningTimer`) and the callbacks as `EventCallback`s
-(`OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged`); see the
+`CurrentLine`, `RunningTimer`, `Sounds`) and the callbacks as `EventCallback`s
+(`OnTaskToggle`, `OnOpenDocument`, `OnPlaySound`, `OnActiveDocumentChanged`); see the
 [Blazor README](../bindings/blazor/README.md#podcasteditor).
 
 ## How it is built

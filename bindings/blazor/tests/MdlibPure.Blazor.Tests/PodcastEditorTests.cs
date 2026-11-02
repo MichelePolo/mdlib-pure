@@ -72,8 +72,9 @@ public class PodcastEditorTests : BunitContext
         var grammar = new PodcastGrammar { Durations = PodcastDurations.Clock, LineBlocks = true, LooseTasks = true, Tags = new() { Mentions = PodcastMentions.Any, Hashtags = true } };
         var cut = Render<PodcastEditor>(ps => ps.Add(p => p.Value, new()).Add(p => p.Grammar, grammar).Add(p => p.TagColors, new Dictionary<string, string> { ["campa"] = "#123456" })
             .Add(p => p.Tasks, PodcastTaskMode.Notify).Add(p => p.Documents, PodcastDocumentMode.Host).Add(p => p.ReadOnly, true).Add(p => p.Compact, true)
-            .Add(p => p.CurrentLine, 3).Add(p => p.RunningTimer, (3, 1)));
+            .Add(p => p.CurrentLine, 3).Add(p => p.RunningTimer, (3, 1)).Add(p => p.Sounds, new[] { "Sigla", "Risata" }));
         var el = cut.Find("mdlib-podcast-editor");
+        Assert.Equal("[\"Sigla\",\"Risata\"]", el.GetAttribute("sounds"));
         Assert.Equal("{\"durations\":\"Clock\",\"tags\":{\"mentions\":\"Any\",\"hashtags\":true},\"lineBlocks\":true,\"looseTasks\":true}", el.GetAttribute("grammar"));
         Assert.Equal("{\"campa\":\"#123456\"}", el.GetAttribute("tag-colors"));
         Assert.Equal("notify", el.GetAttribute("tasks"));
@@ -83,22 +84,25 @@ public class PodcastEditorTests : BunitContext
         Assert.Equal("3", el.GetAttribute("current-line"));
         Assert.Equal("3:1", el.GetAttribute("running-timer"));
         var plain = Render<PodcastEditor>(ps => ps.Add(p => p.Value, new())).Find("mdlib-podcast-editor");
-        foreach (var name in new[] { "grammar", "tag-colors", "tasks", "documents", "readonly", "compact", "current-line", "running-timer" }) Assert.False(plain.HasAttribute(name), name);
+        foreach (var name in new[] { "grammar", "tag-colors", "tasks", "documents", "readonly", "compact", "current-line", "running-timer", "sounds" }) Assert.False(plain.HasAttribute(name), name);
     }
 
     [Fact]
     public async Task Custom_events_reach_the_callbacks()
     {
-        PodcastTaskEventArgs? task = null; PodcastDocumentEventArgs? document = null; string? active = null;
+        PodcastTaskEventArgs? task = null; PodcastDocumentEventArgs? document = null; PodcastSoundEventArgs? sound = null; string? active = null;
         var cut = Render<PodcastEditor>(ps => ps.Add(p => p.Value, new()).Add(p => p.Tasks, PodcastTaskMode.Notify)
-            .Add(p => p.OnTaskToggle, (PodcastTaskEventArgs e) => task = e).Add(p => p.OnOpenDocument, (PodcastDocumentEventArgs e) => document = e).Add(p => p.OnActiveDocumentChanged, (string name) => active = name));
+            .Add(p => p.OnTaskToggle, (PodcastTaskEventArgs e) => task = e).Add(p => p.OnOpenDocument, (PodcastDocumentEventArgs e) => document = e).Add(p => p.OnActiveDocumentChanged, (string name) => active = name)
+            .Add(p => p.OnPlaySound, (PodcastSoundEventArgs e) => sound = e));
         var el = cut.Find("mdlib-podcast-editor");
         await el.TriggerEventAsync("onpodcasttask", new PodcastTaskEventArgs { Document = "Scaletta", Id = 2, Checked = true, Line = 4, Box = 1 });
         await el.TriggerEventAsync("onpodcastdocument", new PodcastDocumentEventArgs { Name = "Scheda ospite.md", Title = "Scheda ospite" });
+        await el.TriggerEventAsync("onpodcastsound", new PodcastSoundEventArgs { Name = "Sigla finale", Title = "Sigla" });
         await el.TriggerEventAsync("onpodcastactive", new PodcastActiveEventArgs { Name = "Appunti" });
         Assert.NotNull(task);
         Assert.Equal((2, true, 4, 1), (task.Id, task.Checked, task.Line, task.Box));
         Assert.Equal("Scheda ospite.md", document?.Name);
+        Assert.Equal(("Sigla finale", "Sigla"), (sound?.Name, sound?.Title));
         Assert.Equal("Appunti", active);
     }
 }

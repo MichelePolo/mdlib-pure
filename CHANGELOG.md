@@ -24,6 +24,16 @@ mdlib-pure stays 0.1.1 (no change to the npm package). Wrapper releases:
 
 ### Added
 
+- Podcast sample: soundboard links. `[Sigla](sound:Sigla finale)` (or
+  `soundboard:`) renders a `.podcast-sound` button that asks the hosting
+  application to play that item of its soundboard; the editor option `sounds`
+  (names the host has, compared ignoring case; `setSounds` live) disables the
+  buttons whose name is unknown, `onPlaySound({ name, title })` reports a click.
+  `<mdlib-podcast-editor>`: attribute `sounds` (JSON array) and event
+  `podcast-sound`; Blazor `Sounds` / `OnPlaySound` (`PodcastSoundEventArgs`);
+  Angular `sounds` / `playSound` (`PodcastSoundEvent`). For the next wrapper
+  releases.
+
 - Blazor `OnValueCommit` (MdlibPure.Blazor 0.2.0) on `MarkdownEditor` (`EventCallback<string?>`) and
   `PodcastEditor` (`EventCallback<PodcastEpisode>`): the user left the editor,
   after the pending `ValueChanged`. The counterpart of Angular's `valueCommit`.

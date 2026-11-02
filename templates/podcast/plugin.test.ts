@@ -188,9 +188,18 @@ describe('podcast plugin, studio options', () => {
     assert.ok(!studio.render('[y](doc:javascript:alert)').includes('href='), 'a document name is never a URL')
     assert.deepEqual(nodes('[titolo](time:5:00)', 'podcastTime').map((t) => [t.title, t.centiseconds]), [['titolo', 30000]], 'titles are accepted in the sample grammar too')
   })
+  test('sound links: a button by soundboard item name, never a URL; sound: and soundboard: are the same', () => {
+    assert.deepEqual(pick('[Sigla](sound:Sigla finale) [](soundboard:Risata) [x](sound:) [a](SOUND:b) [c](sound:bad\\name)', 'podcastSound').map((d) => [d.name, d.title]), [['Sigla finale', 'Sigla'], ['Risata', ''], ['b', 'a']])
+    assert.match(studio.render('[Sigla](soundboard:Sigla finale)'), /<button type="button" class="podcast-sound" data-sound="Sigla finale" data-title="Sigla" aria-label="Suona: Sigla finale">♫ Sigla<\/button>/)
+    assert.match(studio.render('[](sound:Risata)'), /data-title="Risata" aria-label="Suona: Risata">♫ Risata<\/button>/, 'without a title the button shows the name')
+    assert.ok(!studio.render('[y](sound:javascript:alert)').includes('href='), 'a sound name is never a URL')
+    assert.equal(md.render('[Sigla](sound:Sigla)').includes('podcast-sound'), true, 'the sample grammar accepts it too')
+    assert.equal(studio.render('- [ ] Apertura [Sigla](sound:Sigla)').match(/podcast-sound/g)?.length, 1, 'inside a task item the button is kept as a control')
+    assert.equal(studio.render('`[Sigla](sound:Sigla)`').includes('podcast-sound'), false, 'code spans are left alone')
+  })
   test('studio options stay linear on hostile input', () => {
     const start = performance.now()
-    for (const source of ['#a'.repeat(50000), '[](doc:'.repeat(20000), '-[]'.repeat(20000), 'a\n'.repeat(20000), '- [ ] a\n'.repeat(10000), '#'.repeat(100000), '@'.repeat(100000), '[x](time:'.repeat(20000)]) {
+    for (const source of ['#a'.repeat(50000), '[](doc:'.repeat(20000), '-[]'.repeat(20000), 'a\n'.repeat(20000), '- [ ] a\n'.repeat(10000), '#'.repeat(100000), '@'.repeat(100000), '[x](time:'.repeat(20000), '[x](soundboard:'.repeat(20000)]) {
       const root = studio.parse(source)
       getPodcastSummary(root)
       taskRanges(source, root)

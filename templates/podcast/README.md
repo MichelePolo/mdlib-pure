@@ -13,6 +13,7 @@ All participants, titles and document contents in the sample are fictional.
 | `[](time:5:00:00)` | Five planned minutes for a section |
 | `[](time:05:00)` | The two-field minutes:seconds form |
 | `[scheda](Gobbo Vera)` | A separate supporting document, identified by name |
+| `[Sigla](sound:Sigla finale)` | A button asking the host to play a soundboard item, by name (`soundboard:` too); disabled when the host's `sounds` list lacks the name |
 | `[ ]` / `[x]` | An incomplete/completed task, including outside a list |
 | `_text_` | Underline in this preset; `*text*` is italic and `**text**` bold |
 
@@ -46,9 +47,10 @@ The custom `[scheda](…)` control opens its document inside the editor.
 - `plugin.test.ts`: grammar, source mapping, GFM interactions and pathological input.
 - `editor.js`: shared, instance-scoped editor with state, callbacks and cleanup. Hosting
   options: `grammar`, `tagColors`, `tasks: 'notify'` (a click raises `onTaskToggle` instead of
-  editing), `documents: 'host'` (a document button raises `onOpenDocument`), `readOnly`,
-  `compact`, `current` and `runningTimer`, with `setTagColors`, `setReadOnly`, `setCurrent`
-  and `setRunningTimer` on the instance.
+  editing), `documents: 'host'` (a document button raises `onOpenDocument`), `sounds` (the
+  soundboard names the host has; a sound button raises `onPlaySound`), `readOnly`,
+  `compact`, `current` and `runningTimer`, with `setTagColors`, `setReadOnly`, `setCurrent`,
+  `setRunningTimer` and `setSounds` on the instance.
 - `../../site/client/podcast.js`: site initialization with opt-in local drafts.
 - `../../site/lib/podcast-data.js`: initial rundown and supporting documents.
 - `ui.js`: static UI markup, shared with the website and the wrappers.
