@@ -29,6 +29,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/ngx-mdlib-pure/tsconfig.spec.json",
+            "include": ["**/*.spec.ts", "../podcast/src/**/*.spec.ts"],
             "browsers": ["chromiumHeadless"]
           }
         }

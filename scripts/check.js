@@ -5,6 +5,11 @@
 //  2. No HTML sinks on content (innerHTML, outerHTML, insertAdjacentHTML,
 //     document.write, eval, new Function) unless the line is explicitly marked
 //     `check:allow-innerHTML` with a justification next to it.
+//  3. Docs coverage (below).
+//  4. Binding parity: what the core offers, every wrapper offers (AGENTS.md
+//     rule 11). Every first-party plugin export is a plugin name of the
+//     elements; the Blazor and Angular wrappers list the same names in the
+//     same order; every custom element of the repository is wrapped by both.
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -49,9 +54,45 @@ const guides = [
 ]
 for (const guide of guides) if (!readme.includes(guide)) errors.push(`README.md: no link to ${guide}`)
 
+// 4. Binding parity (AGENTS.md rule 11, "Bindings follow the core").
+const read = (f) => readFileSync(f, 'utf8')
+const elementSource = read('src/element.ts')
+const factories = /const FACTORIES = new Map[^[]*\[([\s\S]*?)\n\]\)/.exec(elementSource)
+const elementPlugins = factories ? [...factories[1].matchAll(/^\s*\['([a-z]+)'/gm)].map((m) => m[1]) : []
+if (!elementPlugins.length) errors.push('src/element.ts: plugin table (FACTORIES) not found')
+/** Entry points that are not syntax plugins (no `plugins` name in the elements). */
+const NOT_PLUGINS = new Set(['.', './package.json', './entities', './adapter', './element'])
+for (const sub of Object.keys(pkg.exports)) {
+  if (NOT_PLUGINS.has(sub) || sub.endsWith('.css')) continue
+  if (!elementPlugins.includes(sub.slice(2))) errors.push(`src/element.ts: plugin "mdlib-pure/${sub.slice(2)}" has no name in FACTORIES (the elements and every binding need it)`)
+}
+const angularPlugins = /MARKDOWN_PLUGINS[^=]*=\s*\[([^\]]*)\]/.exec(read('bindings/angular/projects/ngx-mdlib-pure/src/lib/plugins.ts'))
+const blazorPlugins = /Names\s*=\s*\[([\s\S]*?)\];/.exec(read('bindings/blazor/src/MdlibPure.Blazor/MarkdownPlugins.cs'))
+const lists = {
+  'bindings/angular (MARKDOWN_PLUGINS in plugins.ts)': angularPlugins ? [...angularPlugins[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]) : [],
+  'bindings/blazor (Names in MarkdownPlugins.cs)': blazorPlugins ? [...blazorPlugins[1].matchAll(/"([a-z]+)"\)/g)].map((m) => m[1]) : [],
+}
+for (const [where, names] of Object.entries(lists)) {
+  if (names.join(' ') !== elementPlugins.join(' ')) errors.push(`${where}: plugins [${names.join(', ')}], the elements have [${elementPlugins.join(', ')}]`)
+}
+/** Every source file under a directory (no build output or dependencies). */
+function sources(dir, ext) {
+  return readdirSync(dir, { withFileTypes: true, recursive: true })
+    .filter((e) => e.isFile() && ext.test(e.name) && !/(^|\/)(node_modules|dist|bin|obj|wwwroot)(\/|$)/.test(join(e.parentPath, e.name)))
+    .map((e) => read(join(e.parentPath, e.name)))
+    .join('\n')
+}
+const blazorSources = sources('bindings/blazor/src', /\.razor$/)
+const angularSources = sources('bindings/angular/projects', /\.ts$/)
+const defined = new Set([...(elementSource + read('templates/podcast/element.js')).matchAll(/customElements\.define\('([a-z-]+)'/g)].map((m) => m[1]))
+for (const tag of defined) {
+  if (!blazorSources.includes(`<${tag}`)) errors.push(`bindings/blazor: no Razor component renders <${tag}>`)
+  if (!angularSources.includes(`selector: '${tag}'`)) errors.push(`bindings/angular: no component has selector '${tag}'`)
+}
+
 if (errors.length) {
   for (const e of errors) console.error('✗ ' + e)
   process.exitCode = 1
 } else {
-  console.log('✓ zero dependencies, no unmarked HTML sinks, public API and guides documented')
+  console.log('✓ zero dependencies, no unmarked HTML sinks, public API and guides documented, bindings at parity')
 }

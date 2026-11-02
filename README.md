@@ -239,7 +239,8 @@ complete, tested plugin to copy.
 
 Both wrap the Web Components of `mdlib-pure/element`: the Blazor package
 bundles them, the Angular package depends on `mdlib-pure`. Neither is on a
-public registry yet.
+public registry yet. They offer the same features with each framework's idioms: a
+new plugin or element reaches both (the [agents guide](AGENTS.md), rule 11).
 
 ### Blazor (.NET 10)
 
@@ -257,7 +258,9 @@ binding, configurable participants, supporting documents and planned duration.
 standalone components: `<mdlib-editor [(value)]>` (also a form control for
 `ngModel` and reactive forms), `<mdlib-markdown [source]>`,
 `provideMdlibPure()` and a `MarkdownService` for the AST, the table of
-contents and HTML. Server-side rendering and hydration work. **Not on npm**,
+contents and HTML; `ngx-mdlib-pure/podcast` adds
+[`PodcastEditor`](bindings/angular/README.md#mdlib-podcast-editor-podcasteditor)
+(next release; from source until then). Server-side rendering and hydration work. **Not on npm**,
 like mdlib-pure itself: install both tarballs from the GitHub releases
 ([`angular-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.1),
 [`mdlib-pure-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.1)).

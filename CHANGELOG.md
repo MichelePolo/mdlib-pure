@@ -16,6 +16,19 @@ break the API).
 
 ### Added
 
+- `ngx-mdlib-pure/podcast` (Angular, next ngx-mdlib-pure release):
+  `PodcastEditor`, the podcast rundown editor as `<mdlib-podcast-editor>`
+  with `[(value)]` of a typed `PodcastEpisode`, a `ControlValueAccessor`, and
+  the Blazor component's hosting options (`grammar`, `tagColors`, `tasks`,
+  `documents`, `readOnly`, `compact`, `currentLine`, `runningTimer`) and
+  events. Tested in Chromium (unit) and in the SSR demo's `/podcast` page.
+- `templates/podcast/element.js`: the `<mdlib-podcast-editor>` element, moved
+  from the Blazor package and shared by both wrappers; `styles` also takes
+  `CSSStyleSheet` objects.
+- `npm run check` verifies binding parity (AGENTS.md rule 11): every plugin
+  export has a name in the elements, the Blazor and Angular plugin lists match
+  it, and every custom element is wrapped by both.
+
 - Copyable podcast plugin example and split editor at `/podcast/`: participant
   completion, section durations (`[](time:5:00:00)`), interactive checkboxes,
   linked supporting documents, local drafts and per-document undo/redo.

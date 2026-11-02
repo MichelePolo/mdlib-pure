@@ -20,3 +20,4 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+/projects/ngx-mdlib-pure/podcast/src/element.generated.ts

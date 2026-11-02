@@ -54,7 +54,7 @@ const mdlib = await build({
   entryPoints: {
     'mdlib-element': 'src/element.ts',
     'mdlib-service': 'bindings/blazor/src/MdlibPure.Blazor/Scripts/mdlib-service.js',
-    'mdlib-podcast': 'bindings/blazor/src/MdlibPure.Blazor/Scripts/mdlib-podcast.js',
+    'mdlib-podcast': 'templates/podcast/element.js',
   },
   outdir: OUT,
   chunkNames: 'chunks/[name]-[hash]',

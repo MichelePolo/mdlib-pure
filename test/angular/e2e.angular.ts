@@ -182,7 +182,7 @@ function expected(markdown: string) {
 
 /** The opening tag of an element in server HTML, and whether it is empty. */
 function ssrElement(html: string, id: string) {
-  const m = new RegExp(`<(mdlib-[a-z]+)\\b([^>]*\\bid="${id}"[^>]*)>([\\s\\S]*?)</\\1>`).exec(html)
+  const m = new RegExp(`<(mdlib-[a-z-]+)\\b([^>]*\\bid="${id}"[^>]*)>([\\s\\S]*?)</\\1>`).exec(html)
   assert.ok(m, `#${id} in the server HTML`)
   const attrs = Object.fromEntries([...m[2].matchAll(/([a-z-]+)(?:="([^"]*)")?/g)].map((a) => [a[1], a[2] ?? '']))
   return { tag: m[1], attrs, content: m[3] }
@@ -411,6 +411,92 @@ describe('Client-side navigation', { timeout: TIMEOUT }, () => {
     assert.deepEqual(r, { spa: true, editors: 1, toolbars: 1 })
     await typeAtEnd(s.page, '\n\nAfter navigation')
     await s.page.waitForFunction(() => document.querySelector('#value')!.textContent!.endsWith('After navigation'), null, { timeout: 5000 })
+    await close(s)
+  })
+})
+
+// --- Podcast editor (ngx-mdlib-pure/podcast) -------------------------------------------------
+
+/** The podcast editor's shadow root has mounted (Playwright's CSS locators pierce open shadow roots). */
+const podcastReady = (page: Page, id: string) => page.locator(`#${id} #podcast-input`).waitFor({ state: 'attached', timeout: 30_000 })
+const episodeJson = (page: Page) => page.locator('#episode-json').textContent().then((t) => JSON.parse(t ?? '{}'))
+
+describe('Podcast editor', { timeout: TIMEOUT }, () => {
+  test('server HTML: the element, empty, with the episode and the participants as attributes', async () => {
+    const res = await fetch(base + '/podcast')
+    assert.equal(res.status, 200)
+    const html = await res.text()
+    const el = ssrElement(html, 'podcast')
+    assert.equal(el.tag, 'mdlib-podcast-editor')
+    assert.equal(el.content, '', 'the element renders in the browser, in its shadow root')
+    assert.ok('ngskiphydration' in el.attrs)
+    const value = JSON.parse(el.attrs.value.replaceAll('&quot;', '"'))
+    assert.match(value.source, /^# An imaginary garden/)
+    assert.deepEqual(value.documents, { Notes: '@Elio Ideas for the greenhouse.' })
+    assert.equal(el.attrs.participants.replaceAll('&quot;', '"'), '["Nora","Elio","Vera"]')
+  })
+
+  test('in the browser: badges, the planned duration computed, typing updates the typed episode', async () => {
+    const s = await open('/podcast')
+    await podcastReady(s.page, 'podcast')
+    assert.equal(await s.page.locator('#podcast #podcast-preview .podcast-mention').count(), 3)
+    await s.page.waitForFunction(() => document.querySelector('#planned')!.textContent === '10:30')
+    await s.page.locator('#podcast #podcast-input').click()
+    await s.page.keyboard.press('Control+End')
+    await s.page.keyboard.type('\n[ ] @Vera Goodbye [](time:0:30:00)')
+    await s.page.waitForFunction(() => document.querySelector('#planned')!.textContent === '11:00')
+    const episode = await episodeJson(s.page)
+    assert.match(episode.source, /@Vera Goodbye \[\]\(time:0:30:00\)$/)
+    assert.equal(episode.durationCentiseconds, 66_000)
+    assert.equal(episode.activeDocument, 'Scaletta')
+    await close(s)
+  })
+
+  test('live participants, replacement from code, document tabs', async () => {
+    const s = await open('/podcast')
+    await podcastReady(s.page, 'podcast')
+    await s.page.click('#replace')
+    await s.page.locator('#podcast #podcast-preview h1', { hasText: 'Replaced' }).waitFor()
+    assert.equal(await s.page.locator('#podcast #podcast-preview .podcast-mention').count(), 0, 'Ines is not a participant yet')
+    await s.page.click('#add-person')
+    await s.page.locator('#podcast #podcast-preview .podcast-mention', { hasText: 'Ines' }).waitFor()
+    await s.page.waitForFunction(() => document.querySelector('#planned')!.textContent === '1:00')
+    await close(s)
+
+    const t = await open('/podcast')
+    await podcastReady(t.page, 'podcast')
+    await t.page.locator('#podcast #podcast-tabs button', { hasText: 'Notes' }).click()
+    await t.page.waitForFunction(() => document.querySelector('#active')!.textContent === 'Open document: Notes')
+    assert.equal(await t.page.locator('#podcast #podcast-input').inputValue(), '@Elio Ideas for the greenhouse.')
+    await close(t)
+  })
+
+  test('reactive form control: value and touched on blur; the two editors are independent', async () => {
+    const s = await open('/podcast')
+    await podcastReady(s.page, 'podcast-form')
+    await s.page.locator('#podcast-form #podcast-input').click()
+    await s.page.keyboard.press('Control+End')
+    await s.page.keyboard.type(' and more')
+    await s.page.waitForFunction(() => document.querySelector('#podcast-form-state')!.textContent === 'Source: [ ] @Nora First point and more')
+    assert.equal(await s.page.getAttribute('#podcast-form-state', 'data-touched'), 'false')
+    await s.page.click('#podcast-blur')
+    await s.page.waitForFunction(() => document.querySelector('#podcast-form-state')!.getAttribute('data-touched') === 'true')
+    assert.match((await episodeJson(s.page)).source, /^# An imaginary garden/, 'the first editor is untouched')
+    await close(s)
+  })
+
+  test('client-side navigation: created by Angular in the browser, it renders the same', async () => {
+    const s = await open('/')
+    await interactive(s.page)
+    await s.page.click('#nav-podcast')
+    await podcastReady(s.page, 'podcast')
+    await podcastReady(s.page, 'podcast-form')
+    assert.equal(await s.page.locator('#podcast #podcast-preview .podcast-mention').count(), 3)
+    await s.page.click('#nav-editor')
+    await rendered(s.page)
+    await s.page.click('#nav-podcast')
+    await podcastReady(s.page, 'podcast')
+    assert.equal(await s.page.evaluate(() => document.querySelectorAll('mdlib-podcast-editor').length), 2)
     await close(s)
   })
 })

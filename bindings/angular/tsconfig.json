@@ -8,7 +8,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "ngx-mdlib-pure": ["./dist/ngx-mdlib-pure"]
+      "ngx-mdlib-pure": ["./dist/ngx-mdlib-pure"],
+      "ngx-mdlib-pure/podcast": ["./dist/ngx-mdlib-pure/podcast"]
     },
     "skipLibCheck": true,
     "isolatedModules": true,

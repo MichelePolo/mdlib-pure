@@ -51,10 +51,11 @@ The custom `[scheda](…)` control opens its document inside the editor.
   and `setRunningTimer` on the instance.
 - `../../site/client/podcast.js`: site initialization with opt-in local drafts.
 - `../../site/lib/podcast-data.js`: initial rundown and supporting documents.
-- `ui.js`: static UI markup, shared with the website and Blazor.
+- `ui.js`: static UI markup, shared with the website and the wrappers.
+- `element.js`: `<mdlib-podcast-editor>`, the custom element the Blazor and Angular wrappers bundle.
 - `../../site/assets/podcast.css`: sample-local theme and responsive layout.
 
 Run `npm run site:build` then `npm run site:serve`; open `/podcast/`.
 Run `npm run verify` and `npm run test:browser` to check the sample with the library.
 
-The [Blazor wrapper](../../bindings/blazor/README.md#podcasteditor) packages this editor as `PodcastEditor` since version 0.1.1 (GitHub release `blazor-v0.1.1`).
+`element.js` wraps the editor as `<mdlib-podcast-editor>`, a form-associated custom element with a shadow root. The [Blazor wrapper](../../bindings/blazor/README.md#podcasteditor) packages it as `PodcastEditor` since version 0.1.1 (GitHub release `blazor-v0.1.1`); the [Angular wrapper](../../bindings/angular/README.md#mdlib-podcast-editor-podcasteditor) as `PodcastEditor` in `ngx-mdlib-pure/podcast` (next release).

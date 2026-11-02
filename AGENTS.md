@@ -24,6 +24,7 @@ declare any task done; it runs all of them.
 | 8 | **Regexes must be linear** on any input: no alternatives that can match the same text inside a quantifier (`(?:\\.|\\[^x])*`), no unanchored `x+$`/`x*$` (scan by hand instead), always `y`/`g` + `lastIndex` instead of `slice(pos)`. | `test/pathological.test.ts` |
 | 9 | **Lookups keyed by input use `Map` or `Object.hasOwn`**, never a plain object (`&constructor;` must not reach `Object.prototype`). | review + tests |
 | 10 | **Docs stay complete for humans and agents.** Every public entry point (`exports` in package.json) is documented in `docs/api.md` and mentioned in `README.md`; every `docs/*.md` and `bindings/*/README.md` is linked from `README.md`. The website, `llms.txt` and `llms-full.txt` are generated from these files: never edit generated copies. | `npm run check` |
+| 11 | **Bindings follow the core.** A new plugin, element or user-facing feature, and every release of mdlib-pure, reaches every wrapper (Blazor, Angular) in the same PR, and each affected wrapper gets its release prepared with it. React, Vue and Preact are covered by `mdlib-pure/adapter` and the Web Components: verify and document the feature there. See "Bindings follow the core" below. | `npm run check` (plugin names, wrapped elements) + review |
 
 **Browser support:** Baseline 2024. Features Baseline-available in 2024 or
 earlier (`light-dark()`, `color-mix()`, `:has()`, `text-wrap: balance`, CSS
@@ -51,7 +52,9 @@ instructions, set up an app or answer a user:
 - never publish: no `npm publish`, no `v*` tags (`.github/workflows/release.yml`
   publishes to npm on them), no `dotnet nuget push`, no new GitHub releases
   or replaced release assets (lockfiles pin their checksums). Publishing is
-  the maintainer's decision.
+  the maintainer's decision: prepare every affected package together (rule
+  11), then ask; publish only what the maintainer approves, as GitHub releases
+  (`mdlib-pure-v*`, `angular-v*`, `blazor-v*`).
 
 When a package is published, update this section, `README.md`, the
 `bindings/*/README.md` and the site in the same commit.
@@ -113,10 +116,12 @@ templates/podcast/    application plugin example (mentions, planned durations, d
                       tasks; options for a hosting application: clock durations with titles,
                       free coloured tags, one line = one block, loose boxes, notify-only tasks,
                       host documents, read-only, current line, running timer);
-                      editor.js/ui.js share the split editor between the site and Blazor,
+                      editor.js/ui.js share the split editor between the site and the
+                      wrappers; element.js is <mdlib-podcast-editor>, bundled by Blazor
+                      (PodcastEditor, since 0.1.1) and Angular (ngx-mdlib-pure/podcast);
                       docs/podcast.md the guide; ordinary links open new browser tabs,
                       document controls open in the editor; fictional people/content only;
-                      no new npm export or core syntax; Blazor 0.1.1 ships PodcastEditor
+                      no new npm export or core syntax
 demo/                 the first live editor (needs `npm run build`)
 site/                 the website: `npm run site:build` → site/out/ (pages, samples, playground)
 bench/                benchmark against other libraries (own package.json)
@@ -132,8 +137,12 @@ bindings/angular/     Angular wrapper, npm package ngx-mdlib-pure (Angular CLI w
                           <mdlib-editor>, ControlValueAccessor; MarkdownViewer = <mdlib-markdown>),
                           provideMdlibPure() (defines the elements in the browser only),
                           MarkdownService (parse/toc/render via getMarkdown, server included);
+    podcast/              secondary entry ngx-mdlib-pure/podcast: PodcastEditor =
+                          <mdlib-podcast-editor> ([(value)] PodcastEpisode, ControlValueAccessor);
+                          src/element.generated.ts is written by scripts/podcast-element.mjs
+                          (before ng build and ng test; gitignored)
                           *.spec.ts run in Chromium
-  demo/                   SSR demo app (zoneless): editor page, forms page (lazy route)
+  demo/                   SSR demo app (zoneless): editor page, forms and podcast pages (lazy routes)
 test/
   spec.test.ts        the 652 CommonMark examples
   gfm.test.ts         GFM extension examples
@@ -350,7 +359,41 @@ become dependencies. The pattern of `mdlib-pure/mermaid` and
    `site/build/sizes.js`, a card in `site/build/pages/plugins.js`, a sample in
    `site/content/samples/` and `site/lib/samples.js`.
 
+6. Bindings (rule 11): its name in the elements' plugin table (`FACTORIES` in
+   `src/element.ts`), in `MARKDOWN_PLUGINS`
+   (`bindings/angular/projects/ngx-mdlib-pure/src/lib/plugins.ts`) and in the
+   `MarkdownPlugins` flags and `Names` of
+   `bindings/blazor/src/MdlibPure.Blazor/MarkdownPlugins.cs`, in the same
+   order; tests and docs of both wrappers. `npm run check` fails until the
+   three lists agree.
+
 `templates/plugin/` is the same structure for a minimal inline plugin.
+
+## Bindings follow the core
+
+The wrappers are thin: they render the Web Components (`<mdlib-markdown>`,
+`<mdlib-editor>`, `<mdlib-podcast-editor>`) and call the same parser. What one
+wrapper offers, the other offers too, with each framework's idioms
+(`@bind-Value`/`EventCallback` in Blazor, `[(value)]`/`output()`/
+`ControlValueAccessor` in Angular).
+
+| Change in the core | Also do, in the same PR |
+|---|---|
+| New syntax plugin | Plugin step 6 above; Blazor `MarkdownPlugins` flag, Angular `MarkdownPluginName`; a test per wrapper |
+| New custom element (or element shared by the wrappers, like `templates/podcast/element.js`) | A Razor component and an Angular component whose host IS the element; unit tests (bUnit, Vitest) and an end-to-end page in each demo |
+| New attribute, event or behavior of an element | The matching parameter/callback (Blazor) and input/output (Angular), documented in both READMEs |
+| Fix in an element or the theme | Re-run `npm run blazor:assets` (Blazor bundles them); raise the Angular peer range (`mdlib-pure ^x.y.z`) when apps must get the fix |
+| mdlib-pure release | Decide with the maintainer which wrappers get a release (bundled code changed: Blazor always; Angular when its peer range or code changes), and prepare them together: versions, docs, site, artifacts |
+| Anything visible to React/Vue/Preact users | Check it through `mdlib-pure/adapter` and the elements (React 19 runs in `test/adapter.test.ts` and `test/browser/`), document it in `README.md` ("React, Vue, Preact") |
+
+`npm run check` verifies what can be checked mechanically: every plugin export
+has a name in the elements, both wrappers list the same plugin names in the
+same order, and every custom element defined in `src/` or `templates/` is
+rendered by a Razor component and is the selector of an Angular component. The
+rest (parameters, events, docs) is review: compare the two READMEs.
+
+A wrapper may lag only when the maintainer says so; then the PR says which
+wrapper is missing what, and `CHANGELOG.md` records it.
 
 ## Definition of done
 
@@ -364,6 +407,9 @@ become dependencies. The pattern of `mdlib-pure/mermaid` and
 - [ ] any change to behavior or API: the human docs (`README.md`, `docs/*.md`,
       `bindings/*/README.md`) and this file say the same thing, in the same
       commit
+- [ ] new plugin, element or feature: both wrappers updated and tested (rule
+      11): `(cd bindings/blazor && dotnet test)`, `npm run test:blazor`,
+      `npm run angular:unit`, `npm run test:angular`
 - [ ] no behavior change to core output unless the task requires it
 
 ## CSS (styles/)

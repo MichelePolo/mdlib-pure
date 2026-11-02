@@ -7,10 +7,10 @@
   "scripts": {
     "ng": "ng",
     "build": "npm run build:lib && npm run build:demo",
-    "build:lib": "ng build ngx-mdlib-pure && node scripts/package-files.mjs",
+    "build:lib": "node scripts/podcast-element.mjs && ng build ngx-mdlib-pure && node scripts/package-files.mjs",
     "build:demo": "ng build demo",
-    "test": "node scripts/fresh-deps.mjs && ng test ngx-mdlib-pure --watch=false",
-    "start": "node scripts/fresh-deps.mjs && ng serve demo",
+    "test": "node scripts/fresh-deps.mjs && node scripts/podcast-element.mjs && ng test ngx-mdlib-pure --watch=false",
+    "start": "node scripts/fresh-deps.mjs && node scripts/podcast-element.mjs && ng serve demo",
     "serve:ssr:demo": "node dist/demo/server/server.mjs",
     "pack": "npm pack ./dist/ngx-mdlib-pure --pack-destination dist"
   },

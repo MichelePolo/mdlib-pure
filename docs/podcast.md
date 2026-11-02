@@ -185,6 +185,36 @@ it directly. The demo has `/podcast/server`, `/podcast/wasm`, `/podcast/auto` an
 The standard `MarkdownEditor`, `MarkdownPlugins`, named configs and AST service
 remain unchanged. `PodcastEditor` is the dedicated component for this grammar.
 
+
+## Using this example with Angular
+
+`ngx-mdlib-pure/podcast` (in [ngx-mdlib-pure](../bindings/angular/README.md#mdlib-podcast-editor-podcasteditor),
+after 0.1.1: build it from source until the next release) has the same editor
+as an Angular component whose host is `<mdlib-podcast-editor>`. The episode is a
+typed `PodcastEpisode`, with `[(value)]` or a form control, and the same
+hosting options as Blazor (`grammar`, `tasks`, `documents`, `readOnly`,
+`currentLine`, `runningTimer`…):
+
+```ts
+import { PodcastEditor, podcastEpisode } from 'ngx-mdlib-pure/podcast'
+
+// template: <mdlib-podcast-editor [(value)]="episode" [participants]="['Nora', 'Elio', 'Vera']" />
+readonly episode = signal(podcastEpisode({ source: '[ ] @Nora Introduction [](time:5:00:00)' }))
+```
+
+Both wrappers bundle the same element, [`templates/podcast/element.js`](../templates/podcast/element.js):
+a fix or a new option there reaches both (rebuild with `npm run blazor:assets`
+and `npm run angular:build`).
+
+## React, Vue and other frameworks
+
+There is no package for them: copy `templates/podcast/` into your app and
+fill a host with `podcastMarkup()` (`ui.js`) and call `mountPodcastEditor(host, options)` from a mount effect (`useEffect`,
+`onMounted`), calling `destroy()` on unmount, or define the element with
+`definePodcastEditor({ styles })` from `element.js` and render
+`<mdlib-podcast-editor>` (React 19 sets its `value` property). The podcast code
+imports mdlib-pure from the repository's `src/`: point those imports at the
+`mdlib-pure` package.
 ## Styling and tests
 
 [podcast.css](../site/assets/podcast.css) scopes the dark studio design to the
