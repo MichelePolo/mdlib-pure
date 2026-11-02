@@ -54,7 +54,7 @@ export const DOCS = [
     slug: 'angular',
     title: 'Angular',
     source: 'bindings/angular/README.md',
-    summary: '`ngx-mdlib-pure` 0.1.1 for Angular 21 and 22: `<mdlib-editor [(value)]>` (a form control too), `<mdlib-markdown>`, `provideMdlibPure()`, `MarkdownService`, SSR with hydration',
+    summary: '`ngx-mdlib-pure` 0.1.1 for Angular 21 and 22: `<mdlib-editor [(value)]>` (a form control too), `<mdlib-markdown>`, `provideMdlibPure()`, `MarkdownService`, SSR with hydration; `ngx-mdlib-pure/podcast` (next release) adds the podcast editor',
     description: 'ngx-mdlib-pure: a Markdown editor with live preview and a viewer for Angular 21 and 22, standalone components with signals and forms, SSR with hydration, built on the mdlib-pure Web Components.',
     note: `Neither \`ngx-mdlib-pure\` nor \`mdlib-pure\` is on the npm registry yet: install both tarballs from the [GitHub releases](${REPO}/releases/tag/angular-v0.1.1), as described under [Install](#install).`,
   },

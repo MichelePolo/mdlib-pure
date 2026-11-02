@@ -27,6 +27,8 @@ diagrams, containers, definition lists, highlights, front matter. Safe by defaul
 - **KaTeX and Mermaid are yours to add**: pass `() => import('mermaid')`; they
   are downloaded only by pages whose Markdown has math or a diagram.
 - **No dependencies** besides Angular and mdlib-pure (peer dependencies).
+- **A podcast rundown editor** too, in `ngx-mdlib-pure/podcast`: see
+  [`PodcastEditor`](#mdlib-podcast-editor-podcasteditor).
 
 Contents: [How it works](#how-it-works) · [Install](#install) · [Setup](#setup) ·
 [Editor](#mdlib-editor-markdowneditor) · [Forms](#forms) · [Viewer](#mdlib-markdown-markdownviewer) ·
@@ -240,6 +242,90 @@ A read-only viewer. The element always has the class `md`, the one the theme sty
 
 Members: `element` (the `<mdlib-markdown>` element), `refresh()`.
 
+## `<mdlib-podcast-editor>`: `PodcastEditor`
+
+The rundown editor of mdlib-pure's [podcast sample](https://michelepolo.github.io/mdlib-pure/podcast/),
+from the secondary entry point **`ngx-mdlib-pure/podcast`**: `@name` badges and
+completion, planned durations `[](time:M:SS:CC)`, checkboxes, supporting
+documents `[scheda](name)`, with a live preview. It is the same element as the
+Blazor wrapper's `PodcastEditor`. The whole episode is bound as a typed
+`PodcastEpisode`:
+
+```ts
+import { PodcastEditor, type PodcastEpisode, podcastEpisode } from 'ngx-mdlib-pure/podcast'
+
+@Component({
+  imports: [PodcastEditor],
+  template: `
+    <mdlib-podcast-editor [(value)]="episode" [participants]="people" delay="300" />
+    <p>Planned: {{ episode().durationCentiseconds / 100 }} s</p>
+  `,
+})
+export class RundownPage {
+  readonly people = ['Nora', 'Elio', 'Vera']
+  readonly episode = signal<PodcastEpisode>(podcastEpisode({
+    source: '# An imaginary garden\n\n[ ] @Nora Introduction [](time:5:00:00)\n\n[scheda](Notes)',
+    documents: { Notes: '@Elio Ideas for the garden.' },
+  }))
+}
+```
+
+Not in the `angular-v0.1.1` release: it ships with the next ngx-mdlib-pure
+release. Until then, build the tarball from source ([Building from source](#building-from-source)).
+
+`PodcastEpisode` has `source` (the main rundown), `documents` (supporting
+documents by name), `activeDocument` (`'Scaletta'` for the main rundown) and
+`durationCentiseconds` (computed by the browser from the main rundown's time
+tags). `podcastEpisode({ … })` fills in the defaults. The participant names
+and the default sample names are fictional; names contain 1–32 letters,
+digits, underscores or hyphens.
+
+| Input | Type | Default | |
+|---|---|---|---|
+| `value` | `PodcastEpisode` | empty episode | Two-way: `[(value)]`. Updated after each typing pause, and at once when focus leaves the editor. |
+| `participants` | `string[]` | the sample's names | `@` completion and badges. Live. |
+| `view` | `'split' \| 'write' \| 'preview'` | `'split'` | Panes shown at first. |
+| `delay` | `number` | `200` | Milliseconds of typing pause before `valueChange`. |
+| `label` | `string` | `'Sorgente Markdown'` | Accessible name of the text area. |
+| `name` | `string` | | Form field name: native form posts send the episode as JSON. |
+| `disabled` | `boolean` | `false` | Makes the editor inert and leaves it out of form data. With forms, use `disable()`. |
+| `grammar` | `PodcastGrammar` | the sample's | Read when the element connects: `durations` (`'centiseconds'` or `'clock'`: `m:ss`, `h:mm:ss`, `5m`, `90s`), `tags` (`mentions`: `'participants'` or `'any'`; `hashtags`), `lineBlocks`, `looseTasks`. |
+| `tagColors` | `Record<string, string>` | | Fixed tag colours by name, ignoring case. Live. |
+| `tasks` | `'edit' \| 'notify'` | `'edit'` | `notify`: a checkbox click leaves the source alone and emits `taskToggle`; your app changes `value`. |
+| `documents` | `'local' \| 'host'` | `'local'` | `host`: no tabs; a document button emits `openDocument`. |
+| `readOnly` | `boolean` | `false` | Preview only; checkboxes and document buttons stay live. Live. |
+| `compact` | `boolean` | `false` | No header, legend, status bar or pane labels. Read when the element connects. |
+| `currentLine` | `number \| null` | `null` | 0-based source line highlighted in the preview. Live. |
+| `runningTimer` | `PodcastTimer \| null` | `null` | `{ line, index, text? }`: the timer chip shown as running; `text` replaces its planned value (a countdown). Live. |
+
+| Output | Payload | |
+|---|---|---|
+| `valueChange` | `PodcastEpisode` | Part of `[(value)]`. |
+| `valueCommit` | `PodcastEpisode` | When focus leaves the editor. |
+| `taskToggle` | `PodcastTaskEvent` | `{ document, id, checked, line, box }` (0-based), with `tasks="notify"`. |
+| `openDocument` | `PodcastDocumentEvent` | `{ name, title }`, with `documents="host"`. |
+| `activeDocumentChange` | `string` | The document shown, when the tabs switch. |
+
+It is a `ControlValueAccessor` too (`[formControl]`, `formControlName`,
+`[(ngModel)]`): the control's value is the `PodcastEpisode`, `touched` when
+focus leaves the editor. The element is defined the first time a
+`PodcastEditor` is created in the browser (nothing to add to
+`provideMdlibPure()`); on the server it renders as an empty element with its
+attributes, like the other components. Its markup and styles live in a shadow
+root, so instances never share IDs; customize its tokens through the exposed
+part, in a global stylesheet:
+
+```css
+mdlib-podcast-editor::part(editor) {
+  --podcast-accent: #b8e986;
+  --podcast-height: 60vh;     /* panes height (default 650px) */
+  --podcast-font-size: 18px;  /* preview text (default 15px) */
+}
+```
+
+The demo's `/podcast` page shows two-way binding, live participants,
+replacement from code, document tabs and a form control.
+
 ## Plugins
 
 `plugins` (inputs) and the `plugins` argument of `MarkdownService` take
@@ -371,6 +457,7 @@ links() {
 | | Server | Browser |
 |---|---|---|
 | `<mdlib-editor>`, `<mdlib-markdown>` | rendered **empty**, with their attributes | defined by `provideMdlibPure()`, they render themselves |
+| `<mdlib-podcast-editor>` | rendered **empty**, with its attributes | defined by the first `PodcastEditor`, renders in its shadow root |
 | `[(value)]`, forms, outputs | initial value in the `value` attribute | live |
 | `MarkdownService` | ✓ (entities included) | ✓ |
 | KaTeX, Mermaid | not loaded | loaded on demand |
@@ -461,7 +548,10 @@ Angular CLI workspace with its own `package.json`:
 ```text
 bindings/angular/
   projects/ngx-mdlib-pure/   the library (ng-packagr): src/lib/*.ts and *.spec.ts
-  demo/                      SSR demo app (zoneless): editor, viewer, service, forms
+    podcast/                 the ngx-mdlib-pure/podcast entry point (PodcastEditor)
+  demo/                      SSR demo app (zoneless): editor, viewer, service, forms, podcast
+  scripts/podcast-element.mjs  bundles templates/podcast/element.js (shared with Blazor) and its
+                             styles into podcast/src/element.generated.ts, before `ng build` and `ng test`
   scripts/package-files.mjs  copies this README and the LICENSE into the package
   scripts/fresh-deps.mjs     drops Vite's dependency caches before `ng test` and `ng serve`
   dist/                      build output (gitignored): ngx-mdlib-pure/, demo/, *.tgz

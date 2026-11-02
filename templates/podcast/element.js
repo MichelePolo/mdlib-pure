@@ -1,8 +1,15 @@
-import { mountPodcastEditor } from '../../../../../templates/podcast/editor.js'
-import { podcastMarkup } from '../../../../../templates/podcast/ui.js'
+// <mdlib-podcast-editor>: the podcast editor as a form-associated custom
+// element, shared by the Blazor (PodcastEditor.razor) and Angular
+// (ngx-mdlib-pure/podcast) wrappers. Not an npm export of mdlib-pure: each
+// wrapper bundles it (scripts/build-blazor-assets.js,
+// bindings/angular/scripts/podcast-element.mjs).
+import { mountPodcastEditor } from './editor.js'
+import { podcastMarkup } from './ui.js'
 
 const sheets = new Map()
+/** A style entry: a CSSStyleSheet as is, or the URL of a stylesheet (fetched once per URL). */
 function stylesheet(url) {
+  if (typeof url !== 'string') return url
   if (!sheets.has(url)) sheets.set(url, fetch(url).then(async (response) => {
     if (!response.ok) throw new Error(`Cannot load podcast stylesheet: ${response.status}`)
     const sheet = new CSSStyleSheet()
@@ -28,7 +35,8 @@ function timerOf(value) {
   return m ? { line: Number(m[1]), index: Number(m[2]), text: m[3] } : null
 }
 
-/** Package-local element: JSON state is the form value and the input event value.
+/** `styles`: URLs (Blazor's static assets) or CSSStyleSheet objects (Angular), adopted by the shadow root.
+ * Package-local element: JSON state is the form value and the input event value.
  * Hosting attributes (read when the element connects): grammar (JSON options of the podcast plugin), tasks
  * ("notify": a checkbox click only raises `podcast-task`), documents ("host": a document button only raises
  * `podcast-document`), compact. Live attributes: tag-colors (JSON), readonly, current-line, running-timer
@@ -50,7 +58,7 @@ export function definePodcastEditor({ styles = [] } = {}) {
 
     constructor() {
       super()
-      // Only the element's debounced input/change events reach Blazor.
+      // Only the element's debounced input/change events reach the host framework.
       this.#root.addEventListener('input', (event) => event.stopPropagation())
       this.#root.addEventListener('change', (event) => event.stopPropagation())
       this.#root.addEventListener('focusout', () => this.#flush())

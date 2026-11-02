@@ -10,6 +10,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'
       <nav aria-label="Pages">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" id="nav-editor">Editor</a>
         <a routerLink="/forms" routerLinkActive="active" id="nav-forms">Forms</a>
+        <a routerLink="/podcast" routerLinkActive="active" id="nav-podcast">Podcast</a>
       </nav>
     </header>
     <main>
