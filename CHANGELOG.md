@@ -9,12 +9,20 @@ break the API).
 
 ### Changed
 
+- `<mdlib-podcast-editor>` dispatches `change` only when focus leaves the
+  editor (moves inside it do not count), like `<mdlib-editor>` and native
+  inputs; before, it followed every typing pause. `input` is unchanged.
+
 - `ngx-mdlib-pure` 0.1.1 (GitHub release `angular-v0.1.1`): requires
   `mdlib-pure ^0.1.1`, so apps get the `<mdlib-editor>` fixes of 0.1.1 (value
   set as a property before connection, missing form APIs). Same code as 0.1.0;
   the packaged README installs the 0.1.1 tarballs.
 
 ### Added
+
+- Blazor `OnValueCommit` on `MarkdownEditor` (`EventCallback<string?>`) and
+  `PodcastEditor` (`EventCallback<PodcastEpisode>`): the user left the editor,
+  after the pending `ValueChanged`. The counterpart of Angular's `valueCommit`.
 
 - `ngx-mdlib-pure/podcast` (Angular, next ngx-mdlib-pure release):
   `PodcastEditor`, the podcast rundown editor as `<mdlib-podcast-editor>`

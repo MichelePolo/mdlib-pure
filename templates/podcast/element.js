@@ -41,7 +41,8 @@ function timerOf(value) {
  * ("notify": a checkbox click only raises `podcast-task`), documents ("host": a document button only raises
  * `podcast-document`), compact. Live attributes: tag-colors (JSON), readonly, current-line, running-timer
  * ("line:index" or "line:index:text", the text replacing the planned value while the timer runs).
- * Events: podcast-task, podcast-document, podcast-active (detail = the editor's payload). */
+ * Events: input (debounced, and before change), change (focus left the editor), podcast-task, podcast-document,
+ * podcast-active (detail = the editor's payload). */
 export function definePodcastEditor({ styles = [] } = {}) {
   if (customElements.get('mdlib-podcast-editor')) return
   class PodcastEditor extends HTMLElement {
@@ -61,7 +62,13 @@ export function definePodcastEditor({ styles = [] } = {}) {
       // Only the element's debounced input/change events reach the host framework.
       this.#root.addEventListener('input', (event) => event.stopPropagation())
       this.#root.addEventListener('change', (event) => event.stopPropagation())
-      this.#root.addEventListener('focusout', () => this.#flush())
+      this.#root.addEventListener('focusout', (event) => {
+        this.#flush()
+        // `change` = the user left the editor (like <mdlib-editor> and native inputs):
+        // focus moving inside it (text area → toolbar, a dialog) is not leaving.
+        if (event.relatedTarget instanceof Node && this.#root.contains(event.relatedTarget)) return
+        this.dispatchEvent(new Event('change', { bubbles: true }))
+      })
       if (Object.hasOwn(this, 'value')) {
         const value = this.value
         delete this.value
@@ -162,7 +169,6 @@ export function definePodcastEditor({ styles = [] } = {}) {
       this.#sent.push(this.#value)
       if (this.#sent.length > 32) this.#sent.shift()
       this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
-      this.dispatchEvent(new Event('change', { bubbles: true }))
     }
   }
   customElements.define('mdlib-podcast-editor', PodcastEditor)

@@ -77,7 +77,7 @@ function stylesheets(): CSSStyleSheet[] {
     '[attr.current-line]': 'currentLine() ?? null',
     '[attr.running-timer]': 'runningTimerAttr()',
     '(input)': 'onElementInput($event)',
-    '(focusout)': 'onElementBlur($event)',
+    '(change)': 'onElementChange($event)',
     '(podcast-task)': 'onTask($event)',
     '(podcast-document)': 'onDocument($event)',
     '(podcast-active)': 'onActive($event)',
@@ -153,14 +153,9 @@ export class PodcastEditor implements ControlValueAccessor {
     this.#onChange(episode)
   }
 
-  /**
-   * Focus left the editor (the element's own `change` follows every typing
-   * pause, so it is not a commit). The element has already sent the pending
-   * value: its shadow root hears `focusout` first.
-   */
-  protected onElementBlur(event: FocusEvent): void {
-    // Inside the shadow root, relatedTarget is retargeted to the element itself.
-    if (event.relatedTarget === this.element) return
+  /** The element's `change` event: focus left the editor (the pending value was sent first). */
+  protected onElementChange(event: Event): void {
+    if (event.target !== this.element) return
     this.#onTouched()
     this.valueCommit.emit(episodeOf(this.element.value))
   }

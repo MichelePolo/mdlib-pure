@@ -14,7 +14,7 @@
                       documents="@(Documents == PodcastDocumentMode.Host ? "host" : null)"
                       readonly="@ReadOnly" compact="@Compact"
                       current-line="@CurrentLine" running-timer="@RunningTimerAttribute"
-                      @oninput="OnInput"
+                      @oninput="OnInput" @onchange="OnChange"
                       @onpodcasttask="OnTaskToggle" @onpodcastdocument="OnOpenDocument" @onpodcastactive="OnActive"></mdlib-podcast-editor>
 
 @code {
@@ -57,6 +57,8 @@
     [Parameter] public EventCallback<PodcastTaskEventArgs> OnTaskToggle { get; set; }
     /// <summary>A document button was clicked while <see cref="Documents"/> is <see cref="PodcastDocumentMode.Host"/>.</summary>
     [Parameter] public EventCallback<PodcastDocumentEventArgs> OnOpenDocument { get; set; }
+    /// <summary>The user left the editor (the element's <c>change</c> event), with the episode at that moment. A pending ValueChanged is raised first.</summary>
+    [Parameter] public EventCallback<PodcastEpisode> OnValueCommit { get; set; }
     /// <summary>The editor switched tabs (<see cref="PodcastDocumentMode.Local"/>): the name of the document shown.</summary>
     [Parameter] public EventCallback<string> OnActiveDocumentChanged { get; set; }
 
@@ -91,6 +93,13 @@
         }
     }
     private void OnInput(ChangeEventArgs args) => CurrentValueAsString = args.Value?.ToString();
+    private Task OnChange(ChangeEventArgs args)
+    {
+        var episode = CurrentValue ?? new();
+        try { episode = PodcastEpisode.FromJson(args.Value?.ToString() ?? "{}"); }
+        catch (JsonException) { }
+        return OnValueCommit.InvokeAsync(episode);
+    }
     private Task OnActive(PodcastActiveEventArgs args) => OnActiveDocumentChanged.InvokeAsync(args.Name);
     private string? ParticipantsAttribute => Participants is null ? null : JsonSerializer.Serialize(Participants, PodcastJsonContext.Default.StringArray);
     private string? GrammarAttribute => Grammar is null ? null : JsonSerializer.Serialize(Grammar, PodcastJsonContext.Default.PodcastGrammar);

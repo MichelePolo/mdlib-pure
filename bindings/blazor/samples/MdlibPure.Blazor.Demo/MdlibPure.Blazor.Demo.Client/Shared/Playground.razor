@@ -18,7 +18,9 @@
     }
 </p>
 
-<MarkdownEditor @bind-Value="Text" Plugins="MarkdownPlugins.All" Config="demo" Delay="Delay" Label="Release notes (Markdown)" Style="block-size: 30rem" />
+<MarkdownEditor @bind-Value="Text" Plugins="MarkdownPlugins.All" Config="demo" Delay="Delay" Label="Release notes (Markdown)" Style="block-size: 30rem"
+                OnValueCommit="v => { _commits++; _committed = v ?? string.Empty; }" />
+<p>Committed on blur: <output id="value-commit" data-count="@_commits">@_committed.Length</output> characters</p>
 
 <div class="panels">
     <section>
@@ -64,6 +66,8 @@
 
     private string Text { get; set; } = Samples.Welcome;
 
+    private int _commits;
+    private string _committed = string.Empty;
     private AstSummary? _ast;
     private string? _error;
 

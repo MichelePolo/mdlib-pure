@@ -235,6 +235,20 @@ for (const [mode, path, renderer] of [
       await close(s)
     })
 
+    test('OnValueCommit reaches C# when the editor loses focus, after the pending value', async () => {
+      const s = await open(`${path}?delay=10000`)
+      await interactive(s.page)
+      await rendered(s.page)
+      await typeAtEnd(s.page, '\n\nCommitted')
+      assert.equal(await s.page.getAttribute('#value-commit', 'data-count'), '0')
+      await s.page.locator('main h1').first().click()
+      await s.page.waitForFunction(() => document.querySelector('#value-commit')!.getAttribute('data-count') === '1', null, { timeout: 10_000 })
+      const value = await csharpValue(s.page)
+      assert.ok(value.endsWith('Committed'), 'the pending value reached C# before the commit')
+      assert.equal(await s.page.locator('#value-commit').textContent(), String(value.length))
+      await close(s)
+    })
+
     test('AST, table of contents and HTML from C# match mdlib-pure', async () => {
       const s = await open(path)
       await interactive(s.page)
@@ -392,6 +406,15 @@ for (const mode of ['server', 'wasm', 'auto']) {
       await page.addStyleTag({ content: '#episode-editor::part(editor) { --podcast-accent: rgb(1, 2, 3); }' })
       assert.equal(await editor.locator('.podcast').evaluate((el) => getComputedStyle(el).getPropertyValue('--podcast-accent').trim()), 'rgb(1, 2, 3)')
       assert.equal(await editor.locator('#podcast-preview a').getAttribute('target'), '_blank')
+      // OnValueCommit: only when focus leaves the editor, not on typing pauses or inside moves.
+      await input.click()
+      await input.press('Control+End')
+      await input.pressSequentially(' ok', { delay: 5 })
+      await page.waitForFunction(() => JSON.parse(document.querySelector('#episode-json')!.textContent!).source.endsWith(' ok'))
+      assert.equal(await page.getAttribute('#episode-commit', 'data-count'), '0')
+      await page.locator('#episode-total').click()
+      await page.waitForFunction(() => document.querySelector('#episode-commit')!.getAttribute('data-count') === '1')
+      assert.match((await page.locator('#episode-commit').textContent())!, / ok$/)
       await editor.getByRole('button', { name: 'Apri scheda: Appunti', exact: true }).click()
       await input.fill('@Elio note [](time:90:00:00)')
       await page.waitForFunction(() => JSON.parse(document.querySelector('#episode-json')!.textContent!).documents.Appunti === '@Elio note [](time:90:00:00)')

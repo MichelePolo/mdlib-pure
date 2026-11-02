@@ -3,7 +3,7 @@
 <p>Fictional participants and documents. Changes, supporting documents and the total are bound to C#.</p>
 @if (_visible)
 {
-    <PodcastEditor id="episode-editor" @bind-Value="Episode" Participants="People" Delay="Delay" />
+    <PodcastEditor id="episode-editor" @bind-Value="Episode" Participants="People" Delay="Delay" OnValueCommit="e => { _commits++; _committedSource = e.Source; }" />
 }
 <p>
     <button id="episode-reset" @onclick="Reset">Replace from C#</button>
@@ -11,6 +11,7 @@
     <button id="episode-toggle" @onclick="() => _visible = !_visible">Mount / unmount</button>
 </p>
 <p>Planned duration: <output id="episode-total">@Episode.DurationCentiseconds</output> centiseconds</p>
+<p>Committed on leaving the editor: <output id="episode-commit" data-count="@_commits">@_committedSource</output></p>
 <pre id="episode-json">@Episode.ToJson()</pre>
 <details>
     <summary>Independent second editor</summary>
@@ -33,6 +34,8 @@
     [Parameter] public string Mode { get; set; } = "";
     [Parameter] public int? Delay { get; set; }
     private bool _visible = true;
+    private int _commits;
+    private string _committedSource = string.Empty;
     private string[] People { get; set; } = ["Nora", "Elio", "Vera"];
     private PodcastEpisode Episode { get; set; } = new()
     {
