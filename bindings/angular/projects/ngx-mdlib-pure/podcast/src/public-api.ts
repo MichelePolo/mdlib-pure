@@ -4,4 +4,4 @@
  * The same element as the Blazor wrapper's PodcastEditor.
  */
 export { type MdlibPodcastEditorElement, PodcastEditor, podcastEpisode } from './podcast-editor'
-export type { PodcastDocumentEvent, PodcastEpisode, PodcastGrammar, PodcastTaskEvent, PodcastTimer } from './podcast-types'
+export type { PodcastDocumentEvent, PodcastEpisode, PodcastGrammar, PodcastSoundEvent, PodcastTaskEvent, PodcastTimer } from './podcast-types'

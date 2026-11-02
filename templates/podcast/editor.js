@@ -12,13 +12,16 @@ const EPISODE = 'Scaletta'
  * - grammar: options of podcast() (durations, tags, lineBlocks, looseTasks); tagColors: fixed colours by name;
  * - tasks: 'edit' (a click rewrites the source) or 'notify' (only onTaskToggle({ document, id, checked, line, box }));
  * - documents: 'local' (tabs and local documents) or 'host' (a document button only calls onOpenDocument({ name, title }));
+ * - sounds: names of the host's soundboard items (`[titolo](sound:nome)` buttons with another name are disabled; compared
+ *   ignoring case; null = every sound button enabled); a click calls onPlaySound({ name, title });
  * - readOnly (preview only, controls stay live), compact (no header, legend, status), current (0-based line of the
  *   current point), runningTimer ({ line, index, text? }: text, e.g. a countdown, replaces the chip's planned value
  *   while it runs); onActiveDocument(name) follows the tabs. */
 export function mountPodcastEditor(host, {
   value = {}, participants = PARTICIPANTS, storageKey = null, reset = false, onChange = () => {},
   grammar = {}, tagColors = null, tasks = 'edit', documents: documentMode = 'local', readOnly = false, compact = false,
-  current = null, runningTimer = null, onTaskToggle = () => {}, onOpenDocument = () => {}, onActiveDocument = () => {},
+  current = null, runningTimer = null, sounds = null, onTaskToggle = () => {}, onOpenDocument = () => {}, onActiveDocument = () => {},
+  onPlaySound = () => {},
 } = {}) {
   const lifetime = new AbortController()
   const on = (target, type, listener) => target.addEventListener(type, listener, { signal: lifetime.signal })
@@ -138,6 +141,7 @@ export function mountPodcastEditor(host, {
     md.renderTo(preview, root)
     ranges = taskRanges(input.value, root)
     for (const check of preview.querySelectorAll('[data-task]')) check.disabled = tasks === 'notify' ? check.dataset.line === undefined : !ranges.has(Number(check.dataset.task))
+    applySounds()
     applyMarks()
     preview.scrollTop = scroll
     const summary = getPodcastSummary(active === EPISODE ? root : md.parse(documents.get(EPISODE)))
@@ -188,6 +192,15 @@ export function mountPodcastEditor(host, {
     saveSoon()
     onActiveDocument(active)
   }
+  // Sound buttons play an item of the host's soundboard: only the names the host lists are live (null = all of them).
+  function applySounds() {
+    const known = Array.isArray(sounds) ? new Set(sounds.filter((name) => typeof name === 'string').map((name) => name.trim().toLowerCase())) : null
+    for (const button of preview.querySelectorAll('[data-sound]')) {
+      const missing = known !== null && !known.has(button.dataset.sound.trim().toLowerCase())
+      button.disabled = missing
+      button.title = missing ? 'Nessun elemento della soundboard con questo nome' : 'Fa partire questo elemento della soundboard'
+    }
+  }
   // The current point and the running timer are marks the host sets: classes on the rendered blocks and chips.
   function applyMarks() {
     for (const el of preview.querySelectorAll('.is-current, .is-running, .is-over')) el.classList.remove('is-current', 'is-running', 'is-over')
@@ -218,6 +231,11 @@ export function mountPodcastEditor(host, {
     $('#podcast-tabs [aria-selected="true"]').focus()
   })
   on(preview, 'click', (event) => {
+    const soundButton = event.target.closest('[data-sound]')
+    if (soundButton) {
+      if (!soundButton.disabled) onPlaySound({ name: soundButton.dataset.sound, title: soundButton.dataset.title ?? soundButton.dataset.sound })
+      return
+    }
     const documentButton = event.target.closest('[data-document]')
     if (documentButton) {
       if (documentMode === 'host') onOpenDocument({ name: documentButton.dataset.document, title: documentButton.dataset.title ?? documentButton.dataset.document })
@@ -479,6 +497,7 @@ export function mountPodcastEditor(host, {
     setTagColors(next) { tagColors = next ?? null; md = parser(); render() },
     setReadOnly(next) { host.toggleAttribute('data-readonly', !!next); closeMentions() },
     setCurrent(line) { current = Number.isInteger(line) ? line : null; applyMarks() },
+    setSounds(next) { sounds = Array.isArray(next) ? next : null; applySounds() },
     setRunningTimer(next) { runningTimer = next && Number.isInteger(next.line) && Number.isInteger(next.index) ? { line: next.line, index: next.index, text: typeof next.text === 'string' ? next.text : undefined } : null; applyMarks() },
     setView(view) {
       host.dataset.view = ['split', 'write', 'preview'].includes(view) ? view : 'split'

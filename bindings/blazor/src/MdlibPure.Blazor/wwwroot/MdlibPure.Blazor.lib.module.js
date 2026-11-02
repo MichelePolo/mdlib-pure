@@ -119,7 +119,7 @@ let eventsRegistered = false
 function registerEvents(blazor) {
   if (eventsRegistered || typeof blazor?.registerCustomEventType !== 'function') return
   eventsRegistered = true
-  for (const [name, browserEventName] of [['podcasttask', 'podcast-task'], ['podcastdocument', 'podcast-document'], ['podcastactive', 'podcast-active']]) {
+  for (const [name, browserEventName] of [['podcasttask', 'podcast-task'], ['podcastdocument', 'podcast-document'], ['podcastsound', 'podcast-sound'], ['podcastactive', 'podcast-active']]) {
     blazor.registerCustomEventType(name, { browserEventName, createEventArgs: (event) => event.detail ?? {} })
   }
 }
