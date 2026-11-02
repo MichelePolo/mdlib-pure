@@ -173,7 +173,7 @@ participants, supporting documents and the planned total:
 ```
 
 Install the 0.1.1 package from the
-[`blazor-v0.1.1` GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.1)
+[`blazor-v0.2.0` GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.2.0)
 following the [installation instructions](../bindings/blazor/README.md#install);
 the older `blazor-v0.1.0` release predates this component. The package
 loads its JavaScript and styles automatically; the app owns saving via
@@ -189,7 +189,7 @@ remain unchanged. `PodcastEditor` is the dedicated component for this grammar.
 ## Using this example with Angular
 
 `ngx-mdlib-pure/podcast` (in [ngx-mdlib-pure](../bindings/angular/README.md#mdlib-podcast-editor-podcasteditor),
-after 0.1.1: build it from source until the next release) has the same editor
+since 0.2.0, GitHub release `angular-v0.2.0`) has the same editor
 as an Angular component whose host is `<mdlib-podcast-editor>`. The episode is a
 typed `PodcastEpisode`, with `[(value)]` or a form control, and the same
 hosting options as Blazor (`grammar`, `tasks`, `documents`, `readOnly`,

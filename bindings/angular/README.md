@@ -62,12 +62,12 @@ This package adds Angular on top, without a second renderer:
 **Not on the npm registry yet**: neither `ngx-mdlib-pure` nor `mdlib-pure`
 is published, so `npm install ngx-mdlib-pure` fails. Until the first release
 there, install both tarballs from the GitHub releases
-([`angular-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.1),
+([`angular-v0.2.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.2.0),
 [`mdlib-pure-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.1)):
 
 ```sh
 npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz \
-  https://github.com/MichelePolo/mdlib-pure/releases/download/angular-v0.1.1/ngx-mdlib-pure-0.1.1.tgz
+  https://github.com/MichelePolo/mdlib-pure/releases/download/angular-v0.2.0/ngx-mdlib-pure-0.2.0.tgz
 npm install katex mermaid   # optional: math and diagrams
 ```
 
@@ -85,13 +85,13 @@ To build the tarballs yourself instead:
    npm ci --prefix bindings/angular    # Angular, ng-packagr…
    npm run angular:build               # mdlib-pure dist/, then the Angular package and its demo
    npm run angular:pack                # → bindings/angular/dist/mdlib-pure-0.1.1.tgz
-                                       #   bindings/angular/dist/ngx-mdlib-pure-0.1.1.tgz
+                                       #   bindings/angular/dist/ngx-mdlib-pure-0.2.0.tgz
    ```
 
 2. Copy them into your app (for example a `vendor/` folder, committed) and install both:
 
    ```sh
-   npm install ./vendor/mdlib-pure-0.1.1.tgz ./vendor/ngx-mdlib-pure-0.1.1.tgz
+   npm install ./vendor/mdlib-pure-0.1.1.tgz ./vendor/ngx-mdlib-pure-0.2.0.tgz
    ```
 
    npm records them as `file:vendor/…tgz` in your `package.json`.
@@ -270,8 +270,7 @@ export class RundownPage {
 }
 ```
 
-Not in the `angular-v0.1.1` release: it ships with the next ngx-mdlib-pure
-release. Until then, build the tarball from source ([Building from source](#building-from-source)).
+Available since **0.2.0** (GitHub release `angular-v0.2.0`).
 
 `PodcastEpisode` has `source` (the main rundown), `documents` (supporting
 documents by name), `activeDocument` (`'Scaletta'` for the main rundown) and

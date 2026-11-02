@@ -55,8 +55,8 @@ and ignores it.
 nothing. Until the first release there, use a local package feed. (The package
 bundles mdlib-pure, which is not on npm either; you need no npm.)
 
-1. Download `MdlibPure.Blazor.0.1.1.nupkg` from the
-   [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.1)
+1. Download `MdlibPure.Blazor.0.2.0.nupkg` from the
+   [GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.2.0)
    (or build it, see [Building from source](#building-from-source)) and put it
    in a folder, for example `packages/` next to your solution.
 2. Add a `nuget.config` next to your solution:
@@ -73,7 +73,7 @@ bundles mdlib-pure, which is not on npm either; you need no npm.)
 3. Reference the package from the project that contains your components:
 
    ```sh
-   dotnet add package MdlibPure.Blazor --version 0.1.1
+   dotnet add package MdlibPure.Blazor --version 0.2.0
    ```
 
    | App | Reference it from |
@@ -166,7 +166,7 @@ In an `EditForm`, with validation (the editor gets the usual `modified`,
 | `Name` | `string?` | | Form field name. Inside an `EditForm` it defaults to the bound expression (`Article.Body`), like `InputText`. |
 | `Class`, `Style` | `string?` | | On the element. Give the editor a height (`block-size: 30rem`): the panes fill it and scroll. |
 | `InertUntilInteractive` | `bool` | `true` | See [Prerendering](#prerendering). |
-| `OnValueCommit` | `EventCallback<string?>` | | The user left the editor (blur), with the text at that moment; a pending `ValueChanged` is raised first. Interactive render modes. Like Angular's `valueCommit`. |
+| `OnValueCommit` | `EventCallback<string?>` | | The user left the editor (blur), with the text at that moment; a pending `ValueChanged` is raised first. Interactive render modes. Like Angular's `valueCommit`. Since 0.2.0. |
 | any other attribute | | | Passed to the element (`id`, `aria-*`, `data-*`…). |
 
 `Element` (`ElementReference?`) is the `<mdlib-editor>` element, for your own JS interop.
@@ -288,7 +288,7 @@ hyphens; duplicates are ignored without case sensitivity (up to 100 names).
 | `CurrentLine` | 0-based source line of the current point, highlighted in the preview (`.is-current`). Live. |
 | `RunningTimer` | `(Line, Index)`: the timer chip to show as running (`.is-running`). Live. The element attribute `running-timer` also takes a third field, `line:index:text`, shown in place of the planned value while the timer runs (a countdown written by the host's own script; `.is-over` when it starts with a minus). |
 | `OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged` | Callbacks of the three modes above; `OnActiveDocumentChanged` follows the tabs in `Local` mode. |
-| `OnValueCommit` | `EventCallback<PodcastEpisode>`: focus left the editor (moves inside it, such as text area → toolbar, do not count); a pending `ValueChanged` is raised first. |
+| `OnValueCommit` | `EventCallback<PodcastEpisode>`: focus left the editor (moves inside it, such as text area → toolbar, do not count); a pending `ValueChanged` is raised first. Since 0.2.0. |
 
 Hosted use, for an application with its own rundown server (the demo's
 "Hosted editor" section does the same):
@@ -577,7 +577,7 @@ dotnet build bindings/blazor/MdlibPure.Blazor.slnx
 (cd bindings/blazor && dotnet test)   # bUnit; global.json there selects Microsoft.Testing.Platform
 npx playwright install chromium   # once
 npm run test:blazor            # end-to-end: builds and starts the demo, drives every render mode
-dotnet pack bindings/blazor/src/MdlibPure.Blazor -c Release -o packages   # → packages/MdlibPure.Blazor.0.1.1.nupkg
+dotnet pack bindings/blazor/src/MdlibPure.Blazor -c Release -o packages   # → packages/MdlibPure.Blazor.0.2.0.nupkg
 ```
 
 Run the demo: `dotnet run --project bindings/blazor/samples/MdlibPure.Blazor.Demo/MdlibPure.Blazor.Demo`,

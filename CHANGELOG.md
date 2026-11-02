@@ -7,6 +7,10 @@ break the API).
 
 ## [Unreleased]
 
+mdlib-pure stays 0.1.1 (no change to the npm package). Wrapper releases:
+`ngx-mdlib-pure` 0.2.0 (GitHub release `angular-v0.2.0`) and
+`MdlibPure.Blazor` 0.2.0 (`blazor-v0.2.0`), both with the entries below.
+
 ### Changed
 
 - `<mdlib-podcast-editor>` dispatches `change` only when focus leaves the
@@ -20,11 +24,11 @@ break the API).
 
 ### Added
 
-- Blazor `OnValueCommit` on `MarkdownEditor` (`EventCallback<string?>`) and
+- Blazor `OnValueCommit` (MdlibPure.Blazor 0.2.0) on `MarkdownEditor` (`EventCallback<string?>`) and
   `PodcastEditor` (`EventCallback<PodcastEpisode>`): the user left the editor,
   after the pending `ValueChanged`. The counterpart of Angular's `valueCommit`.
 
-- `ngx-mdlib-pure/podcast` (Angular, next ngx-mdlib-pure release):
+- `ngx-mdlib-pure/podcast` (Angular, ngx-mdlib-pure 0.2.0):
   `PodcastEditor`, the podcast rundown editor as `<mdlib-podcast-editor>`
   with `[(value)]` of a typed `PodcastEpisode`, a `ControlValueAccessor`, and
   the Blazor component's hosting options (`grammar`, `tagColors`, `tasks`,

@@ -1,6 +1,6 @@
 {
   "name": "ngx-mdlib-pure",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Angular Markdown editor with live preview, viewer, forms integration and SSR, built on mdlib-pure's Web Components.",
   "license": "MIT",
   "author": "Michele Polo <michele.polo@gmail.com>",

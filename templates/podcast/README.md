@@ -58,4 +58,4 @@ The custom `[scheda](…)` control opens its document inside the editor.
 Run `npm run site:build` then `npm run site:serve`; open `/podcast/`.
 Run `npm run verify` and `npm run test:browser` to check the sample with the library.
 
-`element.js` wraps the editor as `<mdlib-podcast-editor>`, a form-associated custom element with a shadow root. The [Blazor wrapper](../../bindings/blazor/README.md#podcasteditor) packages it as `PodcastEditor` since version 0.1.1 (GitHub release `blazor-v0.1.1`); the [Angular wrapper](../../bindings/angular/README.md#mdlib-podcast-editor-podcasteditor) as `PodcastEditor` in `ngx-mdlib-pure/podcast` (next release).
+`element.js` wraps the editor as `<mdlib-podcast-editor>`, a form-associated custom element with a shadow root. The [Blazor wrapper](../../bindings/blazor/README.md#podcasteditor) packages it as `PodcastEditor` since version 0.1.1 (GitHub release `blazor-v0.1.1`); the [Angular wrapper](../../bindings/angular/README.md#mdlib-podcast-editor-podcasteditor) as `PodcastEditor` in `ngx-mdlib-pure/podcast` since 0.2.0 (GitHub release `angular-v0.2.0`).

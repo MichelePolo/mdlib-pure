@@ -247,7 +247,7 @@ new plugin or element reaches both (the [agents guide](AGENTS.md), rule 11).
 [`MdlibPure.Blazor`](bindings/blazor/README.md) wraps the Web Components for
 every render mode: `<MarkdownEditor @bind-Value>`, `<Markdown>` and an AST
 service. **Not on nuget.org**: download the `.nupkg` from the
-[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.1.1)
+[GitHub release](https://github.com/MichelePolo/mdlib-pure/releases/tag/blazor-v0.2.0)
 and add it from a local package feed. Version 0.1.1 adds
 [`PodcastEditor`](bindings/blazor/README.md#podcasteditor), with typed episode
 binding, configurable participants, supporting documents and planned duration.
@@ -260,9 +260,9 @@ standalone components: `<mdlib-editor [(value)]>` (also a form control for
 `provideMdlibPure()` and a `MarkdownService` for the AST, the table of
 contents and HTML; `ngx-mdlib-pure/podcast` adds
 [`PodcastEditor`](bindings/angular/README.md#mdlib-podcast-editor-podcasteditor)
-(next release; from source until then). Server-side rendering and hydration work. **Not on npm**,
+(since 0.2.0). Server-side rendering and hydration work. **Not on npm**,
 like mdlib-pure itself: install both tarballs from the GitHub releases
-([`angular-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.1),
+([`angular-v0.2.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.2.0),
 [`mdlib-pure-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.1)).
 
 ## Performance
