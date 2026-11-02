@@ -31,6 +31,21 @@ public class PodcastEditorTests : BunitContext
     }
 
     [Fact]
+    public void Change_raises_OnValueCommit_with_the_episode()
+    {
+        PodcastEpisode? committed = null;
+        var cut = Render<PodcastEditor>(ps => ps.Add(p => p.Value, new() { Source = "original" }).Add(p => p.OnValueCommit, (PodcastEpisode e) => committed = e));
+        cut.Find("mdlib-podcast-editor").Change(new ChangeEventArgs { Value = "{\"source\":\"left\",\"durationCentiseconds\":100}" });
+        Assert.NotNull(committed);
+        Assert.Equal("left", committed.Source);
+        Assert.Equal(100, committed.DurationCentiseconds);
+
+        // Malformed JSON: the current episode.
+        cut.Find("mdlib-podcast-editor").Change(new ChangeEventArgs { Value = "invalid JSON" });
+        Assert.Equal("original", committed.Source);
+    }
+
+    [Fact]
     public void Invalid_json_does_not_replace_the_bound_episode()
     {
         var changes = 0;

@@ -166,6 +166,7 @@ In an `EditForm`, with validation (the editor gets the usual `modified`,
 | `Name` | `string?` | | Form field name. Inside an `EditForm` it defaults to the bound expression (`Article.Body`), like `InputText`. |
 | `Class`, `Style` | `string?` | | On the element. Give the editor a height (`block-size: 30rem`): the panes fill it and scroll. |
 | `InertUntilInteractive` | `bool` | `true` | See [Prerendering](#prerendering). |
+| `OnValueCommit` | `EventCallback<string?>` | | The user left the editor (blur), with the text at that moment; a pending `ValueChanged` is raised first. Interactive render modes. Like Angular's `valueCommit`. |
 | any other attribute | | | Passed to the element (`id`, `aria-*`, `data-*`…). |
 
 `Element` (`ElementReference?`) is the `<mdlib-editor>` element, for your own JS interop.
@@ -287,6 +288,7 @@ hyphens; duplicates are ignored without case sensitivity (up to 100 names).
 | `CurrentLine` | 0-based source line of the current point, highlighted in the preview (`.is-current`). Live. |
 | `RunningTimer` | `(Line, Index)`: the timer chip to show as running (`.is-running`). Live. The element attribute `running-timer` also takes a third field, `line:index:text`, shown in place of the planned value while the timer runs (a countdown written by the host's own script; `.is-over` when it starts with a minus). |
 | `OnTaskToggle`, `OnOpenDocument`, `OnActiveDocumentChanged` | Callbacks of the three modes above; `OnActiveDocumentChanged` follows the tabs in `Local` mode. |
+| `OnValueCommit` | `EventCallback<PodcastEpisode>`: focus left the editor (moves inside it, such as text area → toolbar, do not count); a pending `ValueChanged` is raised first. |
 
 Hosted use, for an application with its own rundown server (the demo's
 "Hosted editor" section does the same):

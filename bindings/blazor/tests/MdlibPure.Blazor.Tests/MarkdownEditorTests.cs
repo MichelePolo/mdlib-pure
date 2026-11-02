@@ -100,6 +100,22 @@ public class MarkdownEditorTests : BunitContext
     }
 
     [Fact]
+    public void Change_raises_OnValueCommit_after_the_pending_value()
+    {
+        var events = new List<string>();
+        var cut = Render<MarkdownEditor>(ps => ps
+            .Add(p => p.Value, "a")
+            .Add(p => p.ValueChanged, (string? v) => events.Add($"changed:{v}"))
+            .Add(p => p.OnValueCommit, (string? v) => events.Add($"commit:{v}")));
+
+        // On blur the element sends the pending input, then change.
+        cut.Find("mdlib-editor").Input(new ChangeEventArgs { Value = "ab" });
+        cut.Find("mdlib-editor").Change(new ChangeEventArgs { Value = "ab" });
+
+        Assert.Equal(["changed:ab", "commit:ab"], events);
+    }
+
+    [Fact]
     public void Value_alone_with_a_name_needs_no_binding()
     {
         // A plain Static SSR form: <MarkdownEditor Value="@Body" Name="body" />.

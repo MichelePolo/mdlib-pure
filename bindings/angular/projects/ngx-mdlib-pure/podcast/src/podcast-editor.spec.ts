@@ -145,6 +145,18 @@ describe('PodcastEditor: [(value)]', () => {
     expect(host.commits.map((e) => e.source)).toEqual(['one'])
   })
 
+  it('focus moving inside the editor (text area → toolbar) is not a commit', async () => {
+    const { fixture, host, editor } = setup(Host)
+    await fixture.whenStable()
+    await mounted(editor())
+    type(editor(), 'inside')
+    root(editor()).querySelector<HTMLButtonElement>('.podcast-toolbar button')!.focus()
+    await until(() => host.episode().source === 'inside')
+    expect(host.commits).toEqual([])
+    root(editor()).querySelector<HTMLButtonElement>('.podcast-toolbar button')!.blur()
+    expect(host.commits.map((e) => e.source)).toEqual(['inside'])
+  })
+
   it('valueCommit fires on blur, with the episode; the pending value is sent first', async () => {
     const { fixture, host, editor } = setup(Host)
     host.delay = 10_000

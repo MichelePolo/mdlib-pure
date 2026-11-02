@@ -6,8 +6,8 @@
     Markdown editor with live preview: <mdlib-editor>.
 
     The element renders the preview in the browser on every keystroke and
-    dispatches a debounced `input` event (and `change` on blur) with the value
-    in event.target.value: that event drives @bind-Value, so a server round trip
+    dispatches a debounced `input` event (and `change` on blur, OnValueCommit)
+    with the value in event.target.value: `input` drives @bind-Value, so a server round trip
     (Interactive Server) never delays typing. Values coming back as the `value`
     attribute while the user types are echoes, and the element ignores them.
 
@@ -28,6 +28,7 @@
               inert="@Inert"
               data-permanent
               @oninput="OnInput"
+              @onchange="OnChange"
               @ref="Element"></mdlib-editor>
 
 @code {
@@ -67,6 +68,12 @@
     /// </summary>
     [Parameter] public bool InertUntilInteractive { get; set; } = true;
 
+    /// <summary>
+    /// The user left the editor (the element's <c>change</c> event, on blur), with the text at that moment.
+    /// A pending <c>ValueChanged</c> is raised first. Interactive render modes only.
+    /// </summary>
+    [Parameter] public EventCallback<string?> OnValueCommit { get; set; }
+
     /// <summary>The <c>&lt;mdlib-editor&gt;</c> element, once rendered.</summary>
     [DisallowNull] public ElementReference? Element { get; protected set; }
 
@@ -93,6 +100,8 @@
     }
 
     private void OnInput(ChangeEventArgs e) => CurrentValueAsString = e.Value as string ?? e.Value?.ToString() ?? string.Empty;
+
+    private Task OnChange(ChangeEventArgs e) => OnValueCommit.InvokeAsync(e.Value as string ?? e.Value?.ToString() ?? CurrentValue);
 
     private string? ClassAttribute
     {
