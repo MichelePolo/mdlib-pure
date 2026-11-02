@@ -82,7 +82,7 @@ export const Markdown = ({ source }) => (
   {
     id: 'use-angular',
     title: 'Angular (21, 22)',
-    text: '`ngx-mdlib-pure` 0.1.0: standalone components whose tag is the Web Component, `[(value)]` with signals, a form control for `ngModel` and reactive forms, SSR with hydration, and a service for the AST. Not on npm yet, like mdlib-pure: both tarballs are attached to GitHub releases.',
+    text: '`ngx-mdlib-pure` 0.1.1: standalone components whose tag is the Web Component, `[(value)]` with signals, a form control for `ngModel` and reactive forms, SSR with hydration, and a service for the AST. Not on npm yet, like mdlib-pure: both tarballs are attached to GitHub releases.',
     lang: 'ts',
     code: `// app.config.ts
 providers: [provideMdlibPure({ loaders: { mermaid: () => import('mermaid') } })]

@@ -259,7 +259,7 @@ standalone components: `<mdlib-editor [(value)]>` (also a form control for
 `provideMdlibPure()` and a `MarkdownService` for the AST, the table of
 contents and HTML. Server-side rendering and hydration work. **Not on npm**,
 like mdlib-pure itself: install both tarballs from the GitHub releases
-([`angular-v0.1.0`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.0),
+([`angular-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/angular-v0.1.1),
 [`mdlib-pure-v0.1.1`](https://github.com/MichelePolo/mdlib-pure/releases/tag/mdlib-pure-v0.1.1)).
 
 ## Performance

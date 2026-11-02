@@ -41,8 +41,8 @@ instructions, set up an app or answer a user:
 - mdlib-pure: the tarball on the GitHub release `mdlib-pure-v0.1.1`
   (`npm install https://github.com/MichelePolo/mdlib-pure/releases/download/mdlib-pure-v0.1.1/mdlib-pure-0.1.1.tgz`),
   or `npm pack` in a clone (`prepack` builds `dist/`) (README.md, "Install");
-- Angular: that tarball plus `ngx-mdlib-pure-0.1.0.tgz` from the GitHub
-  release `angular-v0.1.0`, or `npm run angular:pack`
+- Angular: that tarball plus `ngx-mdlib-pure-0.1.1.tgz` from the GitHub
+  release `angular-v0.1.1`, or `npm run angular:pack`
   (bindings/angular/README.md, "Install");
 - Blazor: `MdlibPure.Blazor.0.1.1.nupkg` attached to the GitHub release
   `blazor-v0.1.1`, from a local NuGet feed (bindings/blazor/README.md,

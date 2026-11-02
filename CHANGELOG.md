@@ -7,6 +7,13 @@ break the API).
 
 ## [Unreleased]
 
+### Changed
+
+- `ngx-mdlib-pure` 0.1.1 (GitHub release `angular-v0.1.1`): requires
+  `mdlib-pure ^0.1.1`, so apps get the `<mdlib-editor>` fixes of 0.1.1 (value
+  set as a property before connection, missing form APIs). Same code as 0.1.0;
+  the packaged README installs the 0.1.1 tarballs.
+
 ### Added
 
 - Copyable podcast plugin example and split editor at `/podcast/`: participant
