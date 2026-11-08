@@ -26,7 +26,6 @@ export const SAMPLES = [
     title: 'Mermaid diagrams',
     plugins: ['mermaid'],
     description: 'The `mermaid` plugin turns ```` ```mermaid ```` fences into `<pre class="mermaid">`. Here `renderMermaid()` loads Mermaid only because this page has diagrams, and themes them from the `--md-*` tokens: switch the color scheme and they are redrawn. Without JavaScript you would see the source.',
-    playground: false,
   },
   {
     id: 'deflist',
@@ -86,5 +85,5 @@ export const SAMPLES = [
   },
 ]
 
-/** The playground's first sample: the text of the original demo editor. */
-export const WELCOME = { id: 'welcome', title: 'Welcome', plugins: ['gfm'], description: 'The text of the first demo editor.' }
+/** The flagship editor's initial document. */
+export const WELCOME = { id: 'welcome', title: 'Esplora l’editor', plugins: ['gfm', 'headings', 'mark', 'math', 'mermaid', 'container', 'deflist'], description: 'A document demonstrating formatting, formulas, diagrams and export.' }

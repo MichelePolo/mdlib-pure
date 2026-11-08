@@ -5,7 +5,7 @@ export const NAV = [
   { path: '/docs/', label: 'Docs', section: 'docs' },
   { path: '/samples/', label: 'Samples', section: 'samples' },
   { path: '/plugins/', label: 'Plugins', section: 'plugins' },
-  { path: '/playground/', label: 'Playground', section: 'playground' },
+  { path: '/playground/', label: 'Editor demo', section: 'playground' },
   { path: '/story/', label: 'Built with AI', section: 'story' },
   { path: '/docs/agents/', label: 'For AI agents', section: 'agents' },
 ]

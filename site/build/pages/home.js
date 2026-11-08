@@ -179,8 +179,8 @@ Output
         <div class="install"><code>${escapeHtml(INSTALL).replaceAll('/', '/<wbr>')}</code><button type="button" class="js-only" data-copy="${escapeHtml(INSTALL)}" aria-label="Copy the install command">Copy</button></div>
         <p class="install-note muted">${inline(INSTALL_NOTE)}</p>
         <p class="actions">
-          <a class="btn btn-primary" href="${rel(PATH, '/docs/getting-started/')}">Read the docs</a>
-          <a class="btn" href="${rel(PATH, '/playground/')}">Open the playground</a>
+          <a class="btn btn-primary" href="${rel(PATH, '/playground/')}">Try the complete editor</a>
+          <a class="btn" href="${rel(PATH, '/docs/getting-started/')}">Read the docs</a>
         </p>
       </div>
       <figure class="live">
@@ -198,6 +198,10 @@ Output
       </figure>
     </section>
 
+    <section class="wrap editor-feature" aria-labelledby="editor-demo-title">
+      <div><h2 id="editor-demo-title">Write it. Preview it. Take it with you.</h2><p>Our complete Markdown editor: writing, split view and reading, a full formatting toolbar, live formulas and diagrams. Export Markdown, HTML or print to PDF. Light and dark themes included.</p></div>
+      <a class="btn btn-primary" href="${rel(PATH, '/playground/')}">Open the editor</a>
+    </section>
     <section class="section" aria-labelledby="datasheet">
       <div class="wrap">
         <h2 class="title" id="datasheet"><span class="mk" aria-hidden="true">##</span>Datasheet</h2>

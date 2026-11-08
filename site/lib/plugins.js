@@ -20,8 +20,7 @@ export const PLUGINS = [
   { id: 'deflist', label: 'Definition lists', hint: 'Term / : Definition', make: () => [deflist()] },
   { id: 'mark', label: 'Mark', hint: '==highlight==', make: () => [mark()] },
   { id: 'frontmatter', label: 'Front matter', hint: 'YAML --- or TOML +++', make: () => [frontmatter()] },
-  // Samples only: the playground does not load Mermaid.
-  { id: 'mermaid', label: 'Mermaid', hint: '```mermaid diagrams', make: () => [mermaid()], playground: false },
+  { id: 'mermaid', label: 'Mermaid', hint: '```mermaid diagrams', make: () => [mermaid()] },
 ]
 
 /** Plugin list for a set of ids, in registry order. */
