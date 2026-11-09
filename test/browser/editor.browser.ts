@@ -136,3 +136,34 @@ for (const width of [1440, 390]) {
     } finally { await page.close() }
   })
 }
+
+for (const viewport of [{ width: 1440, height: 1000 }, { width: 1024, height: 768 }, { width: 390, height: 844 }]) {
+  test(`all editor modes retain usable pane height at ${viewport.width}x${viewport.height}`, { timeout: 60000 }, async () => {
+    const page = await open(viewport.width)
+    try {
+      await page.setViewportSize(viewport)
+      for (const source of ['# Short document', Array.from({ length: 50 }, (_, i) => `## Heading ${i}\n\nParagraph **content**.\n`).join('\n')]) {
+        await page.getByRole('button', { name: 'Split', exact: true }).click()
+        await page.locator('#src').fill(source)
+        await page.waitForFunction(text => document.querySelector('#panel-preview')?.textContent?.includes(text), source.includes('Short') ? 'Short document' : 'Heading 49')
+        for (const mode of ['Scrivi', 'Split', 'Leggi', 'Split', 'Leggi', 'Scrivi']) {
+          await page.getByRole('button', { name: mode, exact: true }).click()
+          for (const selector of mode === 'Scrivi' ? ['#src'] : mode === 'Leggi' ? ['#panel-preview'] : ['#src', '#panel-preview']) {
+            const box = await page.locator(selector).boundingBox()
+            assert.ok(box && box.height >= 300, `${mode}: ${selector} must have a usable height, got ${box?.height}`)
+          }
+          assert.equal(await page.locator('#src').isVisible(), mode !== 'Leggi')
+          assert.equal(await page.locator('#panel-preview').isVisible(), mode !== 'Scrivi')
+          assert.equal(await page.locator('#src').inputValue(), source)
+          if (mode === 'Leggi' && viewport.width >= 768) {
+            const geometry = await page.evaluate(() => ({
+              editor: document.querySelector('main.pg')!.getBoundingClientRect().bottom,
+              panes: document.querySelector('.pg-panes')!.getBoundingClientRect().bottom,
+            }))
+            assert.ok(Math.abs(geometry.editor - geometry.panes) < 2, 'reading pane uses the remaining editor height')
+          }
+        }
+      }
+    } finally { await page.close() }
+  })
+}

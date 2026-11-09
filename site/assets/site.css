@@ -688,7 +688,9 @@ body.app { background: var(--raised); }
 .pg button:focus-visible { outline:2px solid var(--editor-accent); outline-offset:2px; }
 .pg button:disabled { opacity:.4; cursor:default; }
 .pg-tools { padding:.55rem 1.5rem; font-size:.8rem; }
-.pg-panes { min-height:0; }
+/* Keep the document in the flexible fifth row when Leggi hides the ribbon.
+   Auto-placement would move it into an auto-sized row and leave this one empty. */
+.pg-panes { grid-row:5; min-height:0; }
 .pg-left { background:var(--raised); }
 .pg #src { line-height:1.8; padding:1.5rem; min-height:0; }
 .pg #panel-preview { padding:2rem clamp(1rem,3vw,3rem); }
