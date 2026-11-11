@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms'
 import { By } from '@angular/platform-browser'
 import { sleep, until } from '../../src/testing/helpers'
 import { type MdlibPodcastEditorElement, PodcastEditor, podcastEpisode } from './podcast-editor'
-import type { PodcastDocumentEvent, PodcastEpisode, PodcastGrammar, PodcastTaskEvent, PodcastTimer } from './podcast-types'
+import type { PodcastDocumentEvent, PodcastEpisode, PodcastGrammar, PodcastSoundEvent, PodcastTaskEvent, PodcastTimer } from './podcast-types'
 
 const SOURCE = '[ ] @Nora Introduction [](time:5:00:00)'
 
@@ -208,15 +208,17 @@ describe('PodcastEditor: two instances', () => {
 describe('PodcastEditor: hosted modes', () => {
   @Component({
     imports: [PodcastEditor],
-    template: `<mdlib-podcast-editor [value]="episode" [participants]="['Nora']" [tasks]="tasks" [documents]="documents"
-      (taskToggle)="toggles.push($event)" (openDocument)="opened.push($event)" (activeDocumentChange)="active.push($event)" />`,
+    template: `<mdlib-podcast-editor [value]="episode" [participants]="['Nora']" [tasks]="tasks" [documents]="documents" [sounds]="sounds()"
+      (taskToggle)="toggles.push($event)" (openDocument)="opened.push($event)" (playSound)="played.push($event)" (activeDocumentChange)="active.push($event)" />`,
   })
   class Host {
-    episode = podcastEpisode({ source: '[ ] @Nora First\n\n[scheda](Notes)', documents: { Notes: 'notes' } })
+    episode = podcastEpisode({ source: '[ ] @Nora First\n\n[scheda](Notes)\n\n[Sigla](sound:Sigla) [Fine](soundboard:Manca)', documents: { Notes: 'notes' } })
     tasks: 'edit' | 'notify' = 'notify'
     documents: 'local' | 'host' = 'host'
+    readonly sounds = signal<string[] | null>(['sigla'])
     readonly toggles: PodcastTaskEvent[] = []
     readonly opened: PodcastDocumentEvent[] = []
+    readonly played: PodcastSoundEvent[] = []
     readonly active: string[] = []
   }
 
@@ -238,6 +240,23 @@ describe('PodcastEditor: hosted modes', () => {
     root(editor()).querySelector<HTMLButtonElement>('.podcast-document')!.click()
     await until(() => host.opened.length === 1)
     expect(host.opened[0]).toEqual({ name: 'Notes', title: 'Notes' })
+  })
+
+  it('sounds: a sound button emits playSound; names the app does not list are disabled, live', async () => {
+    const { fixture, host, editor } = setup(Host)
+    await fixture.whenStable()
+    await mounted(editor())
+    await until(() => root(editor()).querySelectorAll('.podcast-sound').length === 2)
+    const button = (name: string) => root(editor()).querySelector<HTMLButtonElement>(`[data-sound="${name}"]`)!
+    expect(button('Sigla').disabled).toBe(false)
+    expect(button('Manca').disabled).toBe(true)
+    button('Sigla').click()
+    await until(() => host.played.length === 1)
+    expect(host.played[0]).toEqual({ name: 'Sigla', title: 'Sigla' })
+    host.sounds.set(['Manca'])
+    fixture.detectChanges()
+    await until(() => button('Manca').disabled === false)
+    expect(button('Sigla').disabled).toBe(true)
   })
 
   it('documents="local": switching tabs emits activeDocumentChange', async () => {

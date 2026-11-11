@@ -1,13 +1,14 @@
 // Podcast sample plugin: copy into an application, import types from mdlib-pure.
-// Syntax: @Name, [titolo](time:…), [scheda](document name) / [titolo](doc:name), [ ] / [x],
+// Syntax: @Name, [titolo](time:…), [scheda](document name) / [titolo](doc:name), [titolo](sound:name), [ ] / [x],
 // _underline_; with options: #topic and free @name tags with colours, "clock" durations
 // (m:ss, h:mm:ss, 5m, 90s), one line = one block, loose checkboxes ("[]", "-[]").
 // AST: podcastMention { name, tone }; podcastTag { prefix, name, color, text, defined };
 // podcastTime { centiseconds, title, line, index } (rendered with a .podcast-clock span); podcastDocument { name, title };
+// podcastSound { name, title } (a soundboard item of the hosting application, by name; `soundboard:` is accepted too);
 // podcastTask { checked, id, line, box, inlineOffset, inlineSource, blockLine? };
 // podcastInvalidTime { value }; podcastItem { checked, children }; podcastWords /
 // podcastUnderline { children }. Blocks that hold tasks get podcastTasks / podcastDone.
-// HTML: mention/tag/time spans, document buttons, checkbox buttons, underlined text.
+// HTML: mention/tag/time spans, document and sound buttons, checkbox buttons, underlined text.
 // Ordinary links open a new browser tab with the core URL safety policy.
 // Time is a planned duration, in integer centiseconds. No document loading here.
 import { visit, type Node, type Plugin, type Root } from '../../src/index.ts'
@@ -181,7 +182,7 @@ function lookup(colors: Record<string, string> | ReadonlyMap<string, string> | n
 
 const TASK_STRICT = /\[[ xX]\](?=[ \t\n]|$)/y
 const TASK_LOOSE = /\[[ \t]{0,3}[xX]?[ \t]{0,3}\](?!\()/y
-const TAGGED_LINK = /\[([^[\]\n]{0,160})\]\((time|doc):([^()\n]{0,160})\)/iy
+const TAGGED_LINK = /\[([^[\]\n]{0,160})\]\((time|doc|sound|soundboard):([^()\n]{0,160})\)/iy
 const GLUED_MARKER = /^([-*+]|\d{1,9}[.)])(?=\[[ \t]{0,3}[xX]?[ \t]{0,3}\])/
 
 export function podcast({ participants = PARTICIPANTS, durations = 'centiseconds', tags = {}, lineBlocks = false, looseTasks = false }: PodcastOptions = {}): Plugin {
@@ -251,9 +252,11 @@ export function podcast({ participants = PARTICIPANTS, durations = 'centiseconds
           TAGGED_LINK.lastIndex = 0
           const [, label, kind, value] = TAGGED_LINK.exec(tagged)!
           const title = label.trim()
-          if (kind.toLowerCase() === 'doc') {
+          const scheme = kind.toLowerCase()
+          if (scheme !== 'time') {
+            // doc: a supporting document; sound / soundboard: an item of the host's soundboard. Names, never URLs.
             const name = value.trim()
-            if (name && !/[\\\x00-\x1f]/.test(name)) p.push({ type: 'podcastDocument', name, title })
+            if (name && !/[\\\x00-\x1f]/.test(name)) p.push({ type: scheme === 'doc' ? 'podcastDocument' : 'podcastSound', name, title })
             else p.text(tagged)
             return true
           }
@@ -350,6 +353,8 @@ export function podcast({ participants = PARTICIPANTS, durations = 'centiseconds
       },
       podcastInvalidTime: (n, r) => r.h('span', { class: 'podcast-invalid', title: clock ? 'Durata non valida: usa minuti:secondi, ore:minuti:secondi, 5m o 90s' : 'Durata non valida: usa minuti:secondi:centesimi' }, n.value as string),
       podcastDocument: (n, r) => r.h('button', { type: 'button', class: 'podcast-document', 'data-document': n.name as string, 'data-title': (n.title as string) || (n.name as string), 'aria-label': `Apri scheda: ${n.name}` }, '▤ ', (n.title as string) || (n.name as string), (n.title as string) ? '' : ' ↗'),
+      // Enabled by default: the editor disables the names its host does not know (option `sounds`).
+      podcastSound: (n, r) => r.h('button', { type: 'button', class: 'podcast-sound', 'data-sound': n.name as string, 'data-title': (n.title as string) || (n.name as string), 'aria-label': `Suona: ${n.name}` }, '♫ ', (n.title as string) || (n.name as string)),
       podcastTask: (n, r) => r.h('button', { type: 'button', role: 'checkbox', class: 'podcast-check', 'data-task': n.id as number, 'data-line': n.line as number | undefined, 'data-box': n.box as number | undefined, 'aria-checked': String(n.checked), 'aria-label': n.checked ? 'Segna intervento da completare' : 'Completa intervento', disabled: true }, n.checked ? '✓' : ''),
       podcastItem: (n, r) => r.h('span', { class: `podcast-item${n.checked ? ' is-complete' : ''}` }, r.children(n)),
       podcastWords: (n, r) => r.h('span', { class: 'podcast-words' }, r.children(n)),

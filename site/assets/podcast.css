@@ -93,6 +93,8 @@
   :where(.podcast-check) { display: inline-grid; place-items: center; inline-size: 19px; block-size: 19px; padding: 0; border: 1px solid var(--podcast-muted); border-radius: 4px; vertical-align: baseline; margin-inline-end: .4rem; font: 700 14px/1 system-ui; }
   :where(.podcast-check[aria-checked='true']) { background: var(--podcast-accent); color: var(--podcast-input); border-color: var(--podcast-accent); }
   :where(.podcast-document) { color: var(--podcast-accent); border: 1px solid var(--podcast-border); font-size: .82rem; padding: .3rem .7rem; margin-block: .2rem; }
+  :where(.podcast-sound) { color: var(--podcast-accent); border: 1px solid var(--podcast-accent); border-radius: 20px; font-size: .82rem; padding: .3rem .7rem; margin-block: .2rem; }
+  :where(.podcast-sound:disabled) { color: var(--podcast-muted); border-color: var(--podcast-border); border-style: dashed; opacity: .7; cursor: not-allowed; }
   :where(.podcast-invalid) { color: var(--podcast-duration); text-decoration: underline wavy; }
   :where(.podcast-tag) { display: inline-block; border-radius: 6px; padding: .08em .5em; font-weight: 650; font-size: .88em; line-height: 1.5; vertical-align: baseline; white-space: nowrap; }
   :where(.podcast-time.is-running) { color: var(--podcast-bg); background: var(--podcast-accent); border-color: var(--podcast-accent); }

@@ -1,10 +1,11 @@
 <!-- Trimming (Blazor WebAssembly publish, PublishTrimmed): Blazor deserializes the arguments of custom DOM events
-     (@onpodcasttask, @onpodcastdocument, @onpodcastactive) by reflection, so a trimmed app lost the constructors and
+     (@onpodcasttask, @onpodcastdocument, @onpodcastsound, @onpodcastactive) by reflection, so a trimmed app lost the constructors and
      setters of these classes and every event failed with "There was an error parsing the event arguments". -->
 <linker>
   <assembly fullname="MdlibPure.Blazor">
     <type fullname="MdlibPure.Blazor.PodcastTaskEventArgs" preserve="all" />
     <type fullname="MdlibPure.Blazor.PodcastDocumentEventArgs" preserve="all" />
+    <type fullname="MdlibPure.Blazor.PodcastSoundEventArgs" preserve="all" />
     <type fullname="MdlibPure.Blazor.PodcastActiveEventArgs" preserve="all" />
   </assembly>
 </linker>

@@ -22,14 +22,15 @@ before(async () => {
         import { mountPodcastEditor } from './templates/podcast/editor.js'
         window.events = []
         window.editor = mountPodcastEditor(document.querySelector('.podcast'), {
-          value: { source: '# Puntata\\n- [ ] Apertura @Campa [intro](time:04:30) [](time:1:05:00)\\n-[] Ospite #tema(color:green) [Scheda ospite](doc:Scheda ospite.md)\\nRiga libera\\n[x] fatto [ ] da fare' },
+          value: { source: '# Puntata\\n- [ ] Apertura @Campa [intro](time:04:30) [](time:1:05:00)\\n-[] Ospite #tema(color:green) [Scheda ospite](doc:Scheda ospite.md)\\nRiga libera [Sigla](sound:Sigla) [Fine](soundboard:Manca)\\n[x] fatto [ ] da fare' },
           participants: ['Campa', 'Duke'],
           grammar: { durations: 'clock', lineBlocks: true, looseTasks: true, tags: { mentions: 'any', hashtags: true } },
           tagColors: { campa: '#123456' },
-          tasks: 'notify', documents: 'host', compact: true, current: 1, runningTimer: { line: 1, index: 1 },
+          tasks: 'notify', documents: 'host', compact: true, current: 1, runningTimer: { line: 1, index: 1 }, sounds: ['sigla'],
           onChange: (state) => window.events.push(['change', state.source]),
           onTaskToggle: (e) => window.events.push(['task', e]),
           onOpenDocument: (e) => window.events.push(['document', e]),
+          onPlaySound: (e) => window.events.push(['sound', e]),
         })`,
       resolveDir: new URL('../../', import.meta.url).pathname,
       loader: 'js',
@@ -207,7 +208,7 @@ describe('podcast sample, in Chromium', () => {
     assert.equal(await page.locator('#podcast-preview .podcast-mention').textContent(), '@Elio')
   })
 
-  test('hosting options: notify tasks, host documents, tags, clock timers, current line and running timer', async (t) => {
+  test('hosting options: notify tasks, host documents, sound buttons, tags, clock timers, current line and running timer', async (t) => {
     const page = await openStudio(t)
     const preview = page.locator('#podcast-preview')
     assert.equal(await preview.locator('.podcast-check').count(), 4)
@@ -225,11 +226,21 @@ describe('podcast sample, in Chromium', () => {
     const before = await page.locator('#podcast-input').inputValue()
     await preview.locator('[data-line="4"][data-box="1"]').click()
     await preview.locator('[data-document]').click()
+    assert.deepEqual(await preview.locator('.podcast-sound').allTextContents(), ['♫ Sigla', '♫ Fine'])
+    assert.equal(await preview.locator('.podcast-sound:disabled').count(), 1, 'a sound the host does not have is disabled')
+    assert.equal(await preview.locator('[data-sound="Manca"]').isDisabled(), true)
+    await preview.locator('[data-sound="Sigla"]').click()
     const events = await page.evaluate(() => (window as unknown as { events: unknown[] }).events)
     assert.deepEqual(events, [
       ['task', { document: 'Scaletta', id: 3, checked: true, line: 4, box: 1 }],
       ['document', { name: 'Scheda ospite.md', title: 'Scheda ospite' }],
+      ['sound', { name: 'Sigla', title: 'Sigla' }],
     ])
+    await page.evaluate(() => (window as unknown as { editor: { setSounds(n: string[] | null): void } }).editor.setSounds(['manca']))
+    assert.equal(await preview.locator('[data-sound="Sigla"]').isDisabled(), true, 'setSounds re-marks the buttons without re-rendering')
+    assert.equal(await preview.locator('[data-sound="Manca"]').isDisabled(), false)
+    await page.evaluate(() => (window as unknown as { editor: { setSounds(n: string[] | null): void } }).editor.setSounds(null))
+    assert.equal(await preview.locator('.podcast-sound:disabled').count(), 0, 'null = the host does not filter')
     assert.equal(await page.locator('#podcast-input').inputValue(), before, 'notify mode never edits the source')
     type Editor = { setCurrent(l: number): void; setRunningTimer(t: { line: number; index: number; text?: string } | null): void; setReadOnly(v: boolean): void }
     await page.evaluate(() => (window as unknown as { editor: Editor }).editor.setRunningTimer({ line: 1, index: 0, text: '-00:12' }))
@@ -242,6 +253,6 @@ describe('podcast sample, in Chromium', () => {
     assert.equal(await page.locator('.podcast-toolbar').isVisible(), false, 'read-only hides the toolbar')
     assert.equal(await page.locator('.podcast-write').isVisible(), false, 'read-only hides the source')
     await preview.locator('[data-line="1"][data-box="0"]').click()
-    assert.equal(await page.evaluate(() => (window as unknown as { events: unknown[] }).events.length), 3, 'read-only keeps the checkboxes live')
+    assert.equal(await page.evaluate(() => (window as unknown as { events: unknown[] }).events.length), 4, 'read-only keeps the checkboxes live')
   })
 })

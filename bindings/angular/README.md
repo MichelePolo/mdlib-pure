@@ -296,6 +296,7 @@ digits, underscores or hyphens.
 | `compact` | `boolean` | `false` | No header, legend, status bar or pane labels. Read when the element connects. |
 | `currentLine` | `number \| null` | `null` | 0-based source line highlighted in the preview. Live. |
 | `runningTimer` | `PodcastTimer \| null` | `null` | `{ line, index, text? }`: the timer chip shown as running; `text` replaces its planned value (a countdown). Live. |
+| `sounds` | `string[] \| null` | `null` | Names of the app's soundboard items: a `[titolo](sound:nome)` link is a button that emits `playSound`; a name not listed (ignoring case) is a disabled button. `null`: every sound button enabled. Live. |
 
 | Output | Payload | |
 |---|---|---|
@@ -303,6 +304,7 @@ digits, underscores or hyphens.
 | `valueCommit` | `PodcastEpisode` | When focus leaves the editor. |
 | `taskToggle` | `PodcastTaskEvent` | `{ document, id, checked, line, box }` (0-based), with `tasks="notify"`. |
 | `openDocument` | `PodcastDocumentEvent` | `{ name, title }`, with `documents="host"`. |
+| `playSound` | `PodcastSoundEvent` | `{ name, title }`: a sound button was clicked. |
 | `activeDocumentChange` | `string` | The document shown, when the tabs switch. |
 
 It is a `ControlValueAccessor` too (`[formControl]`, `formControlName`,

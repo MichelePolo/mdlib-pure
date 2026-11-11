@@ -44,6 +44,12 @@ export interface PodcastDocumentEvent {
   title: string
 }
 
+/** A sound button click (`[titolo](sound:nome)`): the app plays that item of its soundboard. */
+export interface PodcastSoundEvent {
+  name: string
+  title: string
+}
+
 /** The timer chip shown as running: source line and ordinal of the timer on it (0-based); `text` replaces the planned value. */
 export interface PodcastTimer {
   line: number

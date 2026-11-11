@@ -4,10 +4,11 @@ namespace MdlibPure.Blazor;
 
 /// <summary>
 /// Custom DOM events of <c>&lt;mdlib-podcast-editor&gt;</c>, mapped for Razor by the JS initializer
-/// (<c>Blazor.registerCustomEventType</c>): <c>podcast-task</c>, <c>podcast-document</c>, <c>podcast-active</c>.
+/// (<c>Blazor.registerCustomEventType</c>): <c>podcast-task</c>, <c>podcast-document</c>, <c>podcast-sound</c>, <c>podcast-active</c>.
 /// </summary>
 [EventHandler("onpodcasttask", typeof(PodcastTaskEventArgs), enableStopPropagation: true, enablePreventDefault: true)]
 [EventHandler("onpodcastdocument", typeof(PodcastDocumentEventArgs), enableStopPropagation: true, enablePreventDefault: true)]
+[EventHandler("onpodcastsound", typeof(PodcastSoundEventArgs), enableStopPropagation: true, enablePreventDefault: true)]
 [EventHandler("onpodcastactive", typeof(PodcastActiveEventArgs), enableStopPropagation: true, enablePreventDefault: true)]
 public static class EventHandlers;
 
@@ -30,6 +31,15 @@ public sealed class PodcastTaskEventArgs : EventArgs
 public sealed class PodcastDocumentEventArgs : EventArgs
 {
     /// <summary>Document name as written in the link (<c>[titolo](doc:name)</c> or <c>[scheda](name)</c>).</summary>
+    public string Name { get; set; } = "";
+    /// <summary>Visible title of the link (the name when the link has no title).</summary>
+    public string Title { get; set; } = "";
+}
+
+/// <summary>A sound button (<c>[titolo](sound:nome)</c>) was clicked: the host plays that item of its soundboard. Buttons whose name is not in <c>Sounds</c> are disabled and never raise it.</summary>
+public sealed class PodcastSoundEventArgs : EventArgs
+{
+    /// <summary>Name of the soundboard item as written in the link.</summary>
     public string Name { get; set; } = "";
     /// <summary>Visible title of the link (the name when the link has no title).</summary>
     public string Title { get; set; } = "";

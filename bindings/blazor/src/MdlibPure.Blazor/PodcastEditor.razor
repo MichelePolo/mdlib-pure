@@ -13,9 +13,9 @@
                       tasks="@(Tasks == PodcastTaskMode.Notify ? "notify" : null)"
                       documents="@(Documents == PodcastDocumentMode.Host ? "host" : null)"
                       readonly="@ReadOnly" compact="@Compact"
-                      current-line="@CurrentLine" running-timer="@RunningTimerAttribute"
+                      current-line="@CurrentLine" running-timer="@RunningTimerAttribute" sounds="@SoundsAttribute"
                       @oninput="OnInput" @onchange="OnChange"
-                      @onpodcasttask="OnTaskToggle" @onpodcastdocument="OnOpenDocument" @onpodcastactive="OnActive"></mdlib-podcast-editor>
+                      @onpodcasttask="OnTaskToggle" @onpodcastdocument="OnOpenDocument" @onpodcastsound="OnPlaySound" @onpodcastactive="OnActive"></mdlib-podcast-editor>
 
 @code {
     private bool _unbound;
@@ -53,10 +53,14 @@
     [Parameter] public int? CurrentLine { get; set; }
     /// <summary>The timer chip to mark as running: (line, ordinal of the timer on that line), both 0-based. Live.</summary>
     [Parameter] public (int Line, int Index)? RunningTimer { get; set; }
+    /// <summary>Names of the host's soundboard items: <c>[titolo](sound:nome)</c> buttons with another name (compared ignoring case) are disabled. Null: every sound button is enabled. Live.</summary>
+    [Parameter] public string[]? Sounds { get; set; }
     /// <summary>A checkbox was clicked while <see cref="Tasks"/> is <see cref="PodcastTaskMode.Notify"/>.</summary>
     [Parameter] public EventCallback<PodcastTaskEventArgs> OnTaskToggle { get; set; }
     /// <summary>A document button was clicked while <see cref="Documents"/> is <see cref="PodcastDocumentMode.Host"/>.</summary>
     [Parameter] public EventCallback<PodcastDocumentEventArgs> OnOpenDocument { get; set; }
+    /// <summary>A sound button was clicked: play that item of the soundboard (<see cref="PodcastSoundEventArgs"/>: <c>Name</c>, <c>Title</c>).</summary>
+    [Parameter] public EventCallback<PodcastSoundEventArgs> OnPlaySound { get; set; }
     /// <summary>The user left the editor (the element's <c>change</c> event), with the episode at that moment. A pending ValueChanged is raised first.</summary>
     [Parameter] public EventCallback<PodcastEpisode> OnValueCommit { get; set; }
     /// <summary>The editor switched tabs (<see cref="PodcastDocumentMode.Local"/>): the name of the document shown.</summary>
@@ -105,6 +109,7 @@
     private string? GrammarAttribute => Grammar is null ? null : JsonSerializer.Serialize(Grammar, PodcastJsonContext.Default.PodcastGrammar);
     private string? TagColorsAttribute => TagColors is null ? null : JsonSerializer.Serialize(TagColors as Dictionary<string, string> ?? new Dictionary<string, string>(TagColors), PodcastJsonContext.Default.DictionaryStringString);
     private string? RunningTimerAttribute => RunningTimer is { } t ? $"{t.Line}:{t.Index}" : null;
+    private string? SoundsAttribute => Sounds is null ? null : JsonSerializer.Serialize(Sounds, PodcastJsonContext.Default.StringArray);
     private string? NameAttribute => !string.IsNullOrEmpty(Name) ? Name : _unbound ? null : NameAttributeValue;
     private string? ClassAttribute => string.Join(' ', new[] { Class, EditContext?.FieldCssClass(FieldIdentifier) }.Where(c => !string.IsNullOrWhiteSpace(c))) is { Length: > 0 } css ? css : null;
     private bool Inert => InertUntilInteractive && AssignedRenderMode is not null && !RendererInfo.IsInteractive;
