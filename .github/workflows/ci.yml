@@ -12,10 +12,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Pin the runner image: moving ubuntu-latest to 26.04 broke installation
+# of Playwright system dependencies before any browser tests could run.
 jobs:
   verify:
     name: verify (Node ${{ matrix.node }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         node: [22, 24]
@@ -34,7 +36,7 @@ jobs:
 
   browser:
     name: browser (Chromium)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -47,7 +49,7 @@ jobs:
 
   blazor:
     name: blazor (.NET 10)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -74,7 +76,7 @@ jobs:
 
   angular:
     name: angular (Angular 22)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
