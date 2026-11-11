@@ -33,6 +33,7 @@ export const MDLIB_TARBALL = `${REPO}/releases/download/mdlib-pure-v0.1.1/mdlib-
  * above the page, for what the site knows and the file does not say.
  */
 export const DOCS = [
+  { slug: 'editor-demo', title: 'Demo editor', source: 'docs/editor-demo.md', summary: 'the complete site editor: writing modes, formatting toolbar, math, diagrams and MD/HTML/PDF export' },
   { slug: 'getting-started', title: 'Getting started', source: 'README.md', summary: 'install, usage, options, highlighting, frameworks, styling, plugins, performance' },
   { slug: 'api', title: 'API reference', source: 'docs/api.md', summary: '`createMarkdown()`, options, methods, AST shape, rendering helpers, every plugin' },
   {

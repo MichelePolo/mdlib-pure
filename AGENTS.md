@@ -124,6 +124,12 @@ templates/podcast/    application plugin example (mentions, planned durations, d
                       no new npm export or core syntax
 demo/                 the first live editor (needs `npm run build`)
 site/                 the website: `npm run site:build` → site/out/ (pages, samples, playground)
+                      /playground/ is the flagship editor: Scrivi/Split/Leggi,
+                      marker toolbar, bidirectional proportional scrolling in Split,
+                      MD/HTML export and browser printing to PDF;
+                      site/lib/editor-commands.js is its command catalog;
+                      docs/editor-demo.md documents the site-only application,
+                      which adds no core/element/wrapper API
 bench/                benchmark against other libraries (own package.json)
 bindings/blazor/      Blazor wrapper, NuGet package MdlibPure.Blazor (.NET 10, own README):
   src/MdlibPure.Blazor/   Razor components over the elements (<Markdown>, <MarkdownEditor>,

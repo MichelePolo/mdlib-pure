@@ -4,6 +4,13 @@ Lightweight Markdown renderer for the browser.
 
 **Website, docs and playground: <https://michelepolo.github.io/mdlib-pure/>** · for AI agents: [llms.txt](https://michelepolo.github.io/mdlib-pure/llms.txt)
 
+**[Try the complete editor](https://michelepolo.github.io/mdlib-pure/playground/)**:
+Scrivi, Split (default), Leggi; a formatting toolbar for CommonMark and every
+first-party syntax plugin, live math and diagrams, light/dark themes, local
+drafts and MD/HTML export. PDF uses the browser print dialog: choose Save as PDF.
+See the [demo editor guide](docs/editor-demo.md).
+
+
 - **100% CommonMark 0.31.2**: all 652 spec examples pass
 - **GFM** as an opt-in plugin (~4 KB): tables, strikethrough, autolinks, task lists, footnotes, alerts. 54/54 GFM extension examples pass
 - **Zero dependencies**, ~11 KB gzipped core

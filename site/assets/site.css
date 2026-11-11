@@ -656,3 +656,61 @@ body.app { background: var(--raised); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* Flagship writing demo: a restrained, SharePoint-inspired command surface. */
+.pg {
+  --editor-accent: light-dark(#0f6cbd, #75b6e7);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  grid-template-rows: auto auto auto auto minmax(24rem, 1fr);
+  min-block-size: 50rem;
+  block-size: calc(100dvh - var(--bar-h));
+  background: var(--paper);
+}
+.editor-heading { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1.25rem 1.5rem; background:var(--raised); }
+.editor-heading h1 { margin:0; font-size:clamp(1.3rem, 2.5vw, 1.9rem); font-weight:600; letter-spacing:-.025em; }
+.editor-heading p { margin:.3rem 0 0; color:var(--md-color-muted); font-size:.9rem; }
+.editor-badge { font-size:.8rem; color:var(--md-color-muted); }
+.editor-commandbar { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; padding:.8rem 1.5rem; border-block:1px solid var(--md-color-border); }
+.editor-name { display:flex; align-items:center; gap:.5rem; font-size:.8rem; color:var(--md-color-muted); }
+.editor-name input { width: min(12rem, 40vw); padding:.4rem; background:var(--paper); color:var(--ink); border:1px solid var(--md-color-border); border-radius:4px; font:inherit; }
+.editor-modes { display:flex; padding:3px; background:var(--raised); border-radius:5px; margin-inline:auto; }
+.editor-commandbar button { min-height:36px; padding:.35rem .8rem; border:1px solid transparent; border-radius:3px; font:inherit; font-size:.875rem; background:transparent; color:inherit; cursor:pointer; }
+.editor-modes button[aria-pressed='true'] { background:var(--paper); color:var(--editor-accent); border-color:var(--md-color-border); box-shadow:0 1px 3px #0001; font-weight:600; }
+.editor-exports button { border-color:var(--md-color-border); }
+.editor-exports button:last-child { background:var(--editor-accent); color:light-dark(white,#142333); }
+.editor-ribbon { display:flex; flex-wrap:wrap; gap:.5rem; padding:.65rem 1.5rem; border-block-end:1px solid var(--md-color-border); }
+.editor-group { padding-inline-end:.5rem; border-inline-end:1px solid var(--md-color-border); }
+.editor-group > span { display:block; font-size:.7rem; color:var(--md-color-muted); padding-inline:4px; margin-block-end:.2rem; }
+.editor-group > div { display:flex; flex-wrap:wrap; }
+.editor-group button { width:34px; height:34px; border:0; border-radius:3px; color:var(--ink); background:transparent; cursor:pointer; font-size:1.3rem; }
+.editor-group svg { width:30px; height:24px; display:block; font:600 14px 'Segoe UI',sans-serif; }
+.editor-group button:hover, .editor-commandbar button:hover { background:color-mix(in srgb, var(--editor-accent) 14%, var(--paper)); color:var(--ink); }
+.pg button:focus-visible { outline:2px solid var(--editor-accent); outline-offset:2px; }
+.pg button:disabled { opacity:.4; cursor:default; }
+.pg-tools { padding:.55rem 1.5rem; font-size:.8rem; }
+/* Keep the document in the flexible fifth row when Leggi hides the ribbon.
+   Auto-placement would move it into an auto-sized row and leave this one empty. */
+.pg-panes { grid-row:5; min-height:0; }
+.pg-left { background:var(--raised); }
+.pg #src { line-height:1.8; padding:1.5rem; min-height:0; }
+.pg #panel-preview { padding:2rem clamp(1rem,3vw,3rem); }
+.pg[data-mode='write'] .pg-panes, .pg[data-mode='read'] .pg-panes { grid-template-columns:minmax(0,1fr); }
+.pg[data-mode='read'] #panel-preview { width:min(100%, 900px); margin-inline:auto; }
+.pg [hidden] { display:none !important; }
+.editor-export-stage, .editor-print-frame { position:fixed; left:-10000px; top:0; width:820px; border:0; }
+.editor-export-stage { background:white; color:#242424; padding:32px; }
+.editor-feature { display:flex; align-items:center; justify-content:space-between; gap:2rem; padding:1.5rem; margin-block:1rem 3rem; border-inline-start:4px solid #0f6cbd; background:var(--raised); }
+.editor-feature h2 { margin:0 0 .4rem; font-size:1.5rem; }
+.editor-feature p { margin:0; max-width:65ch; }
+@media (width < 48rem) {
+  .editor-heading, .editor-commandbar, .editor-ribbon { padding-inline:1rem; }
+  .editor-badge { display:none; }
+  .editor-commandbar { gap:.6rem; }
+  .editor-name { width:100%; }
+  .editor-name input { flex:1; width:auto; }
+  .editor-modes { margin-inline:0 auto; }
+  .editor-feature { align-items:start; flex-direction:column; }
+  .pg { grid-template-rows:auto auto auto auto auto; block-size:auto; }
+  .pg #src { min-height:45dvh; }
+  .pg .pg-panel { max-height:65dvh; }
+}
