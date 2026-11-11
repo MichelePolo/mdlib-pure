@@ -14,6 +14,9 @@ concurrency:
 
 # Pin the runner image: moving ubuntu-latest to 26.04 broke installation
 # of Playwright system dependencies before any browser tests could run.
+# Ubuntu 24.04 runners already contain Chromium shared libraries. Download
+# the locked browser only: --with-deps needlessly contacts failing apt mirrors
+# for supplemental fonts. Browser launch/tests still fail on missing libraries.
 jobs:
   verify:
     name: verify (Node ${{ matrix.node }})
@@ -44,7 +47,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - run: npm run test:browser
 
   blazor:
@@ -60,7 +63,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       # wwwroot/dist of the Razor class library (gitignored): elements, service
       # module, styles, KaTeX, Mermaid. The .NET build fails without it.
       - run: npm run blazor:assets
@@ -89,7 +92,7 @@ jobs:
             bindings/angular/package-lock.json
       - run: npm ci
       # Same Playwright version in both workspaces: one Chromium for both.
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       # The Angular workspace links the repository's dist/ ("mdlib-pure": "file:../..").
       - run: npm run build
       - run: npm ci --prefix bindings/angular
